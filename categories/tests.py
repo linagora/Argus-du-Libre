@@ -8,6 +8,7 @@ from categories.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Tag,
 )
 
 User = get_user_model()
@@ -595,3 +596,138 @@ class FieldAdminTestCase(TestCase):
 
         self.assertFalse(Field.objects.filter(id=field_id).exists())
         self.assertFalse(FieldTranslation.objects.filter(field_id=field_id).exists())
+
+
+class TagModelTestCase(TestCase):
+    """Test cases for Tag model."""
+
+    def test_tag_creation(self):
+        """Test that a tag can be created."""
+        tag = Tag.objects.create(name="Open Source", slug="open-source")
+        self.assertIsNotNone(tag.id)
+        self.assertEqual(tag.name, "Open Source")
+        self.assertEqual(tag.slug, "open-source")
+
+    def test_tag_str(self):
+        """Test tag string representation."""
+        tag = Tag.objects.create(name="Security", slug="security")
+        self.assertEqual(str(tag), "Security")
+
+    def test_tag_name_unique(self):
+        """Test that tag name must be unique."""
+        Tag.objects.create(name="Privacy", slug="privacy")
+        with self.assertRaises(Exception):
+            Tag.objects.create(name="Privacy", slug="privacy-2")
+
+    def test_tag_slug_unique(self):
+        """Test that tag slug must be unique."""
+        Tag.objects.create(name="Privacy", slug="privacy")
+        with self.assertRaises(Exception):
+            Tag.objects.create(name="Privacy Policy", slug="privacy")
+
+    def test_tag_ordering(self):
+        """Test that tags are ordered by name."""
+        tag1 = Tag.objects.create(name="Zebra", slug="zebra")
+        tag2 = Tag.objects.create(name="Alpha", slug="alpha")
+        tag3 = Tag.objects.create(name="Beta", slug="beta")
+
+        tags = list(Tag.objects.all())
+        self.assertEqual(tags[0].name, "Alpha")
+        self.assertEqual(tags[1].name, "Beta")
+        self.assertEqual(tags[2].name, "Zebra")
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class TagAdminTestCase(TestCase):
+    """Test cases for Tag admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.tag = Tag.objects.create(name="Open Source", slug="open-source")
+
+    def test_tag_list_view_accessible(self):
+        """Test that tag list view is accessible."""
+        response = self.client.get("/admin/categories/tag/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_tag_list_displays_tag(self):
+        """Test that tag list displays tag name."""
+        response = self.client.get("/admin/categories/tag/")
+        self.assertContains(response, "Open Source")
+        self.assertContains(response, "open-source")
+
+    def test_tag_add_view_accessible(self):
+        """Test that tag add view is accessible."""
+        response = self.client.get("/admin/categories/tag/add/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_tag_edit_view_accessible(self):
+        """Test that tag edit view is accessible."""
+        response = self.client.get(f"/admin/categories/tag/{self.tag.id}/change/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_tag(self):
+        """Test creating a tag through admin."""
+        data = {
+            "name": "Privacy",
+            "slug": "privacy",
+        }
+
+        response = self.client.post("/admin/categories/tag/add/", data, follow=True)
+
+        self.assertEqual(Tag.objects.count(), 2)
+        new_tag = Tag.objects.get(slug="privacy")
+        self.assertEqual(new_tag.name, "Privacy")
+
+    def test_update_tag(self):
+        """Test updating a tag through admin."""
+        data = {
+            "name": "Open Source Software",
+            "slug": "open-source-software",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/tag/{self.tag.id}/change/", data, follow=True
+        )
+
+        self.tag.refresh_from_db()
+        self.assertEqual(self.tag.name, "Open Source Software")
+        self.assertEqual(self.tag.slug, "open-source-software")
+
+    def test_delete_tag(self):
+        """Test deleting a tag through admin."""
+        tag_id = self.tag.id
+
+        response = self.client.post(
+            f"/admin/categories/tag/{tag_id}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        self.assertFalse(Tag.objects.filter(id=tag_id).exists())
+
+    def test_search_by_name(self):
+        """Test searching tags by name."""
+        Tag.objects.create(name="Privacy", slug="privacy")
+        Tag.objects.create(name="Security", slug="security")
+
+        response = self.client.get("/admin/categories/tag/?q=Privacy")
+        self.assertContains(response, "Privacy")
+        self.assertNotContains(response, "Security")
+
+    def test_search_by_slug(self):
+        """Test searching tags by slug."""
+        Tag.objects.create(name="Privacy", slug="privacy")
+        Tag.objects.create(name="Security", slug="security")
+
+        response = self.client.get("/admin/categories/tag/?q=security")
+        self.assertContains(response, "Security")
+        self.assertNotContains(response, "Privacy")

@@ -103,3 +103,21 @@ class FieldTranslation(models.Model):
     def __str__(self):
         """Return the translation in format: locale - name."""
         return f"{self.locale} - {self.name}"
+
+
+class Tag(models.Model):
+    """Tag model for categorizing and linking similar softwares."""
+
+    name = models.CharField(max_length=255, unique=True, help_text="Tag name")
+    slug = models.SlugField(
+        max_length=255, unique=True, help_text="URL-friendly identifier for the tag"
+    )
+
+    class Meta:
+        verbose_name = "Tag"
+        verbose_name_plural = "Tags"
+        ordering = ["name"]
+
+    def __str__(self):
+        """Return the tag name."""
+        return self.name

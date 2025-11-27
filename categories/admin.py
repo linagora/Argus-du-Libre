@@ -8,6 +8,7 @@ from categories.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Tag,
 )
 
 
@@ -87,3 +88,14 @@ class FieldAdmin(admin.ModelAdmin):
         return translation.name if translation else "-"
 
     get_name_fr.short_description = "Name (French)"
+
+
+@admin.register(Tag, site=admin_site)
+class TagAdmin(admin.ModelAdmin):
+    """Admin interface for tags."""
+
+    list_display = ["id", "name", "slug"]
+    search_fields = ["name", "slug"]
+    ordering = ["name"]
+    fields = ["name", "slug"]
+    prepopulated_fields = {"slug": ("name",)}
