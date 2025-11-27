@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "mozilla_django_oidc",
+    "categories",
 ]
 
 MIDDLEWARE = [
