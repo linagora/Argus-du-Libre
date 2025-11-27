@@ -1,9 +1,9 @@
-"""Admin configuration for categories."""
+"""Admin configuration for projects."""
 
 from django.contrib import admin
 
 from argus_du_libre.admin import admin_site
-from categories.models import (
+from projects.models import (
     Category,
     CategoryTranslation,
     Field,

@@ -1,9 +1,9 @@
-"""Tests for categories models and admin."""
+"""Tests for projects models and admin."""
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
-from categories.models import (
+from projects.models import (
     Category,
     CategoryTranslation,
     Field,
