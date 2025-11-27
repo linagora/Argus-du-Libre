@@ -37,10 +37,15 @@ ALLOWED_HOSTS = (
     os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
 )
 
+# Add testserver for testing
+if DEBUG:
+    ALLOWED_HOSTS.extend(["localhost", "127.0.0.1", "testserver"])
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    "argus_du_libre.apps.ArgusConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -142,14 +147,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 OIDC_ENABLED = os.getenv("OIDC_ENABLED", "False") == "True"
 
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-]
-
 if OIDC_ENABLED:
-    AUTHENTICATION_BACKENDS.insert(
-        0, "argus_du_libre.auth.OIDCAdminAuthenticationBackend"
-    )
+    AUTHENTICATION_BACKENDS = [
+        "argus_du_libre.auth.OIDCAdminAuthenticationBackend",
+    ]
+else:
+    AUTHENTICATION_BACKENDS = [
+        "django.contrib.auth.backends.ModelBackend",
+    ]
 
 # OIDC Configuration
 # https://mozilla-django-oidc.readthedocs.io/
