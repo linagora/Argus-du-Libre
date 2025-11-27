@@ -8,6 +8,7 @@ from categories.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Software,
     Tag,
 )
 
@@ -99,3 +100,41 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ["name"]
     fields = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(Software, site=admin_site)
+class SoftwareAdmin(admin.ModelAdmin):
+    """Admin interface for software."""
+
+    list_display = [
+        "id",
+        "name",
+        "slug",
+        "state",
+        "get_tags",
+        "created_at",
+        "updated_at",
+        "featured_at",
+    ]
+    list_filter = ["state", "tags", "created_at"]
+    search_fields = ["name", "slug", "repository_url", "website_url"]
+    ordering = ["-created_at"]
+    filter_horizontal = ["tags"]
+    prepopulated_fields = {"slug": ("name",)}
+    fields = [
+        "name",
+        "slug",
+        "logo_url",
+        "repository_url",
+        "website_url",
+        "state",
+        "tags",
+        "featured_at",
+    ]
+    readonly_fields = ["created_at", "updated_at"]
+
+    def get_tags(self, obj):
+        """Get tags as comma-separated string."""
+        return ", ".join([tag.name for tag in obj.tags.all()])
+
+    get_tags.short_description = "Tags"

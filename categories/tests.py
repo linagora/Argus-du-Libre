@@ -8,6 +8,7 @@ from categories.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Software,
     Tag,
 )
 
@@ -731,3 +732,233 @@ class TagAdminTestCase(TestCase):
         response = self.client.get("/admin/categories/tag/?q=security")
         self.assertContains(response, "Security")
         self.assertNotContains(response, "Privacy")
+
+
+class SoftwareModelTestCase(TestCase):
+    """Test cases for Software model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.tag1 = Tag.objects.create(name="Open Source", slug="open-source")
+        self.tag2 = Tag.objects.create(name="Privacy", slug="privacy")
+
+    def test_software_creation(self):
+        """Test that a software can be created."""
+        software = Software.objects.create(
+            name="Firefox",
+            slug="firefox",
+            repository_url="https://github.com/mozilla/gecko-dev",
+            website_url="https://www.mozilla.org/firefox/",
+        )
+        self.assertIsNotNone(software.id)
+        self.assertEqual(software.name, "Firefox")
+        self.assertEqual(software.slug, "firefox")
+        self.assertEqual(software.state, Software.STATE_DRAFT)
+
+    def test_software_default_state(self):
+        """Test that default state is draft."""
+        software = Software.objects.create(name="Test", slug="test")
+        self.assertEqual(software.state, Software.STATE_DRAFT)
+
+    def test_software_str(self):
+        """Test software string representation."""
+        software = Software.objects.create(name="Firefox", slug="firefox")
+        self.assertEqual(str(software), "Firefox")
+
+    def test_software_slug_unique(self):
+        """Test that slug must be unique."""
+        Software.objects.create(name="Firefox", slug="firefox")
+        with self.assertRaises(Exception):
+            Software.objects.create(name="Firefox Browser", slug="firefox")
+
+    def test_software_state_choices(self):
+        """Test that software can have different states."""
+        software = Software.objects.create(
+            name="Test", slug="test", state=Software.STATE_PUBLISHED
+        )
+        self.assertEqual(software.state, Software.STATE_PUBLISHED)
+
+    def test_software_ordering(self):
+        """Test that softwares are ordered by creation date (newest first)."""
+        software1 = Software.objects.create(name="First", slug="first")
+        software2 = Software.objects.create(name="Second", slug="second")
+        software3 = Software.objects.create(name="Third", slug="third")
+
+        softwares = list(Software.objects.all())
+        self.assertEqual(softwares[0], software3)
+        self.assertEqual(softwares[1], software2)
+        self.assertEqual(softwares[2], software1)
+
+    def test_software_tags_relationship(self):
+        """Test many-to-many relationship with tags."""
+        software = Software.objects.create(name="Firefox", slug="firefox")
+        software.tags.add(self.tag1, self.tag2)
+
+        self.assertEqual(software.tags.count(), 2)
+        self.assertIn(self.tag1, software.tags.all())
+        self.assertIn(self.tag2, software.tags.all())
+
+    def test_software_tags_reverse_relationship(self):
+        """Test reverse relationship from tags to softwares."""
+        software1 = Software.objects.create(name="Firefox", slug="firefox")
+        software2 = Software.objects.create(name="Tor Browser", slug="tor-browser")
+
+        software1.tags.add(self.tag1)
+        software2.tags.add(self.tag1)
+
+        self.assertEqual(self.tag1.softwares.count(), 2)
+        self.assertIn(software1, self.tag1.softwares.all())
+        self.assertIn(software2, self.tag1.softwares.all())
+
+    def test_software_timestamps(self):
+        """Test that timestamps are set automatically."""
+        software = Software.objects.create(name="Test", slug="test")
+        self.assertIsNotNone(software.created_at)
+        self.assertIsNotNone(software.updated_at)
+
+    def test_software_featured_at_nullable(self):
+        """Test that featured_at can be null."""
+        software = Software.objects.create(name="Test", slug="test")
+        self.assertIsNone(software.featured_at)
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class SoftwareAdminTestCase(TestCase):
+    """Test cases for Software admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.tag1 = Tag.objects.create(name="Open Source", slug="open-source")
+        self.tag2 = Tag.objects.create(name="Privacy", slug="privacy")
+
+        self.software = Software.objects.create(
+            name="Firefox",
+            slug="firefox",
+            repository_url="https://github.com/mozilla/gecko-dev",
+            website_url="https://www.mozilla.org/firefox/",
+            state=Software.STATE_DRAFT,
+        )
+        self.software.tags.add(self.tag1)
+
+    def test_software_list_view_accessible(self):
+        """Test that software list view is accessible."""
+        response = self.client.get("/admin/categories/software/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_software_list_displays_software(self):
+        """Test that software list displays software."""
+        response = self.client.get("/admin/categories/software/")
+        self.assertContains(response, "Firefox")
+        self.assertContains(response, "firefox")
+
+    def test_software_add_view_accessible(self):
+        """Test that software add view is accessible."""
+        response = self.client.get("/admin/categories/software/add/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_software_edit_view_accessible(self):
+        """Test that software edit view is accessible."""
+        response = self.client.get(
+            f"/admin/categories/software/{self.software.id}/change/"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_software(self):
+        """Test creating a software through admin."""
+        data = {
+            "name": "Thunderbird",
+            "slug": "thunderbird",
+            "repository_url": "https://github.com/mozilla/releases-comm-central",
+            "website_url": "https://www.thunderbird.net/",
+            "state": Software.STATE_DRAFT,
+            "tags": [self.tag2.id],
+            "logo_url": "",
+            "featured_at": "",
+        }
+
+        response = self.client.post(
+            "/admin/categories/software/add/", data, follow=True
+        )
+
+        self.assertEqual(Software.objects.count(), 2)
+        new_software = Software.objects.get(slug="thunderbird")
+        self.assertEqual(new_software.name, "Thunderbird")
+        self.assertEqual(new_software.state, Software.STATE_DRAFT)
+        self.assertIn(self.tag2, new_software.tags.all())
+
+    def test_update_software(self):
+        """Test updating a software through admin."""
+        data = {
+            "name": "Firefox Browser",
+            "slug": "firefox",
+            "repository_url": "https://github.com/mozilla/gecko-dev",
+            "website_url": "https://www.mozilla.org/firefox/new/",
+            "state": Software.STATE_PUBLISHED,
+            "tags": [self.tag1.id, self.tag2.id],
+            "logo_url": "https://example.com/logo.png",
+            "featured_at": "",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+        )
+
+        self.software.refresh_from_db()
+        self.assertEqual(self.software.name, "Firefox Browser")
+        self.assertEqual(self.software.state, Software.STATE_PUBLISHED)
+        self.assertEqual(self.software.tags.count(), 2)
+        self.assertIn(self.tag1, self.software.tags.all())
+        self.assertIn(self.tag2, self.software.tags.all())
+
+    def test_delete_software(self):
+        """Test deleting a software through admin."""
+        software_id = self.software.id
+
+        response = self.client.post(
+            f"/admin/categories/software/{software_id}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        self.assertFalse(Software.objects.filter(id=software_id).exists())
+
+    def test_filter_by_state(self):
+        """Test filtering softwares by state."""
+        Software.objects.create(
+            name="Published App",
+            slug="published-app",
+            state=Software.STATE_PUBLISHED,
+        )
+
+        response = self.client.get(
+            f"/admin/categories/software/?state={Software.STATE_PUBLISHED}"
+        )
+        self.assertContains(response, "Published App")
+        self.assertNotContains(response, "Firefox")
+
+    def test_filter_by_tag(self):
+        """Test filtering softwares by tag."""
+        software2 = Software.objects.create(name="Tor Browser", slug="tor-browser")
+        software2.tags.add(self.tag2)
+
+        response = self.client.get(
+            f"/admin/categories/software/?tags__id__exact={self.tag2.id}"
+        )
+        self.assertContains(response, "Tor Browser")
+        self.assertNotContains(response, "Firefox")
+
+    def test_search_by_name(self):
+        """Test searching softwares by name."""
+        Software.objects.create(name="Thunderbird", slug="thunderbird")
+
+        response = self.client.get("/admin/categories/software/?q=Thunderbird")
+        self.assertContains(response, "Thunderbird")
+        self.assertNotContains(response, "Firefox")

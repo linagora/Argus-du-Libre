@@ -121,3 +121,50 @@ class Tag(models.Model):
     def __str__(self):
         """Return the tag name."""
         return self.name
+
+
+class Software(models.Model):
+    """Software/Project model being tracked."""
+
+    STATE_DRAFT = "draft"
+    STATE_IN_REVIEW = "in_review"
+    STATE_PUBLISHED = "published"
+
+    STATE_CHOICES = [
+        (STATE_DRAFT, "Draft"),
+        (STATE_IN_REVIEW, "In Review"),
+        (STATE_PUBLISHED, "Published"),
+    ]
+
+    name = models.CharField(max_length=255, help_text="Software name")
+    slug = models.SlugField(
+        max_length=255, unique=True, help_text="URL-friendly identifier"
+    )
+    logo_url = models.TextField(blank=True, help_text="URL to the software logo")
+    repository_url = models.TextField(
+        blank=True, help_text="URL to the source code repository"
+    )
+    website_url = models.TextField(blank=True, help_text="URL to the software website")
+    state = models.CharField(
+        max_length=50,
+        choices=STATE_CHOICES,
+        default=STATE_DRAFT,
+        help_text="Publication state",
+    )
+    tags = models.ManyToManyField(
+        Tag, related_name="softwares", blank=True, help_text="Tags for categorization"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    featured_at = models.DateTimeField(
+        null=True, blank=True, help_text="When the software was featured"
+    )
+
+    class Meta:
+        verbose_name = "Software"
+        verbose_name_plural = "Softwares"
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        """Return the software name."""
+        return self.name
