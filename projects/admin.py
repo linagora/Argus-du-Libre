@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from argus_du_libre.admin import admin_site
 from projects.models import (
+    Block,
     Category,
     CategoryTranslation,
     Field,
@@ -102,6 +103,15 @@ class TagAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
+class BlockInline(admin.StackedInline):
+    """Inline admin for content blocks."""
+
+    model = Block
+    extra = 0
+    fields = ["kind", "locale", "content"]
+    ordering = ["kind", "locale"]
+
+
 @admin.register(Software, site=admin_site)
 class SoftwareAdmin(admin.ModelAdmin):
     """Admin interface for software."""
@@ -121,6 +131,7 @@ class SoftwareAdmin(admin.ModelAdmin):
     ordering = ["-created_at"]
     filter_horizontal = ["tags"]
     prepopulated_fields = {"slug": ("name",)}
+    inlines = [BlockInline]
     fields = [
         "name",
         "slug",

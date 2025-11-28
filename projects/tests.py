@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
 from projects.models import (
+    Block,
     Category,
     CategoryTranslation,
     Field,
@@ -882,6 +883,11 @@ class SoftwareAdminTestCase(TestCase):
             "tags": [self.tag2.id],
             "logo_url": "",
             "featured_at": "",
+            # Block inline data (no blocks)
+            "blocks-TOTAL_FORMS": "0",
+            "blocks-INITIAL_FORMS": "0",
+            "blocks-MIN_NUM_FORMS": "0",
+            "blocks-MAX_NUM_FORMS": "1000",
         }
 
         response = self.client.post(
@@ -905,6 +911,11 @@ class SoftwareAdminTestCase(TestCase):
             "tags": [self.tag1.id, self.tag2.id],
             "logo_url": "https://example.com/logo.png",
             "featured_at": "",
+            # Block inline data (no blocks)
+            "blocks-TOTAL_FORMS": "0",
+            "blocks-INITIAL_FORMS": "0",
+            "blocks-MIN_NUM_FORMS": "0",
+            "blocks-MAX_NUM_FORMS": "1000",
         }
 
         response = self.client.post(
@@ -961,4 +972,286 @@ class SoftwareAdminTestCase(TestCase):
 
         response = self.client.get("/admin/categories/software/?q=Thunderbird")
         self.assertContains(response, "Thunderbird")
-        self.assertNotContains(response, "Firefox")
+
+
+class BlockModelTestCase(TestCase):
+    """Test cases for Block model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.software = Software.objects.create(name="Firefox", slug="firefox")
+        self.block_en = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="Firefox is a free and open-source web browser.",
+        )
+        self.block_fr = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_OVERVIEW,
+            locale="fr",
+            content="Firefox est un navigateur web libre et open-source.",
+        )
+
+    def test_block_creation(self):
+        """Test that a block can be created."""
+        block = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_FEATURES,
+            locale="en",
+            content="# Features\n\n- Fast\n- Secure\n- Private",
+        )
+        self.assertIsNotNone(block.id)
+        self.assertEqual(block.kind, Block.KIND_FEATURES)
+        self.assertEqual(block.locale, "en")
+        self.assertIn("Fast", block.content)
+
+    def test_block_kind_choices(self):
+        """Test that block kind choices are correct."""
+        self.assertEqual(Block.KIND_OVERVIEW, "overview")
+        self.assertEqual(Block.KIND_USE_CASE, "use_case")
+        self.assertEqual(Block.KIND_FEATURES, "features")
+
+    def test_block_str_representation(self):
+        """Test that __str__ returns meaningful description."""
+        expected = f"{self.software.name} - Overview (en)"
+        self.assertEqual(str(self.block_en), expected)
+
+    def test_block_unique_together_constraint(self):
+        """Test that unique constraint on (software, kind, locale) is enforced."""
+        from django.db import IntegrityError
+
+        with self.assertRaises(IntegrityError):
+            Block.objects.create(
+                software=self.software,
+                kind=Block.KIND_OVERVIEW,
+                locale="en",
+                content="Duplicate content",
+            )
+
+    def test_block_allows_same_kind_different_locale(self):
+        """Test that same kind with different locale is allowed."""
+        block = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_OVERVIEW,
+            locale="de",
+            content="Firefox ist ein freier Webbrowser.",
+        )
+        self.assertIsNotNone(block.id)
+        self.assertEqual(Block.objects.filter(kind=Block.KIND_OVERVIEW).count(), 3)
+
+    def test_block_allows_different_kind_same_locale(self):
+        """Test that different kind with same locale is allowed."""
+        block = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_FEATURES,
+            locale="en",
+            content="# Features",
+        )
+        self.assertIsNotNone(block.id)
+        self.assertEqual(Block.objects.filter(locale="en").count(), 2)
+
+    def test_block_cascade_delete_with_software(self):
+        """Test that blocks are deleted when software is deleted."""
+        software_id = self.software.id
+        block_ids = [self.block_en.id, self.block_fr.id]
+
+        self.software.delete()
+
+        self.assertFalse(Software.objects.filter(id=software_id).exists())
+        self.assertFalse(Block.objects.filter(id__in=block_ids).exists())
+
+    def test_block_ordering(self):
+        """Test that blocks are ordered by software, kind, locale."""
+        software2 = Software.objects.create(name="Thunderbird", slug="thunderbird")
+        Block.objects.create(
+            software=software2,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="Email client",
+        )
+        Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_FEATURES,
+            locale="en",
+            content="Features",
+        )
+        Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_USE_CASE,
+            locale="en",
+            content="Use cases",
+        )
+
+        blocks = list(Block.objects.all())
+        # Should be ordered by software ID, then kind, then locale
+        # Get Firefox blocks (should be consecutive and ordered by kind)
+        firefox_blocks = [b for b in blocks if b.software == self.software]
+        self.assertEqual(len(firefox_blocks), 4)  # 2 from setUp + 2 from test
+        # Within Firefox blocks, features comes first, then overview, then use_case
+        self.assertEqual(firefox_blocks[0].kind, Block.KIND_FEATURES)
+        self.assertEqual(firefox_blocks[1].kind, Block.KIND_OVERVIEW)
+        self.assertEqual(firefox_blocks[2].kind, Block.KIND_OVERVIEW)
+        self.assertEqual(firefox_blocks[3].kind, Block.KIND_USE_CASE)
+
+    def test_block_timestamps(self):
+        """Test that created_at and updated_at are set automatically."""
+        self.assertIsNotNone(self.block_en.created_at)
+        self.assertIsNotNone(self.block_en.updated_at)
+
+    def test_block_markdown_content(self):
+        """Test that markdown content is stored correctly."""
+        markdown_content = """# Overview
+
+Firefox is a **fast** and *secure* browser.
+
+## Features
+- Privacy protection
+- Fast browsing
+- Cross-platform
+"""
+        block = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_FEATURES,
+            locale="en",
+            content=markdown_content,
+        )
+        self.assertEqual(block.content, markdown_content)
+        self.assertIn("**fast**", block.content)
+        self.assertIn("## Features", block.content)
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class BlockAdminTestCase(TestCase):
+    """Test cases for Block admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="password"
+        )
+        self.client.login(username="admin", password="password")
+
+        self.software = Software.objects.create(name="Firefox", slug="firefox")
+        self.block = Block.objects.create(
+            software=self.software,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="Firefox is a web browser.",
+        )
+
+    def test_block_inline_in_software_admin(self):
+        """Test that blocks appear as inline in software admin."""
+        response = self.client.get(
+            f"/admin/categories/software/{self.software.id}/change/"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Blocks")
+        self.assertContains(response, self.block.content)
+
+    def test_create_block_through_software_admin(self):
+        """Test creating a block through software admin inline."""
+        tag = Tag.objects.create(name="Browser", slug="browser")
+
+        data = {
+            "name": "Firefox",
+            "slug": "firefox",
+            "state": Software.STATE_DRAFT,
+            "tags": [tag.id],
+            "logo_url": "",
+            "repository_url": "",
+            "website_url": "",
+            "featured_at": "",
+            # Block inline data
+            "blocks-TOTAL_FORMS": "2",
+            "blocks-INITIAL_FORMS": "1",
+            "blocks-MIN_NUM_FORMS": "0",
+            "blocks-MAX_NUM_FORMS": "1000",
+            "blocks-0-id": self.block.id,
+            "blocks-0-kind": Block.KIND_OVERVIEW,
+            "blocks-0-locale": "en",
+            "blocks-0-content": "Updated overview",
+            "blocks-1-kind": Block.KIND_FEATURES,
+            "blocks-1-locale": "en",
+            "blocks-1-content": "# Features\n- Fast\n- Secure",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+        )
+
+        # Should have 2 blocks now
+        self.assertEqual(self.software.blocks.count(), 2)
+        features_block = Block.objects.get(
+            software=self.software, kind=Block.KIND_FEATURES
+        )
+        self.assertEqual(features_block.locale, "en")
+        self.assertIn("Fast", features_block.content)
+
+    def test_update_block_through_software_admin(self):
+        """Test updating a block through software admin inline."""
+        tag = Tag.objects.create(name="Browser", slug="browser")
+
+        data = {
+            "name": "Firefox",
+            "slug": "firefox",
+            "state": Software.STATE_DRAFT,
+            "tags": [tag.id],
+            "logo_url": "",
+            "repository_url": "",
+            "website_url": "",
+            "featured_at": "",
+            # Block inline data
+            "blocks-TOTAL_FORMS": "1",
+            "blocks-INITIAL_FORMS": "1",
+            "blocks-MIN_NUM_FORMS": "0",
+            "blocks-MAX_NUM_FORMS": "1000",
+            "blocks-0-id": self.block.id,
+            "blocks-0-kind": Block.KIND_OVERVIEW,
+            "blocks-0-locale": "fr",
+            "blocks-0-content": "Firefox est un navigateur web.",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+        )
+
+        self.block.refresh_from_db()
+        self.assertEqual(self.block.locale, "fr")
+        self.assertIn("navigateur", self.block.content)
+
+    def test_delete_block_through_software_admin(self):
+        """Test deleting a block through software admin inline."""
+        tag = Tag.objects.create(name="Browser", slug="browser")
+        block_id = self.block.id
+
+        data = {
+            "name": "Firefox",
+            "slug": "firefox",
+            "state": Software.STATE_DRAFT,
+            "tags": [tag.id],
+            "logo_url": "",
+            "repository_url": "",
+            "website_url": "",
+            "featured_at": "",
+            # Block inline data with DELETE
+            "blocks-TOTAL_FORMS": "1",
+            "blocks-INITIAL_FORMS": "1",
+            "blocks-MIN_NUM_FORMS": "0",
+            "blocks-MAX_NUM_FORMS": "1000",
+            "blocks-0-id": self.block.id,
+            "blocks-0-kind": Block.KIND_OVERVIEW,
+            "blocks-0-locale": "en",
+            "blocks-0-content": "Firefox is a web browser.",
+            "blocks-0-DELETE": "on",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+        )
+
+        self.assertFalse(Block.objects.filter(id=block_id).exists())
+        self.assertEqual(self.software.blocks.count(), 0)

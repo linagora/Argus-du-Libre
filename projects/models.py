@@ -168,3 +168,40 @@ class Software(models.Model):
     def __str__(self):
         """Return the software name."""
         return self.name
+
+
+class Block(models.Model):
+    """Content block model for multilingual software descriptions."""
+
+    KIND_OVERVIEW = "overview"
+    KIND_USE_CASE = "use_case"
+    KIND_FEATURES = "features"
+
+    KIND_CHOICES = [
+        (KIND_OVERVIEW, "Overview"),
+        (KIND_USE_CASE, "Use Case"),
+        (KIND_FEATURES, "Features"),
+    ]
+
+    software = models.ForeignKey(
+        Software, on_delete=models.CASCADE, related_name="blocks"
+    )
+    kind = models.CharField(
+        max_length=50, choices=KIND_CHOICES, help_text="Type of content block"
+    )
+    locale = models.CharField(
+        max_length=10, help_text="Language code (e.g., 'en', 'fr', 'de')"
+    )
+    content = models.TextField(help_text="Markdown content")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Block"
+        verbose_name_plural = "Blocks"
+        unique_together = [["software", "kind", "locale"]]
+        ordering = ["software", "kind", "locale"]
+
+    def __str__(self):
+        """Return block description."""
+        return f"{self.software.name} - {self.get_kind_display()} ({self.locale})"
