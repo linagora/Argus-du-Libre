@@ -205,3 +205,46 @@ class Block(models.Model):
     def __str__(self):
         """Return block description."""
         return f"{self.software.name} - {self.get_kind_display()} ({self.locale})"
+
+
+class AnalysisResult(models.Model):
+    """Analysis results for each software and field combination."""
+
+    software = models.ForeignKey(
+        Software, on_delete=models.CASCADE, related_name="analysis_results"
+    )
+    field = models.ForeignKey(
+        Field, on_delete=models.CASCADE, related_name="analysis_results"
+    )
+    score = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        help_text="Analysis score (1.00 to 5.00)",
+    )
+    is_published = models.BooleanField(
+        default=False, help_text="Whether the result is published"
+    )
+    is_manual = models.BooleanField(
+        default=False, help_text="TRUE if manually entered/corrected"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Analysis Result"
+        verbose_name_plural = "Analysis Results"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["software", "field"]),
+            models.Index(fields=["is_published"]),
+        ]
+
+    def __str__(self):
+        """Return analysis result description."""
+        return f"{self.software.name} - {self.field} - {self.score}"
+
+    def clean(self):
+        """Validate that score is between 1 and 5."""
+        from django.core.exceptions import ValidationError
+
+        if self.score is not None and (self.score < 1 or self.score > 5):
+            raise ValidationError({"score": "Score must be between 1.00 and 5.00"})

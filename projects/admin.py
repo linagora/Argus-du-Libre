@@ -4,6 +4,7 @@ from django.contrib import admin
 
 from argus_du_libre.admin import admin_site
 from projects.models import (
+    AnalysisResult,
     Block,
     Category,
     CategoryTranslation,
@@ -149,3 +150,25 @@ class SoftwareAdmin(admin.ModelAdmin):
         return ", ".join([tag.name for tag in obj.tags.all()])
 
     get_tags.short_description = "Tags"
+
+
+@admin.register(AnalysisResult, site=admin_site)
+class AnalysisResultAdmin(admin.ModelAdmin):
+    """Admin interface for analysis results."""
+
+    list_display = [
+        "id",
+        "software",
+        "field",
+        "score",
+        "is_published",
+        "is_manual",
+        "created_at",
+    ]
+    list_filter = ["is_published", "is_manual", "field", "software", "created_at"]
+    list_editable = ["is_published", "is_manual"]
+    search_fields = ["software__name", "field__translations__name"]
+    ordering = ["-created_at"]
+    fields = ["software", "field", "score", "is_published", "is_manual"]
+    readonly_fields = ["created_at"]
+    autocomplete_fields = ["software"]

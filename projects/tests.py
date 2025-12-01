@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 
 from projects.models import (
+    AnalysisResult,
     Block,
     Category,
     CategoryTranslation,
@@ -1255,3 +1256,244 @@ class BlockAdminTestCase(TestCase):
 
         self.assertFalse(Block.objects.filter(id=block_id).exists())
         self.assertEqual(self.software.blocks.count(), 0)
+
+
+class AnalysisResultModelTestCase(TestCase):
+    """Test cases for AnalysisResult model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category, locale="en", name="Security"
+        )
+        self.field = Field.objects.create(category=self.category, slug="test-field")
+        FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Test Field"
+        )
+        self.software = Software.objects.create(name="Firefox", slug="firefox")
+
+    def test_analysis_result_creation(self):
+        """Test that an analysis result can be created."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.5
+        )
+        self.assertIsNotNone(result.id)
+        self.assertEqual(result.software, self.software)
+        self.assertEqual(result.field, self.field)
+        self.assertEqual(result.score, 4.5)
+        self.assertFalse(result.is_published)
+        self.assertFalse(result.is_manual)
+        self.assertIsNotNone(result.created_at)
+
+    def test_analysis_result_defaults(self):
+        """Test that default values are set correctly."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=3.0
+        )
+        self.assertFalse(result.is_published)
+        self.assertFalse(result.is_manual)
+
+    def test_analysis_result_str(self):
+        """Test string representation."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.75
+        )
+        expected = f"{self.software.name} - {self.field} - 4.75"
+        self.assertEqual(str(result), expected)
+
+    def test_analysis_result_ordering(self):
+        """Test that results are ordered by created_at descending."""
+        result1 = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=3.0
+        )
+        result2 = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.0
+        )
+        result3 = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=5.0
+        )
+
+        results = list(AnalysisResult.objects.all())
+        # Should be ordered by created_at descending (newest first)
+        self.assertEqual(results[0].id, result3.id)
+        self.assertEqual(results[1].id, result2.id)
+        self.assertEqual(results[2].id, result1.id)
+
+    def test_analysis_result_cascade_delete_software(self):
+        """Test that deleting software deletes its analysis results."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.0
+        )
+        result_id = result.id
+
+        self.software.delete()
+
+        self.assertFalse(AnalysisResult.objects.filter(id=result_id).exists())
+
+    def test_analysis_result_cascade_delete_field(self):
+        """Test that deleting field deletes its analysis results."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.0
+        )
+        result_id = result.id
+
+        self.field.delete()
+
+        self.assertFalse(AnalysisResult.objects.filter(id=result_id).exists())
+
+    def test_score_validation_valid_values(self):
+        """Test that scores between 1 and 5 are valid."""
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=1.0
+        )
+        result.full_clean()  # Should not raise
+
+        result.score = 5.0
+        result.full_clean()  # Should not raise
+
+        result.score = 3.5
+        result.full_clean()  # Should not raise
+
+    def test_score_validation_invalid_values(self):
+        """Test that scores outside 1-5 range are invalid."""
+        from django.core.exceptions import ValidationError
+
+        result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=0.5
+        )
+        with self.assertRaises(ValidationError):
+            result.full_clean()
+
+        result.score = 5.5
+        with self.assertRaises(ValidationError):
+            result.full_clean()
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class AnalysisResultAdminTestCase(TestCase):
+    """Test cases for AnalysisResult admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.category = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category, locale="en", name="Security"
+        )
+        self.field = Field.objects.create(category=self.category, slug="test-field")
+        FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Test Field"
+        )
+        self.software = Software.objects.create(name="Firefox", slug="firefox")
+        self.result = AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=4.5
+        )
+
+    def test_analysis_result_list_view_accessible(self):
+        """Test that analysis result list view is accessible."""
+        response = self.client.get("/admin/categories/analysisresult/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_analysis_result_list_displays_data(self):
+        """Test that list view displays result data."""
+        response = self.client.get("/admin/categories/analysisresult/")
+        self.assertContains(response, "Firefox")
+        self.assertContains(response, "4.5")
+
+    def test_analysis_result_add_view_accessible(self):
+        """Test that add view is accessible."""
+        response = self.client.get("/admin/categories/analysisresult/add/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_analysis_result_edit_view_accessible(self):
+        """Test that edit view is accessible."""
+        response = self.client.get(
+            f"/admin/categories/analysisresult/{self.result.id}/change/"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_analysis_result(self):
+        """Test creating an analysis result through admin."""
+        data = {
+            "software": self.software.id,
+            "field": self.field.id,
+            "score": "3.75",
+            "is_published": True,
+            "is_manual": True,
+        }
+
+        response = self.client.post(
+            "/admin/categories/analysisresult/add/", data, follow=True
+        )
+
+        # Check that result was created
+        self.assertEqual(AnalysisResult.objects.count(), 2)
+        new_result = AnalysisResult.objects.get(score=3.75)
+        self.assertEqual(new_result.software, self.software)
+        self.assertEqual(new_result.field, self.field)
+        self.assertTrue(new_result.is_published)
+        self.assertTrue(new_result.is_manual)
+
+    def test_update_analysis_result(self):
+        """Test updating an analysis result through admin."""
+        data = {
+            "software": self.software.id,
+            "field": self.field.id,
+            "score": "2.5",
+            "is_published": True,
+            "is_manual": False,
+        }
+
+        response = self.client.post(
+            f"/admin/categories/analysisresult/{self.result.id}/change/",
+            data,
+            follow=True,
+        )
+
+        # Refresh from database
+        self.result.refresh_from_db()
+        self.assertEqual(self.result.score, 2.5)
+        self.assertTrue(self.result.is_published)
+        self.assertFalse(self.result.is_manual)
+
+    def test_delete_analysis_result(self):
+        """Test deleting an analysis result through admin."""
+        result_id = self.result.id
+
+        response = self.client.post(
+            f"/admin/categories/analysisresult/{result_id}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        # Check that result was deleted
+        self.assertFalse(AnalysisResult.objects.filter(id=result_id).exists())
+
+    def test_filter_by_is_published(self):
+        """Test filtering by is_published."""
+        AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field,
+            score=3.0,
+            is_published=True,
+        )
+
+        response = self.client.get("/admin/categories/analysisresult/?is_published=1")
+        self.assertEqual(response.status_code, 200)
+
+    def test_filter_by_is_manual(self):
+        """Test filtering by is_manual."""
+        AnalysisResult.objects.create(
+            software=self.software, field=self.field, score=3.0, is_manual=True
+        )
+
+        response = self.client.get("/admin/categories/analysisresult/?is_manual=1")
+        self.assertEqual(response.status_code, 200)
