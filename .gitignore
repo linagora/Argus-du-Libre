@@ -68,6 +68,3 @@ dmypy.json
 
 # Ruff
 .ruff_cache/
-
-# Claude code
-.claude/
