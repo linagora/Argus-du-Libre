@@ -21,7 +21,7 @@
         {% if software.tags.all %}
         <div class="mb-3">
             {% for tag in software.tags.all %}
-            <span class="badge bg-secondary me-1">{{ tag.name }}</span>
+            <a href="{% url 'public:tag_detail' slug=tag.slug %}" class="badge bg-secondary me-1 text-decoration-none">{{ tag.name }}</a>
             {% endfor %}
         </div>
         {% endif %}

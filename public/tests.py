@@ -547,3 +547,128 @@ class ProjectDetailViewTestCase(TestCase):
         # Overall = (2.0 * 3 + 4.0 * 1) / (3 + 1) = 10.0 / 4 = 2.5
         expected_score = Decimal("2.50")
         self.assertEqual(response.context["overall_score"], expected_score)
+
+
+class TagDetailViewTestCase(TestCase):
+    """Test cases for tag detail view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create tags
+        self.tag1 = Tag.objects.create(name="Database", slug="database")
+        self.tag2 = Tag.objects.create(name="Cache", slug="cache")
+
+        # Create published software with tags
+        self.software1 = Software.objects.create(
+            name="Software 1",
+            slug="software-1",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 15, tzinfo=UTC),
+        )
+        self.software1.tags.add(self.tag1, self.tag2)
+
+        self.software2 = Software.objects.create(
+            name="Software 2",
+            slug="software-2",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 10, tzinfo=UTC),
+        )
+        self.software2.tags.add(self.tag1)
+
+        # Create draft software with tag
+        self.draft_software = Software.objects.create(
+            name="Draft Software",
+            slug="draft-software",
+            state=Software.STATE_DRAFT,
+        )
+        self.draft_software.tags.add(self.tag1)
+
+    def test_tag_detail_page_loads_successfully(self):
+        """Test that tag detail page returns 200 status."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/tag_detail.html")
+
+    def test_tag_detail_returns_404_for_nonexistent_tag(self):
+        """Test that 404 is returned for non-existent tag."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "does-not-exist"})
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_tag_detail_shows_tag_name(self):
+        """Test that tag name is displayed."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertContains(response, "Database")
+
+    def test_tag_detail_shows_published_projects_only(self):
+        """Test that only published projects are shown."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertContains(response, "Software 1")
+        self.assertContains(response, "Software 2")
+        self.assertNotContains(response, "Draft Software")
+
+    def test_tag_detail_shows_correct_projects_for_tag(self):
+        """Test that only projects with the specific tag are shown."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "cache"})
+        )
+        self.assertContains(response, "Software 1")
+        self.assertNotContains(response, "Software 2")
+
+    def test_tag_detail_orders_by_featured_at(self):
+        """Test that projects are ordered by featured_at descending."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        content = response.content.decode("utf-8")
+
+        # Software 1 (featured Jan 15) should appear before Software 2 (featured Jan 10)
+        software1_pos = content.find("Software 1")
+        software2_pos = content.find("Software 2")
+        self.assertLess(software1_pos, software2_pos)
+
+    def test_tag_detail_shows_project_logos(self):
+        """Test that project logos are displayed."""
+        self.software1.logo_url = "https://example.com/logo.png"
+        self.software1.save()
+
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertContains(response, self.software1.logo_url)
+
+    def test_tag_detail_shows_read_more_links(self):
+        """Test that read more links point to project detail."""
+        response = self.client.get(
+            "/en/tag/database/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        project_url = "/en/project/software-1/"
+        self.assertContains(response, project_url)
+        self.assertContains(response, "Read More")
+
+    def test_tag_detail_empty_state(self):
+        """Test that empty state is shown when no projects have the tag."""
+        tag_no_projects = Tag.objects.create(name="Empty Tag", slug="empty-tag")
+
+        response = self.client.get(
+            "/en/tag/empty-tag/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No projects found with this tag")
+
+    def test_project_detail_tags_are_clickable(self):
+        """Test that tags on project detail page are clickable links."""
+        response = self.client.get(
+            reverse("public:project_detail", kwargs={"slug": "software-1"})
+        )
+        tag_url = reverse("public:tag_detail", kwargs={"slug": "database"})
+        self.assertContains(response, tag_url)
+        # Check that the tag is a link, not just a span
+        self.assertContains(response, f'<a href="{tag_url}"')

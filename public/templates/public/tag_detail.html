@@ -1,0 +1,52 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ tag.name }} - Argus du Libre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">{{ tag.name }}</h1>
+        <p class="lead text-muted">{% trans "Projects with this tag" %}</p>
+    </div>
+
+    {% if projects %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for project in projects %}
+        <div class="col">
+            <div class="card h-100 text-center shadow-sm hover-shadow">
+                <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+                    {% if project.logo_url %}
+                    <div class="mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                        <img src="{{ project.logo_url }}"
+                             alt="{{ project.name }}"
+                             style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;">
+                    </div>
+                    {% endif %}
+                    <h5 class="card-title mb-2">{{ project.name }}</h5>
+                    <a href="{% url 'public:project_detail' slug=project.slug %}"
+                       class="btn btn-sm btn-outline-primary mt-2">
+                        {% trans "Read More" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="text-muted">{% trans "No projects found with this tag." %}</p>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.hover-shadow {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+</style>
+{% endblock %}

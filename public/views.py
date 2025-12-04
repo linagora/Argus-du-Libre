@@ -118,3 +118,21 @@ def project_detail(request, slug):
     }
 
     return render(request, "public/project_detail.html", context)
+
+def tag_detail(request, slug):
+    """Tag detail view showing all published projects with this tag."""
+    from projects.models import Tag
+
+    tag = get_object_or_404(Tag, slug=slug)
+
+    # Get all published projects with this tag
+    projects = tag.softwares.filter(state=Software.STATE_PUBLISHED).order_by(
+        "-featured_at", "-created_at"
+    )
+
+    context = {
+        "tag": tag,
+        "projects": projects,
+    }
+
+    return render(request, "public/tag_detail.html", context)
