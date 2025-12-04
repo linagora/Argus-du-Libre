@@ -136,10 +136,10 @@ class SoftwareAdmin(admin.ModelAdmin):
     fields = [
         "name",
         "slug",
-        "logo_url",
-        "repository_url",
-        "website_url",
         "state",
+        "repository_url",
+        "logo_url",
+        "website_url",
         "tags",
         "featured_at",
     ]

@@ -1,0 +1,141 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+{% load markdown_extras %}
+
+{% block title %}{{ software.name }} - Argus du Libre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Project Header -->
+    <div class="text-center mb-5">
+        {% if software.logo_url %}
+        <div class="mb-3">
+            <img src="{{ software.logo_url }}"
+                 alt="{{ software.name }}"
+                 style="width: 150px; height: 150px; object-fit: contain;">
+        </div>
+        {% endif %}
+        <h1 class="display-4 mb-3">{{ software.name }}</h1>
+
+        <!-- Tags -->
+        {% if software.tags.all %}
+        <div class="mb-3">
+            {% for tag in software.tags.all %}
+            <span class="badge bg-secondary me-1">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Overall Score and Website Link -->
+        <div class="d-flex justify-content-center align-items-center gap-3">
+            {% if software.website_url %}
+            <a href="{{ software.website_url }}"
+               class="btn btn-primary"
+               target="_blank"
+               rel="noopener">
+                {% trans "Visit Website" %}
+            </a>
+            {% endif %}
+            {% if overall_score %}
+            <div class="d-flex align-items-center">
+                <span class="me-2 fw-semibold">{% trans "Overall Score:" %}</span>
+                <span class="score-badge score-{{ overall_score|floatformat:0 }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                    {{ overall_score|floatformat:1 }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Category Scores -->
+    {% if categories_with_scores %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        {% for category_data in categories_with_scores %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ category_data.category_name }}</h5>
+                    {% if category_data.score %}
+                    <span class="score-badge score-{{ category_data.score|floatformat:0 }}">
+                        {{ category_data.score|floatformat:1 }}
+                    </span>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        {% for field_data in category_data.fields %}
+                        <li class="d-flex justify-content-between align-items-center mb-2">
+                            <span>{{ field_data.field_name }}</span>
+                            <span class="score-badge score-{{ field_data.score|floatformat:0 }}">
+                                {{ field_data.score|floatformat:1 }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Overview Section -->
+    {% if overview_block %}
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h3 class="mb-0">{% trans "Overview" %}</h3>
+        </div>
+        <div class="card-body">
+            <div class="markdown-content">
+                {{ overview_block.content|markdown }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.score-badge {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    min-width: 3rem;
+}
+
+/* Color scale from red (1) to green (5) */
+.score-1 {
+    background-color: #dc3545;  /* Red */
+}
+
+.score-2 {
+    background-color: #fd7e14;  /* Orange */
+}
+
+.score-3 {
+    background-color: #ffc107;  /* Yellow */
+}
+
+.score-4 {
+    background-color: #a3d977;  /* Light green */
+}
+
+.score-5 {
+    background-color: #28a745;  /* Green */
+}
+
+.markdown-content {
+    line-height: 1.6;
+}
+
+.card-header h5 {
+    color: #212529;
+}
+</style>
+{% endblock %}
