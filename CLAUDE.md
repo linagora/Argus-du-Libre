@@ -88,6 +88,125 @@ This keeps all database tables prefixed with `categories_*` while using `project
 - `UNIQUE(software_id, kind, locale)` on Block
 - `UNIQUE(slug)` on Tag and Software
 
+**Analysis Results:**
+- Links Software to Field with a score (1.00 to 5.00)
+- Has `is_published` flag to control visibility
+- Scores are used to calculate category and overall scores
+
+## Public Pages Architecture
+
+The project has a public-facing interface (`public` app) for browsing projects and their analysis results.
+
+### Page Structure
+
+**Homepage** (`/`)
+- Shows up to 20 featured published projects
+- Displays projects in card grid (1/2/4 columns responsive)
+- Each card has logo, name, and "Read More" link
+- Ordered by `featured_at` descending
+
+**Project Detail** (`/project/<slug>/`)
+- Header with logo, name, tags (clickable), overall score, website link
+- Category cards with weighted scores and field details
+- Overview block with markdown content
+- Color-coded score badges (1=red to 5=green)
+- All categories/fields use localized names from translation tables
+
+**Tag Detail** (`/tag/<slug>/`)
+- Shows all published projects with specific tag
+- Same card layout as homepage
+- Ordered by `featured_at`, then `created_at`
+
+### Score Calculation System
+
+The project uses a **weighted mean** system for scoring:
+
+1. **Field Scores** (AnalysisResult):
+   - Stored as Decimal (1.00 to 5.00)
+   - Only published results are displayed
+
+2. **Category Scores**:
+   - Weighted mean of field scores using field weights
+   - Formula: `Σ(field_score × field_weight) / Σ(field_weight)`
+   - Calculated in view, passed to template
+
+3. **Overall Score**:
+   - Weighted mean of category scores using category weights
+   - Formula: `Σ(category_score × category_weight) / Σ(category_weight)`
+   - Displayed on project detail page
+
+**Example:**
+```python
+# Field scores: Code Quality (4.5, weight=2), Performance (3.0, weight=1)
+# Category score = (4.5 × 2 + 3.0 × 1) / (2 + 1) = 4.0
+```
+
+### Localization in Public Views
+
+Public views retrieve localized content dynamically:
+
+```python
+locale = get_language()  # Current user locale
+
+# Get localized names
+category_translation = category.get_translation(locale)
+category_name = category_translation.name if category_translation else str(category)
+```
+
+**Pattern:**
+- Views use `get_translation(locale)` to fetch locale-specific strings
+- Pass `*_name` strings to templates (not model objects)
+- Templates use `{% trans %}` for UI strings
+- Markdown content (Block model) is filtered by locale in query
+
+### Markdown Rendering
+
+Block content uses markdown with safe HTML rendering:
+
+**Template filter** (`public/templatetags/markdown_extras.py`):
+```python
+@register.filter(name="markdown")
+def markdown_format(text):
+    return mark_safe(markdown.markdown(text, extensions=["fenced_code", "tables"]))
+```
+
+**Usage:**
+```django
+{% load markdown_extras %}
+{{ overview_block.content|markdown }}
+```
+
+**Dependencies:**
+- `markdown` library (installed via uv)
+
+### Translation Workflow
+
+**Adding new translatable strings:**
+
+1. Mark strings in templates with `{% trans %}`:
+```django
+{% load i18n %}
+<h1>{% trans "New Feature Title" %}</h1>
+```
+
+2. Generate translation files:
+```bash
+uv run python manage.py makemessages -l fr --no-location --no-obsolete
+```
+
+3. Edit `public/locale/fr/LC_MESSAGES/django.po`:
+```
+msgid "New Feature Title"
+msgstr "Nouveau titre de fonctionnalité"
+```
+
+4. Compile translations:
+```bash
+uv run python manage.py compilemessages -l fr
+```
+
+**Supported languages:** English (en), French (fr)
+
 ## Configuration
 
 All configuration uses environment variables loaded from `.env` file:
@@ -120,7 +239,25 @@ class MyAdminTestCase(TestCase):
    - Relationship tests (ForeignKey, ManyToMany, cascade deletes)
    - Admin tests (list, create, read, update, delete, filters, search)
 
-3. **Use `TestCase`** (not `SimpleTestCase`) - database access is required
+3. **Test public views** (see `public/tests.py`):
+   - View tests (status codes, templates, 404 handling)
+   - Content tests (verify correct data is displayed)
+   - Score calculation tests (verify weighted mean formulas)
+   - Localization tests (test both English and French with explicit locale)
+   - Edge case tests (empty states, missing data, unpublished content)
+
+4. **Use `TestCase`** (not `SimpleTestCase`) - database access is required
+
+5. **Test localization explicitly** when needed:
+```python
+# Test English page
+response = self.client.get("/en/page/", HTTP_ACCEPT_LANGUAGE="en")
+self.assertContains(response, "English Text")
+
+# Test French page
+response = self.client.get("/fr/page/", HTTP_ACCEPT_LANGUAGE="fr")
+self.assertContains(response, "Texte français")
+```
 
 ## Code Style
 
