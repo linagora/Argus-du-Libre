@@ -24,6 +24,7 @@ A Django application for managing and analyzing free and open-source software in
 - Python 3.13 or higher
 - PostgreSQL 12 or higher
 - [uv](https://docs.astral.sh/uv/) package manager
+- gettext
 
 ### Installing uv
 
@@ -207,11 +208,3 @@ argus_du_libre/
     pyproject.toml      # Python project configuration
     .env.example        # Environment variables template
 ```
-
-## License
-
-[Add your license information here]
-
-## Contributing
-
-[Add contributing guidelines here]
