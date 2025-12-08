@@ -136,3 +136,33 @@ def tag_detail(request, slug):
     }
 
     return render(request, "public/tag_detail.html", context)
+
+
+def search(request):
+    """Search view for finding projects by name or content."""
+    from django.db.models import Q
+
+    query = request.GET.get("q", "").strip()
+    results = []
+
+    if query:
+        # Get current locale
+        locale = get_language()
+
+        # Search in software name and block content for current locale
+        results = (
+            Software.objects.filter(
+                Q(name__icontains=query)
+                | Q(blocks__content__icontains=query, blocks__locale=locale),
+                state=Software.STATE_PUBLISHED,
+            )
+            .distinct()
+            .order_by("-featured_at", "-created_at")
+        )
+
+    context = {
+        "query": query,
+        "results": results,
+    }
+
+    return render(request, "public/search.html", context)

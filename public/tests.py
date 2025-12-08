@@ -672,3 +672,285 @@ class TagDetailViewTestCase(TestCase):
         self.assertContains(response, tag_url)
         # Check that the tag is a link, not just a span
         self.assertContains(response, f'<a href="{tag_url}"')
+
+
+class SearchViewTestCase(TestCase):
+    """Test cases for search view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create published software
+        self.software1 = Software.objects.create(
+            name="Django Project",
+            slug="django-project",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 15, tzinfo=UTC),
+        )
+        self.software2 = Software.objects.create(
+            name="Flask Application",
+            slug="flask-app",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 10, tzinfo=UTC),
+        )
+        self.software3 = Software.objects.create(
+            name="FastAPI Service",
+            slug="fastapi-service",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 5, tzinfo=UTC),
+        )
+
+        # Create draft software (should not appear in search)
+        self.draft_software = Software.objects.create(
+            name="Draft Django Tool",
+            slug="draft-tool",
+            state=Software.STATE_DRAFT,
+        )
+
+        # Create blocks with searchable content
+        Block.objects.create(
+            software=self.software1,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="A comprehensive web framework for Python developers.",
+        )
+        Block.objects.create(
+            software=self.software1,
+            kind=Block.KIND_OVERVIEW,
+            locale="fr",
+            content="Un framework web complet pour les développeurs Python.",
+        )
+        Block.objects.create(
+            software=self.software2,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="A micro web framework for building APIs.",
+        )
+        Block.objects.create(
+            software=self.software3,
+            kind=Block.KIND_OVERVIEW,
+            locale="en",
+            content="Modern Python API framework with automatic documentation.",
+        )
+
+    def test_search_page_loads_successfully(self):
+        """Test that search page returns 200 status."""
+        response = self.client.get(reverse("public:search"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/search.html")
+
+    def test_search_without_query_shows_empty_state(self):
+        """Test that search without query parameter shows empty state."""
+        response = self.client.get(reverse("public:search"))
+        self.assertContains(response, "Enter a search query to find projects")
+        self.assertEqual(len(response.context["results"]), 0)
+
+    def test_search_with_empty_query_shows_empty_state(self):
+        """Test that search with empty query shows empty state."""
+        response = self.client.get(reverse("public:search") + "?q=")
+        self.assertContains(response, "Enter a search query to find projects")
+
+    def test_search_finds_projects_by_name(self):
+        """Test that search finds projects by name."""
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+        self.assertNotContains(response, "Flask Application")
+        self.assertNotContains(response, "FastAPI Service")
+
+    def test_search_finds_projects_by_block_content(self):
+        """Test that search finds projects by block content."""
+        response = self.client.get(
+            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        # Both Django and Flask have "framework" in their content
+        self.assertContains(response, "Django Project")
+        self.assertContains(response, "Flask Application")
+        self.assertContains(response, "FastAPI Service")
+
+    def test_search_finds_projects_by_specific_content(self):
+        """Test that search finds projects by specific content."""
+        response = self.client.get(
+            "/en/search/?q=APIs", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Flask Application")
+        self.assertNotContains(response, "Django Project")
+
+    def test_search_is_case_insensitive(self):
+        """Test that search is case insensitive."""
+        response = self.client.get(
+            "/en/search/?q=django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+
+        response = self.client.get(
+            "/en/search/?q=DJANGO", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+
+    def test_search_only_shows_published_projects(self):
+        """Test that only published projects appear in search results."""
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+        self.assertNotContains(response, "Draft Django Tool")
+
+    def test_search_does_not_show_in_review_projects(self):
+        """Test that in-review projects do not appear in search results."""
+        in_review = Software.objects.create(
+            name="Review Django App",
+            slug="review-app",
+            state=Software.STATE_IN_REVIEW,
+        )
+
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+        self.assertNotContains(response, "Review Django App")
+
+    def test_search_shows_results_count(self):
+        """Test that search shows the number of results."""
+        response = self.client.get(
+            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "projects found")
+
+    def test_search_shows_no_results_message(self):
+        """Test that search shows message when no results found."""
+        response = self.client.get(
+            "/en/search/?q=nonexistent", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "No projects found matching your search")
+        self.assertContains(response, "Back to Homepage")
+
+    def test_search_results_are_distinct(self):
+        """Test that search results have no duplicates."""
+        # Create multiple blocks for same software
+        Block.objects.create(
+            software=self.software1,
+            kind=Block.KIND_FEATURES,
+            locale="en",
+            content="Django features include ORM, admin, and security.",
+        )
+
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        results = response.context["results"]
+
+        # Count occurrences of software1
+        django_count = sum(1 for r in results if r.slug == "django-project")
+        self.assertEqual(django_count, 1)
+
+    def test_search_orders_by_featured_at_then_created_at(self):
+        """Test that results are ordered by featured_at, then created_at."""
+        response = self.client.get(
+            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        content = response.content.decode("utf-8")
+
+        # Django (Jan 15) should appear before Flask (Jan 10) and FastAPI (Jan 5)
+        django_pos = content.find("Django Project")
+        flask_pos = content.find("Flask Application")
+        fastapi_pos = content.find("FastAPI Service")
+        self.assertGreater(django_pos, 0, "Django Project not found in results")
+        self.assertGreater(flask_pos, 0, "Flask Application not found in results")
+        self.assertGreater(fastapi_pos, 0, "FastAPI Service not found in results")
+        self.assertLess(django_pos, flask_pos)
+        self.assertLess(flask_pos, fastapi_pos)
+
+    def test_search_shows_project_logos(self):
+        """Test that project logos are displayed in results."""
+        self.software1.logo_url = "https://example.com/django-logo.png"
+        self.software1.save()
+
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, self.software1.logo_url)
+
+    def test_search_shows_read_more_links(self):
+        """Test that read more links point to project detail."""
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "/en/project/django-project/")
+        self.assertContains(response, "Read More")
+
+    def test_search_respects_locale_in_blocks(self):
+        """Test that search searches in blocks of current locale."""
+        # Search in English (should find "framework")
+        response = self.client.get(
+            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+
+        # Search in French (should find "framework" from French content)
+        response = self.client.get(
+            "/fr/search/?q=développeurs", HTTP_ACCEPT_LANGUAGE="fr"
+        )
+        self.assertContains(response, "Django Project")
+
+        # Search in English should not find French-only terms
+        response = self.client.get(
+            "/en/search/?q=développeurs", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertNotContains(response, "Django Project")
+
+    def test_search_in_name_works_regardless_of_locale(self):
+        """Test that name search works in any locale."""
+        # Search by name in English
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Django Project")
+
+        # Search by name in French should also work
+        response = self.client.get(
+            "/fr/search/?q=Django", HTTP_ACCEPT_LANGUAGE="fr"
+        )
+        self.assertContains(response, "Django Project")
+
+    def test_search_shows_query_in_page_title(self):
+        """Test that search query is displayed in the page."""
+        response = self.client.get(
+            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, 'Results for "Django"')
+
+    def test_search_with_special_characters(self):
+        """Test that search handles special characters correctly."""
+        # Create software with special characters
+        special_software = Software.objects.create(
+            name="C++ Compiler",
+            slug="cpp-compiler",
+            state=Software.STATE_PUBLISHED,
+        )
+
+        response = self.client.get(
+            "/en/search/?q=C++", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "C++ Compiler")
+
+    def test_search_with_multiple_words(self):
+        """Test that search works with multiple words."""
+        response = self.client.get(
+            "/en/search/?q=web framework", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        # Should find projects with either "web" or "framework"
+        self.assertContains(response, "Django Project")
+        self.assertContains(response, "Flask Application")
+
+    def test_homepage_has_search_form(self):
+        """Test that homepage includes a search form."""
+        response = self.client.get("/en/", HTTP_ACCEPT_LANGUAGE="en")
+        self.assertContains(response, 'action="/en/search/"')
+        self.assertContains(response, 'name="q"')
+        self.assertContains(response, "Search")
+
+    def test_search_form_submits_to_correct_url(self):
+        """Test that search form submits to the search view."""
+        response = self.client.get("/fr/", HTTP_ACCEPT_LANGUAGE="fr")
+        self.assertContains(response, 'action="/fr/search/"')

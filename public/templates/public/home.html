@@ -10,6 +10,22 @@
         <p class="lead text-muted">{% trans "Discover our selection of quality open source software" %}</p>
     </div>
 
+    <div class="mb-5">
+        <form method="get" action="{% url 'public:search' %}" class="mx-auto" style="max-width: 600px;">
+            <div class="input-group input-group-lg">
+                <input type="text"
+                       name="q"
+                       class="form-control"
+                       placeholder="{% trans 'Search projects...' %}"
+                       aria-label="{% trans 'Search projects' %}"
+                       required>
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> {% trans "Search" %}
+                </button>
+            </div>
+        </form>
+    </div>
+
     {% if featured_projects %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
         {% for project in featured_projects %}

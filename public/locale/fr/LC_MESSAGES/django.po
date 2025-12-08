@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-04 10:31+0000\n"
+"POT-Creation-Date: 2025-12-08 15:21+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -31,6 +31,15 @@ msgstr "Projets Open Source en vedette"
 msgid "Discover our selection of quality open source software"
 msgstr "Découvrez notre sélection de logiciels open source de qualité"
 
+msgid "Search projects..."
+msgstr "Rechercher des projets..."
+
+msgid "Search projects"
+msgstr "Rechercher des projets"
+
+msgid "Search"
+msgstr "Rechercher"
+
 msgid "Read More"
 msgstr "En savoir plus"
 
@@ -45,6 +54,40 @@ msgstr "Score global :"
 
 msgid "Overview"
 msgstr "Aperçu"
+
+msgid "Search Results"
+msgstr "Résultats de recherche"
+
+#, python-format
+msgid "Results for \"%(query)s\""
+msgstr "Résultats pour \"%(query)s\""
+
+msgid "Enter a search query to find projects"
+msgstr "Entrez une requête pour trouver des projets"
+
+#, python-format
+msgid ""
+"\n"
+"                    %(counter)s project found\n"
+"                "
+msgid_plural ""
+"\n"
+"                    %(counter)s projects found\n"
+"                "
+msgstr[0] ""
+"\n"
+"                    %(counter)s projet trouvé\n"
+"                "
+msgstr[1] ""
+"\n"
+"                    %(counter)s projets trouvés\n"
+"                "
+
+msgid "No projects found matching your search."
+msgstr "Aucun projet ne correspond à votre recherche."
+
+msgid "Back to Homepage"
+msgstr "Retour à l'accueil"
 
 msgid "Projects with this tag"
 msgstr "Projets avec ce tag"
