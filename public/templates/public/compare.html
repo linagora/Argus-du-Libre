@@ -1,0 +1,269 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Compare Projects" %} - Argus du Libre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4">{% trans "Project Comparison" %}</h1>
+        <p class="lead text-muted">{% trans "Compare scores across multiple projects" %}</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-warning text-center" role="alert">
+        {{ error }}
+        <div class="mt-3">
+            <a href="{% url 'public:home' %}" class="btn btn-primary">{% trans "Back to Homepage" %}</a>
+        </div>
+    </div>
+    {% elif projects %}
+    <!-- Comparison Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered comparison-table">
+            <!-- Header Row with Project Names -->
+            <thead>
+                <tr>
+                    <th class="metric-column">{% trans "Metric" %}</th>
+                    {% for project in projects %}
+                    <th class="project-column text-center">
+                        <div class="project-header">
+                            {% if project.logo_url %}
+                            <img src="{{ project.logo_url }}"
+                                 alt="{{ project.name }}"
+                                 class="project-logo mb-2">
+                            {% endif %}
+                            <div class="project-name">
+                                <a href="{% url 'public:project_detail' slug=project.slug %}" class="text-decoration-none text-dark fw-bold">
+                                    {{ project.name }}
+                                </a>
+                            </div>
+                        </div>
+                    </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Overall Score Row -->
+                <tr class="overall-row">
+                    <td class="metric-name fw-bold">{% trans "Overall Score" %}</td>
+                    {% for proj_data in projects_data %}
+                    <td class="text-center">
+                        {% if proj_data.overall_score %}
+                        <span class="score-badge score-{{ proj_data.overall_score|floatformat:0 }}">
+                            {{ proj_data.overall_score|floatformat:1 }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Category and Field Rows -->
+                {% for category_data in categories_comparison %}
+                <!-- Category Header Row -->
+                <tr class="category-row">
+                    <td class="metric-name fw-bold category-name">{{ category_data.category_name }}</td>
+                    {% for score in category_data.category_scores %}
+                    <td class="text-center">
+                        {% if score %}
+                        <span class="score-badge score-{{ score|floatformat:0 }}">
+                            {{ score|floatformat:1 }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+
+                <!-- Field Rows -->
+                {% for field_data in category_data.fields %}
+                <tr class="field-row">
+                    <td class="metric-name field-name">{{ field_data.field_name }}</td>
+                    {% for score in field_data.scores %}
+                    <td class="text-center">
+                        {% if score %}
+                        <span class="score-badge score-{{ score|floatformat:0 }}">
+                            {{ score|floatformat:1 }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Legend -->
+    <div class="text-center mt-4">
+        <div class="d-inline-flex align-items-center gap-3 flex-wrap justify-content-center">
+            <small class="text-muted">{% trans "Score Legend:" %}</small>
+            <span class="score-badge score-1 score-badge-sm">1</span>
+            <span class="score-badge score-2 score-badge-sm">2</span>
+            <span class="score-badge score-3 score-badge-sm">3</span>
+            <span class="score-badge score-4 score-badge-sm">4</span>
+            <span class="score-badge score-5 score-badge-sm">5</span>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="text-center mt-5">
+        <a href="{% url 'public:home' %}" class="btn btn-outline-primary">{% trans "Back to Homepage" %}</a>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="text-muted">{% trans "No projects selected for comparison." %}</p>
+        <a href="{% url 'public:home' %}" class="btn btn-primary mt-3">{% trans "Back to Homepage" %}</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.comparison-table {
+    font-size: 0.9rem;
+    min-width: 800px;
+}
+
+.comparison-table th,
+.comparison-table td {
+    vertical-align: middle;
+    padding: 1rem;
+}
+
+.metric-column {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    min-width: 200px;
+    position: sticky;
+    left: 0;
+    z-index: 10;
+}
+
+.project-column {
+    min-width: 150px;
+    max-width: 200px;
+}
+
+.project-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.project-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+.project-name {
+    font-size: 1rem;
+    word-break: break-word;
+}
+
+.metric-name {
+    background-color: #f8f9fa;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+}
+
+.overall-row {
+    background-color: #e9ecef;
+    font-weight: 600;
+}
+
+.category-row {
+    background-color: #f1f3f5;
+}
+
+.category-name {
+    padding-left: 1rem;
+}
+
+.field-row {
+    background-color: #ffffff;
+}
+
+.field-name {
+    padding-left: 2rem;
+    font-size: 0.875rem;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+    min-width: 3rem;
+}
+
+.score-badge-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    min-width: 2rem;
+}
+
+/* Color scale from red (1) to green (5) */
+.score-1 {
+    background-color: #dc3545;  /* Red */
+}
+
+.score-2 {
+    background-color: #fd7e14;  /* Orange */
+}
+
+.score-3 {
+    background-color: #ffc107;  /* Yellow */
+}
+
+.score-4 {
+    background-color: #a3d977;  /* Light green */
+}
+
+.score-5 {
+    background-color: #28a745;  /* Green */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .comparison-table {
+        font-size: 0.8rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.5rem;
+    }
+
+    .project-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .project-name {
+        font-size: 0.85rem;
+    }
+
+    .metric-column {
+        min-width: 150px;
+    }
+
+    .project-column {
+        min-width: 120px;
+    }
+}
+</style>
+{% endblock %}

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-08 15:21+0000\n"
+"POT-Creation-Date: 2025-12-08 15:43+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -21,6 +21,30 @@ msgstr "Travailler dans l'Open Source"
 
 msgid "Expertise"
 msgstr "Expertise"
+
+msgid "Compare Projects"
+msgstr "Comparer les projets"
+
+msgid "Project Comparison"
+msgstr "Comparaison de projets"
+
+msgid "Compare scores across multiple projects"
+msgstr "Comparer les scores de plusieurs projets"
+
+msgid "Back to Homepage"
+msgstr "Retour à l'accueil"
+
+msgid "Metric"
+msgstr "Métrique"
+
+msgid "Overall Score"
+msgstr "Score global"
+
+msgid "Score Legend:"
+msgstr "Légende des scores :"
+
+msgid "No projects selected for comparison."
+msgstr "Aucun projet sélectionné pour la comparaison."
 
 msgid "Featured Projects"
 msgstr "Projets en vedette"
@@ -52,8 +76,20 @@ msgstr "Visiter le site"
 msgid "Overall Score:"
 msgstr "Score global :"
 
+msgid "Compare with Other Projects"
+msgstr "Comparer avec d'autres projets"
+
+msgid "Select projects to compare (1-4):"
+msgstr "Sélectionnez les projets à comparer (1-4) :"
+
+msgid "Hold Ctrl (Windows) or Cmd (Mac) to select multiple projects"
+msgstr "Maintenez Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs projets"
+
 msgid "Overview"
 msgstr "Aperçu"
+
+msgid "Please select between 1 and 4 projects to compare."
+msgstr "Veuillez sélectionner entre 1 et 4 projets à comparer."
 
 msgid "Search Results"
 msgstr "Résultats de recherche"
@@ -85,9 +121,6 @@ msgstr[1] ""
 
 msgid "No projects found matching your search."
 msgstr "Aucun projet ne correspond à votre recherche."
-
-msgid "Back to Homepage"
-msgstr "Retour à l'accueil"
 
 msgid "Projects with this tag"
 msgstr "Projets avec ce tag"

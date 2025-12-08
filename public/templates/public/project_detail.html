@@ -92,7 +92,57 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Compare Projects Section -->
+    {% if other_projects %}
+    <div class="card shadow-sm mb-5">
+        <div class="card-header">
+            <h3 class="mb-0">{% trans "Compare with Other Projects" %}</h3>
+        </div>
+        <div class="card-body">
+            <form id="compareForm" method="get" action="{% url 'public:compare' %}">
+                <div class="mb-3">
+                    <label for="projectSelect" class="form-label">{% trans "Select projects to compare (1-4):" %}</label>
+                    <select multiple class="form-select" id="projectSelect" name="compare_projects" size="8">
+                        {% for project in other_projects %}
+                        <option value="{{ project.slug }}">{{ project.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-text text-muted">
+                        {% trans "Hold Ctrl (Windows) or Cmd (Mac) to select multiple projects" %}
+                    </small>
+                </div>
+                <button type="submit" class="btn btn-primary" id="compareBtn">
+                    <i class="bi bi-bar-chart"></i> {% trans "Compare Projects" %}
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+document.getElementById('compareForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const select = document.getElementById('projectSelect');
+    const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
+
+    // Validate: need 1-4 other projects selected
+    if (selectedOptions.length < 1 || selectedOptions.length > 4) {
+        alert('{% trans "Please select between 1 and 4 projects to compare." %}');
+        return;
+    }
+
+    // Add current project slug to the list
+    const currentSlug = '{{ software.slug }}';
+    const allSlugs = [currentSlug, ...selectedOptions];
+
+    // Build comparison URL
+    const compareUrl = this.action + '?projects=' + allSlugs.join(',');
+    window.location.href = compareUrl;
+});
+</script>
 
 <style>
 .score-badge {

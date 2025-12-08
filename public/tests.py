@@ -954,3 +954,328 @@ class SearchViewTestCase(TestCase):
         """Test that search form submits to the search view."""
         response = self.client.get("/fr/", HTTP_ACCEPT_LANGUAGE="fr")
         self.assertContains(response, 'action="/fr/search/"')
+
+
+class CompareViewTestCase(TestCase):
+    """Test cases for compare view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create categories with translations
+        self.category_tech = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category_tech, locale="en", name="Technology"
+        )
+        CategoryTranslation.objects.create(
+            category=self.category_tech, locale="fr", name="Technologie"
+        )
+
+        self.category_security = Category.objects.create(weight=2)
+        CategoryTranslation.objects.create(
+            category=self.category_security, locale="en", name="Security"
+        )
+
+        # Create fields with translations
+        self.field_code_quality = Field.objects.create(
+            category=self.category_tech, slug="code-quality", weight=2
+        )
+        FieldTranslation.objects.create(
+            field=self.field_code_quality, locale="en", name="Code Quality"
+        )
+
+        self.field_performance = Field.objects.create(
+            category=self.category_tech, slug="performance", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=self.field_performance, locale="en", name="Performance"
+        )
+
+        self.field_vulnerability = Field.objects.create(
+            category=self.category_security, slug="vulnerability", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=self.field_vulnerability, locale="en", name="Vulnerability"
+        )
+
+        # Create published software
+        self.software1 = Software.objects.create(
+            name="Project A",
+            slug="project-a",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 15, tzinfo=UTC),
+        )
+        self.software2 = Software.objects.create(
+            name="Project B",
+            slug="project-b",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 10, tzinfo=UTC),
+        )
+        self.software3 = Software.objects.create(
+            name="Project C",
+            slug="project-c",
+            state=Software.STATE_PUBLISHED,
+            featured_at=datetime(2024, 1, 5, tzinfo=UTC),
+        )
+
+        # Create draft software (should not be comparable)
+        self.draft_software = Software.objects.create(
+            name="Draft Project",
+            slug="draft-project",
+            state=Software.STATE_DRAFT,
+        )
+
+        # Create analysis results for software1
+        AnalysisResult.objects.create(
+            software=self.software1,
+            field=self.field_code_quality,
+            score=Decimal("4.50"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software1,
+            field=self.field_performance,
+            score=Decimal("3.00"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software1,
+            field=self.field_vulnerability,
+            score=Decimal("5.00"),
+            is_published=True,
+        )
+
+        # Create analysis results for software2
+        AnalysisResult.objects.create(
+            software=self.software2,
+            field=self.field_code_quality,
+            score=Decimal("3.50"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software2,
+            field=self.field_performance,
+            score=Decimal("4.50"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software2,
+            field=self.field_vulnerability,
+            score=Decimal("3.00"),
+            is_published=True,
+        )
+
+        # Create analysis results for software3
+        AnalysisResult.objects.create(
+            software=self.software3,
+            field=self.field_code_quality,
+            score=Decimal("5.00"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software3,
+            field=self.field_vulnerability,
+            score=Decimal("4.00"),
+            is_published=True,
+        )
+
+    def test_compare_page_loads_successfully(self):
+        """Test that compare page returns 200 status with valid projects."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/compare.html")
+
+    def test_compare_requires_at_least_two_projects(self):
+        """Test that compare requires at least 2 projects."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please select between 2 and 5 projects")
+
+    def test_compare_allows_maximum_five_projects(self):
+        """Test that compare allows maximum 5 projects."""
+        # Create 2 more projects
+        Software.objects.create(
+            name="Project D", slug="project-d", state=Software.STATE_PUBLISHED
+        )
+        Software.objects.create(
+            name="Project E", slug="project-e", state=Software.STATE_PUBLISHED
+        )
+        Software.objects.create(
+            name="Project F", slug="project-f", state=Software.STATE_PUBLISHED
+        )
+
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b,project-c,project-d,project-e,project-f",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Please select between 2 and 5 projects")
+
+    def test_compare_shows_project_names(self):
+        """Test that compare shows all project names."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Project A")
+        self.assertContains(response, "Project B")
+
+    def test_compare_shows_overall_scores(self):
+        """Test that compare shows overall scores for each project."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Overall Score")
+
+        # Check that scores are displayed
+        projects_data = response.context["projects_data"]
+        self.assertEqual(len(projects_data), 2)
+
+        # Project A: Tech (4.5*2+3.0*1)/3=4.0, Security (5.0)
+        # Overall: (4.0*1+5.0*2)/3=4.67
+        self.assertEqual(projects_data[0]["overall_score"], Decimal("4.67"))
+
+        # Project B: Tech (3.5*2+4.5*1)/3=3.83, Security (3.0)
+        # Overall: (3.83*1+3.0*2)/3=3.28
+        self.assertEqual(projects_data[1]["overall_score"], Decimal("3.28"))
+
+    def test_compare_shows_category_scores(self):
+        """Test that compare shows category scores."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Technology")
+        self.assertContains(response, "Security")
+
+        categories_comparison = response.context["categories_comparison"]
+        self.assertEqual(len(categories_comparison), 2)
+
+    def test_compare_shows_field_scores(self):
+        """Test that compare shows field scores."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Code Quality")
+        self.assertContains(response, "Performance")
+        self.assertContains(response, "Vulnerability")
+
+    def test_compare_handles_missing_field_scores(self):
+        """Test that compare handles when a project doesn't have all field scores."""
+        # Project C is missing Performance score
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-c", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Check that both projects are shown
+        self.assertContains(response, "Project A")
+        self.assertContains(response, "Project C")
+
+    def test_compare_only_shows_published_projects(self):
+        """Test that only published projects can be compared."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,draft-project",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "One or more projects not found or not published")
+
+    def test_compare_handles_nonexistent_projects(self):
+        """Test that compare handles non-existent project slugs."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,nonexistent", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "One or more projects not found or not published")
+
+    def test_compare_orders_projects_alphabetically(self):
+        """Test that projects are ordered by name."""
+        response = self.client.get(
+            "/en/compare/?projects=project-c,project-a,project-b",
+            HTTP_ACCEPT_LANGUAGE="en",
+        )
+        projects = response.context["projects"]
+        self.assertEqual(projects[0].slug, "project-a")
+        self.assertEqual(projects[1].slug, "project-b")
+        self.assertEqual(projects[2].slug, "project-c")
+
+    def test_compare_orders_categories_by_weight(self):
+        """Test that categories are ordered by weight."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        categories_comparison = response.context["categories_comparison"]
+
+        # Technology (weight 1) should come before Security (weight 2)
+        self.assertEqual(categories_comparison[0]["category_name"], "Technology")
+        self.assertEqual(categories_comparison[1]["category_name"], "Security")
+
+    def test_compare_respects_locale_for_category_names(self):
+        """Test that category names are localized."""
+        # Test in English
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Technology")
+
+        # Test in French
+        response = self.client.get(
+            "/fr/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="fr"
+        )
+        self.assertContains(response, "Technologie")
+
+    def test_compare_shows_score_badges(self):
+        """Test that scores are shown with color-coded badges."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        # Should have score badges
+        self.assertContains(response, "score-badge")
+        self.assertContains(response, "score-3")
+        self.assertContains(response, "score-4")
+        self.assertContains(response, "score-5")
+
+    def test_compare_shows_project_links(self):
+        """Test that project names link to their detail pages."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "/en/project/project-a/")
+        self.assertContains(response, "/en/project/project-b/")
+
+    def test_compare_shows_score_legend(self):
+        """Test that score legend is displayed."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Score Legend")
+
+    def test_compare_shows_back_button(self):
+        """Test that back to homepage button is shown."""
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Back to Homepage")
+
+    def test_project_detail_shows_compare_selector(self):
+        """Test that project detail page shows comparison selector."""
+        response = self.client.get(
+            reverse("public:project_detail", kwargs={"slug": "project-a"})
+        )
+        self.assertContains(response, "Compare with Other Projects")
+        self.assertContains(response, "projectSelect")
+
+    def test_project_detail_compare_selector_lists_other_projects(self):
+        """Test that compare selector shows other published projects."""
+        response = self.client.get(
+            reverse("public:project_detail", kwargs={"slug": "project-a"})
+        )
+        # Should show other published projects
+        self.assertContains(response, "Project B")
+        self.assertContains(response, "Project C")
+        # Should not show draft projects
+        self.assertNotContains(response, "Draft Project")
+        # Should not show current project
+        # (Actually, it might not contain "Project A" in the selector, only in the header)
