@@ -68,3 +68,6 @@ dmypy.json
 
 # Ruff
 .ruff_cache/
+
+# Prefer AGENTS.md to CLAUDE.md
+CLAUDE.md
