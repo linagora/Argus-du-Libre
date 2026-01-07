@@ -10,6 +10,9 @@ from projects.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Metric,
+    MetricTranslation,
+    MetricValue,
     Software,
     Tag,
 )
@@ -314,18 +317,12 @@ class FieldModelTestCase(TestCase):
             weight=1,
             analysis_periodicity_days=30,
         )
-        FieldTranslation.objects.create(
-            field=self.field, locale="en", name="License"
-        )
-        FieldTranslation.objects.create(
-            field=self.field, locale="fr", name="Licence"
-        )
+        FieldTranslation.objects.create(field=self.field, locale="en", name="License")
+        FieldTranslation.objects.create(field=self.field, locale="fr", name="Licence")
 
     def test_field_creation(self):
         """Test that a field can be created."""
-        field = Field.objects.create(
-            category=self.category, slug="privacy", weight=2
-        )
+        field = Field.objects.create(category=self.category, slug="privacy", weight=2)
         self.assertIsNotNone(field.id)
         self.assertEqual(field.weight, 2)
         self.assertEqual(field.slug, "privacy")
@@ -348,7 +345,9 @@ class FieldModelTestCase(TestCase):
 
     def test_field_str_returns_first_translation_if_no_english(self):
         """Test that __str__ returns first translation if no English."""
-        field = Field.objects.create(category=self.category, slug="french-only", weight=3)
+        field = Field.objects.create(
+            category=self.category, slug="french-only", weight=3
+        )
         FieldTranslation.objects.create(
             field=field, locale="fr", name="Français seulement"
         )
@@ -450,7 +449,9 @@ class FieldTranslationModelTestCase(TestCase):
         FieldTranslation.objects.create(field=self.field, locale="en", name="First")
 
         with self.assertRaises(Exception):
-            FieldTranslation.objects.create(field=self.field, locale="en", name="Second")
+            FieldTranslation.objects.create(
+                field=self.field, locale="en", name="Second"
+            )
 
     def test_same_locale_different_fields(self):
         """Test that same locale can be used for different fields."""
@@ -1497,3 +1498,570 @@ class AnalysisResultAdminTestCase(TestCase):
 
         response = self.client.get("/admin/categories/analysisresult/?is_manual=1")
         self.assertEqual(response.status_code, 200)
+
+
+class MetricModelTestCase(TestCase):
+    """Test cases for Metric model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        self.field = Field.objects.create(category=self.category, slug="popularity")
+        FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Popularity"
+        )
+        self.metric = Metric.objects.create(field=self.field, slug="github-stars")
+        MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="GitHub Stars"
+        )
+        MetricTranslation.objects.create(
+            metric=self.metric, locale="fr", name="Étoiles GitHub"
+        )
+
+    def test_metric_creation(self):
+        """Test that a metric can be created."""
+        metric = Metric.objects.create(field=self.field, slug="npm-downloads", weight=2)
+        self.assertIsNotNone(metric.id)
+        self.assertEqual(metric.field, self.field)
+        self.assertEqual(metric.slug, "npm-downloads")
+        self.assertEqual(metric.weight, 2)
+        self.assertTrue(metric.collection_enabled)
+
+    def test_metric_default_weight(self):
+        """Test that default weight is 1."""
+        metric = Metric.objects.create(field=self.field, slug="test-metric")
+        self.assertEqual(metric.weight, 1)
+
+    def test_metric_default_collection_enabled(self):
+        """Test that default collection_enabled is True."""
+        metric = Metric.objects.create(field=self.field, slug="test-metric")
+        self.assertTrue(metric.collection_enabled)
+
+    def test_metric_str_returns_english_name(self):
+        """Test that __str__ returns English name when available."""
+        self.assertEqual(str(self.metric), "GitHub Stars")
+
+    def test_metric_str_returns_first_translation_if_no_english(self):
+        """Test that __str__ returns first translation if no English."""
+        metric = Metric.objects.create(field=self.field, slug="french-only")
+        MetricTranslation.objects.create(
+            metric=metric, locale="fr", name="Métrique française"
+        )
+        self.assertIn("française", str(metric))
+
+    def test_metric_str_returns_id_if_no_translations(self):
+        """Test that __str__ returns ID if no translations exist."""
+        metric = Metric.objects.create(field=self.field, slug="no-translations")
+        self.assertEqual(str(metric), f"Metric {metric.id}")
+
+    def test_get_translation(self):
+        """Test getting translation by locale."""
+        translation_en = self.metric.get_translation("en")
+        self.assertIsNotNone(translation_en)
+        self.assertEqual(translation_en.name, "GitHub Stars")
+
+        translation_fr = self.metric.get_translation("fr")
+        self.assertIsNotNone(translation_fr)
+        self.assertEqual(translation_fr.name, "Étoiles GitHub")
+
+    def test_get_translation_returns_none_for_missing_locale(self):
+        """Test that get_translation returns None for missing locale."""
+        translation_de = self.metric.get_translation("de")
+        self.assertIsNone(translation_de)
+
+    def test_metric_ordering(self):
+        """Test that metrics are ordered by field, weight, then id."""
+        field2 = Field.objects.create(category=self.category, slug="quality")
+        metric1 = Metric.objects.create(field=self.field, slug="metric1", weight=3)
+        metric2 = Metric.objects.create(field=self.field, slug="metric2", weight=1)
+        metric3 = Metric.objects.create(field=field2, slug="metric3", weight=1)
+
+        metrics = list(Metric.objects.all())
+        # Should be ordered by field, then weight
+        self.assertEqual(metrics[0].weight, 1)  # self.metric
+        self.assertEqual(metrics[1].weight, 1)  # metric2
+        self.assertEqual(metrics[2].weight, 3)  # metric1
+
+    def test_metric_unique_together_constraint(self):
+        """Test that (field, slug) must be unique."""
+        with self.assertRaises(Exception):
+            Metric.objects.create(field=self.field, slug="github-stars")
+
+    def test_same_slug_different_fields(self):
+        """Test that same slug can be used for different fields."""
+        field2 = Field.objects.create(category=self.category, slug="another-field")
+        metric2 = Metric.objects.create(field=field2, slug="github-stars")
+        self.assertIsNotNone(metric2.id)
+        self.assertNotEqual(self.metric.id, metric2.id)
+
+    def test_metric_cascade_delete(self):
+        """Test that deleting a field deletes its metrics."""
+        metric_id = self.metric.id
+        translation_count = MetricTranslation.objects.filter(
+            metric_id=metric_id
+        ).count()
+        self.assertEqual(translation_count, 2)
+
+        self.field.delete()
+
+        self.assertFalse(Metric.objects.filter(id=metric_id).exists())
+        self.assertEqual(
+            MetricTranslation.objects.filter(metric_id=metric_id).count(), 0
+        )
+
+
+class MetricTranslationModelTestCase(TestCase):
+    """Test cases for MetricTranslation model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        self.field = Field.objects.create(category=self.category, slug="test-field")
+        self.metric = Metric.objects.create(field=self.field, slug="test-metric")
+
+    def test_translation_creation(self):
+        """Test that a translation can be created."""
+        translation = MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="Test Metric"
+        )
+        self.assertIsNotNone(translation.id)
+        self.assertEqual(translation.locale, "en")
+        self.assertEqual(translation.name, "Test Metric")
+
+    def test_translation_with_description(self):
+        """Test creating a translation with description."""
+        translation = MetricTranslation.objects.create(
+            metric=self.metric,
+            locale="en",
+            name="Test Metric",
+            description="A test metric for unit testing",
+        )
+        self.assertEqual(translation.description, "A test metric for unit testing")
+
+    def test_translation_str(self):
+        """Test translation string representation."""
+        translation = MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="Test"
+        )
+        self.assertEqual(str(translation), "en - Test")
+
+    def test_unique_together_constraint(self):
+        """Test that locale must be unique per metric."""
+        MetricTranslation.objects.create(metric=self.metric, locale="en", name="First")
+
+        with self.assertRaises(Exception):
+            MetricTranslation.objects.create(
+                metric=self.metric, locale="en", name="Second"
+            )
+
+    def test_same_locale_different_metrics(self):
+        """Test that same locale can be used for different metrics."""
+        metric2 = Metric.objects.create(field=self.field, slug="another-metric")
+
+        translation1 = MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="Metric 1"
+        )
+        translation2 = MetricTranslation.objects.create(
+            metric=metric2, locale="en", name="Metric 2"
+        )
+
+        self.assertIsNotNone(translation1.id)
+        self.assertIsNotNone(translation2.id)
+        self.assertNotEqual(translation1.id, translation2.id)
+
+
+class MetricValueModelTestCase(TestCase):
+    """Test cases for MetricValue model."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        self.field = Field.objects.create(category=self.category, slug="popularity")
+        self.metric = Metric.objects.create(field=self.field, slug="github-stars")
+        self.software = Software.objects.create(name="Django", slug="django")
+
+    def test_metric_value_creation(self):
+        """Test that a metric value can be created."""
+        from decimal import Decimal
+
+        value = MetricValue.objects.create(
+            metric=self.metric,
+            software=self.software,
+            value=Decimal("45000.0000"),
+            source="GitHub API",
+        )
+        self.assertIsNotNone(value.id)
+        self.assertEqual(value.metric, self.metric)
+        self.assertEqual(value.software, self.software)
+        self.assertEqual(value.value, Decimal("45000.0000"))
+        self.assertEqual(value.source, "GitHub API")
+        self.assertIsNotNone(value.collected_at)
+
+    def test_metric_value_str(self):
+        """Test string representation."""
+        value = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=12345
+        )
+        self.assertIn("Django", str(value))
+        self.assertIn("12345", str(value))
+
+    def test_metric_value_ordering(self):
+        """Test that values are ordered by collected_at descending."""
+        value1 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=1000
+        )
+        value2 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=2000
+        )
+        value3 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=3000
+        )
+
+        values = list(MetricValue.objects.all())
+        # Should be ordered by collected_at descending (newest first)
+        self.assertEqual(values[0].id, value3.id)
+        self.assertEqual(values[1].id, value2.id)
+        self.assertEqual(values[2].id, value1.id)
+
+    def test_metric_value_historical_tracking(self):
+        """Test that multiple values can be stored for same metric/software."""
+        value1 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=1000
+        )
+        value2 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=2000
+        )
+        value3 = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=3000
+        )
+
+        # All three should exist
+        self.assertEqual(
+            MetricValue.objects.filter(
+                metric=self.metric, software=self.software
+            ).count(),
+            3,
+        )
+
+    def test_metric_value_cascade_delete_metric(self):
+        """Test that deleting metric deletes its values."""
+        value = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=1000
+        )
+        value_id = value.id
+
+        self.metric.delete()
+
+        self.assertFalse(MetricValue.objects.filter(id=value_id).exists())
+
+    def test_metric_value_cascade_delete_software(self):
+        """Test that deleting software deletes its metric values."""
+        value = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=1000
+        )
+        value_id = value.id
+
+        self.software.delete()
+
+        self.assertFalse(MetricValue.objects.filter(id=value_id).exists())
+
+    def test_metric_value_decimal_precision(self):
+        """Test that decimal values are stored with correct precision."""
+        from decimal import Decimal
+
+        value = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=Decimal("0.8567")
+        )
+        self.assertEqual(value.value, Decimal("0.8567"))
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class MetricAdminTestCase(TestCase):
+    """Test cases for Metric admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.category = Category.objects.create(weight=1)
+        self.field = Field.objects.create(category=self.category, slug="popularity")
+        FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Popularity"
+        )
+
+        self.metric = Metric.objects.create(field=self.field, slug="github-stars")
+        MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="GitHub Stars"
+        )
+        MetricTranslation.objects.create(
+            metric=self.metric, locale="fr", name="Étoiles GitHub"
+        )
+
+    def test_metric_list_view_accessible(self):
+        """Test that metric list view is accessible."""
+        response = self.client.get("/admin/categories/metric/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_metric_list_displays_translations(self):
+        """Test that metric list displays English and French names."""
+        response = self.client.get("/admin/categories/metric/")
+        self.assertContains(response, "GitHub Stars")
+        self.assertContains(response, "Étoiles GitHub")
+
+    def test_metric_add_view_accessible(self):
+        """Test that metric add view is accessible."""
+        response = self.client.get("/admin/categories/metric/add/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_metric_edit_view_accessible(self):
+        """Test that metric edit view is accessible."""
+        response = self.client.get(f"/admin/categories/metric/{self.metric.id}/change/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_metric_edit_view_shows_translations(self):
+        """Test that edit view shows existing translations."""
+        response = self.client.get(f"/admin/categories/metric/{self.metric.id}/change/")
+        self.assertContains(response, "GitHub Stars")
+        self.assertContains(response, "Étoiles GitHub")
+
+    def test_create_metric_with_translations(self):
+        """Test creating a metric through admin."""
+        data = {
+            "field": self.field.id,
+            "slug": "npm-downloads",
+            "weight": 2,
+            "collection_enabled": True,
+            # Management form data for inline
+            "translations-TOTAL_FORMS": "2",
+            "translations-INITIAL_FORMS": "0",
+            "translations-MIN_NUM_FORMS": "2",
+            "translations-MAX_NUM_FORMS": "10",
+            # Translation 1 (English)
+            "translations-0-locale": "en",
+            "translations-0-name": "npm Downloads",
+            "translations-0-description": "Number of npm package downloads",
+            # Translation 2 (French)
+            "translations-1-locale": "fr",
+            "translations-1-name": "Téléchargements npm",
+            "translations-1-description": "Nombre de téléchargements du package npm",
+        }
+
+        response = self.client.post("/admin/categories/metric/add/", data, follow=True)
+
+        # Check that metric was created
+        self.assertEqual(Metric.objects.count(), 2)
+        new_metric = Metric.objects.get(slug="npm-downloads")
+        self.assertEqual(new_metric.weight, 2)
+
+        # Check translations
+        en_translation = new_metric.get_translation("en")
+        self.assertIsNotNone(en_translation)
+        self.assertEqual(en_translation.name, "npm Downloads")
+        self.assertEqual(en_translation.description, "Number of npm package downloads")
+
+        fr_translation = new_metric.get_translation("fr")
+        self.assertIsNotNone(fr_translation)
+        self.assertEqual(fr_translation.name, "Téléchargements npm")
+
+    def test_update_metric(self):
+        """Test updating a metric through admin."""
+        data = {
+            "field": self.field.id,
+            "slug": "github-stars",
+            "weight": 5,
+            "collection_enabled": False,
+            # Management form data for inline
+            "translations-TOTAL_FORMS": "2",
+            "translations-INITIAL_FORMS": "2",
+            "translations-MIN_NUM_FORMS": "2",
+            "translations-MAX_NUM_FORMS": "10",
+            # Existing translations
+            "translations-0-id": MetricTranslation.objects.get(
+                metric=self.metric, locale="en"
+            ).id,
+            "translations-0-locale": "en",
+            "translations-0-name": "GitHub Stars Updated",
+            "translations-0-description": "",
+            "translations-1-id": MetricTranslation.objects.get(
+                metric=self.metric, locale="fr"
+            ).id,
+            "translations-1-locale": "fr",
+            "translations-1-name": "Étoiles GitHub Mise à jour",
+            "translations-1-description": "",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/metric/{self.metric.id}/change/", data, follow=True
+        )
+
+        self.metric.refresh_from_db()
+        self.assertEqual(self.metric.weight, 5)
+        self.assertFalse(self.metric.collection_enabled)
+
+        en_translation = self.metric.get_translation("en")
+        self.assertEqual(en_translation.name, "GitHub Stars Updated")
+
+    def test_delete_metric(self):
+        """Test deleting a metric through admin."""
+        metric_id = self.metric.id
+
+        response = self.client.post(
+            f"/admin/categories/metric/{metric_id}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        self.assertFalse(Metric.objects.filter(id=metric_id).exists())
+
+    def test_filter_by_field(self):
+        """Test filtering metrics by field."""
+        field2 = Field.objects.create(category=self.category, slug="quality")
+        metric2 = Metric.objects.create(field=field2, slug="code-coverage")
+
+        response = self.client.get(
+            f"/admin/categories/metric/?field__id__exact={field2.id}"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_filter_by_collection_enabled(self):
+        """Test filtering by collection_enabled."""
+        Metric.objects.create(
+            field=self.field, slug="disabled-metric", collection_enabled=False
+        )
+
+        response = self.client.get("/admin/categories/metric/?collection_enabled=1")
+        self.assertEqual(response.status_code, 200)
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class MetricValueAdminTestCase(TestCase):
+    """Test cases for MetricValue admin interface."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.category = Category.objects.create(weight=1)
+        self.field = Field.objects.create(category=self.category, slug="popularity")
+        self.metric = Metric.objects.create(field=self.field, slug="github-stars")
+        MetricTranslation.objects.create(
+            metric=self.metric, locale="en", name="GitHub Stars"
+        )
+        self.software = Software.objects.create(name="Django", slug="django")
+        self.value = MetricValue.objects.create(
+            metric=self.metric, software=self.software, value=45000, source="GitHub API"
+        )
+
+    def test_metric_value_list_view_accessible(self):
+        """Test that metric value list view is accessible."""
+        response = self.client.get("/admin/categories/metricvalue/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_metric_value_list_displays_data(self):
+        """Test that list view displays value data."""
+        response = self.client.get("/admin/categories/metricvalue/")
+        self.assertContains(response, "Django")
+        self.assertContains(response, "45000")
+
+    def test_metric_value_add_view_accessible(self):
+        """Test that add view is accessible."""
+        response = self.client.get("/admin/categories/metricvalue/add/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_metric_value_edit_view_accessible(self):
+        """Test that edit view is accessible."""
+        response = self.client.get(
+            f"/admin/categories/metricvalue/{self.value.id}/change/"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_metric_value(self):
+        """Test creating a metric value through admin."""
+        data = {
+            "metric": self.metric.id,
+            "software": self.software.id,
+            "value": "50000.0000",
+            "source": "GitHub API v2",
+        }
+
+        response = self.client.post(
+            "/admin/categories/metricvalue/add/", data, follow=True
+        )
+
+        # Check that value was created
+        self.assertEqual(MetricValue.objects.count(), 2)
+        new_value = MetricValue.objects.get(value=50000)
+        self.assertEqual(new_value.source, "GitHub API v2")
+
+    def test_update_metric_value(self):
+        """Test updating a metric value through admin."""
+        data = {
+            "metric": self.metric.id,
+            "software": self.software.id,
+            "value": "46000.0000",
+            "source": "GitHub API Updated",
+        }
+
+        response = self.client.post(
+            f"/admin/categories/metricvalue/{self.value.id}/change/",
+            data,
+            follow=True,
+        )
+
+        self.value.refresh_from_db()
+        self.assertEqual(self.value.value, 46000)
+        self.assertEqual(self.value.source, "GitHub API Updated")
+
+    def test_delete_metric_value(self):
+        """Test deleting a metric value through admin."""
+        value_id = self.value.id
+
+        response = self.client.post(
+            f"/admin/categories/metricvalue/{value_id}/delete/",
+            {"post": "yes"},
+            follow=True,
+        )
+
+        self.assertFalse(MetricValue.objects.filter(id=value_id).exists())
+
+    def test_filter_by_metric(self):
+        """Test filtering by metric."""
+        metric2 = Metric.objects.create(field=self.field, slug="npm-downloads")
+        MetricValue.objects.create(metric=metric2, software=self.software, value=1000)
+
+        response = self.client.get(
+            f"/admin/categories/metricvalue/?metric__id__exact={self.metric.id}"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_search_by_software_name(self):
+        """Test searching values by software name."""
+        software2 = Software.objects.create(name="Flask", slug="flask")
+        MetricValue.objects.create(metric=self.metric, software=software2, value=5000)
+
+        response = self.client.get("/admin/categories/metricvalue/?q=Flask")
+        self.assertContains(response, "Flask")
+
+    def test_search_by_source(self):
+        """Test searching values by source."""
+        MetricValue.objects.create(
+            metric=self.metric,
+            software=self.software,
+            value=1000,
+            source="Custom Scraper",
+        )
+
+        response = self.client.get("/admin/categories/metricvalue/?q=Scraper")
+        self.assertContains(response, "Scraper")

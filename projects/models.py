@@ -248,3 +248,97 @@ class AnalysisResult(models.Model):
 
         if self.score is not None and (self.score < 1 or self.score > 5):
             raise ValidationError({"score": "Score must be between 1.00 and 5.00"})
+
+
+class Metric(models.Model):
+    """Metric definition for automated data collection."""
+
+    field = models.ForeignKey(Field, on_delete=models.CASCADE, related_name="metrics")
+    slug = models.SlugField(
+        max_length=100, help_text="URL-friendly identifier for the metric"
+    )
+    weight = models.IntegerField(
+        default=1, help_text="Weight for aggregating multiple metrics"
+    )
+    collection_enabled = models.BooleanField(
+        default=True, help_text="Whether automated collection is enabled"
+    )
+
+    class Meta:
+        verbose_name = "Metric"
+        verbose_name_plural = "Metrics"
+        ordering = ["field", "weight", "id"]
+        unique_together = [["field", "slug"]]
+        indexes = [
+            models.Index(fields=["field", "collection_enabled"]),
+        ]
+
+    def __str__(self):
+        """Return the metric name in English if available, otherwise the first translation."""
+        translation = self.translations.filter(locale="en").first()
+        if translation:
+            return translation.name
+        translation = self.translations.first()
+        return translation.name if translation else f"Metric {self.id}"
+
+    def get_translation(self, locale):
+        """Get translation for a specific locale."""
+        return self.translations.filter(locale=locale).first()
+
+
+class MetricTranslation(models.Model):
+    """Translation model for metric names and descriptions."""
+
+    metric = models.ForeignKey(
+        Metric, on_delete=models.CASCADE, related_name="translations"
+    )
+    locale = models.CharField(
+        max_length=10, help_text="Language code (e.g., 'en', 'fr', 'de')"
+    )
+    name = models.CharField(max_length=255, help_text="Metric name in this language")
+    description = models.TextField(
+        blank=True, help_text="Metric description in this language"
+    )
+
+    class Meta:
+        verbose_name = "Metric Translation"
+        verbose_name_plural = "Metric Translations"
+        unique_together = [["metric", "locale"]]
+        ordering = ["locale"]
+
+    def __str__(self):
+        """Return the translation in format: locale - name."""
+        return f"{self.locale} - {self.name}"
+
+
+class MetricValue(models.Model):
+    """Historical metric values collected over time."""
+
+    metric = models.ForeignKey(Metric, on_delete=models.CASCADE, related_name="values")
+    software = models.ForeignKey(
+        Software, on_delete=models.CASCADE, related_name="metric_values"
+    )
+    value = models.DecimalField(
+        max_digits=20,
+        decimal_places=4,
+        help_text="Metric value (e.g., 45000 for GitHub stars, 0.85 for percentages)",
+    )
+    collected_at = models.DateTimeField(
+        auto_now_add=True, help_text="When this value was collected"
+    )
+    source = models.CharField(
+        max_length=255, blank=True, help_text="Source of the data (e.g., 'GitHub API')"
+    )
+
+    class Meta:
+        verbose_name = "Metric Value"
+        verbose_name_plural = "Metric Values"
+        ordering = ["-collected_at"]
+        indexes = [
+            models.Index(fields=["metric", "software", "-collected_at"]),
+            models.Index(fields=["software", "-collected_at"]),
+        ]
+
+    def __str__(self):
+        """Return metric value description."""
+        return f"{self.software.name} - {self.metric} - {self.value} ({self.collected_at.date()})"

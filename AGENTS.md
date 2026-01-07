@@ -40,6 +40,7 @@ class CategoryTranslation(models.Model):
 **Models using this pattern:**
 - Category/CategoryTranslation
 - Field/FieldTranslation
+- Metric/MetricTranslation
 - Block (inline with Software, stores locale directly)
 
 **Key conventions:**
@@ -59,9 +60,11 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 
 ### Data Models
 
-**Category → Field Hierarchy:**
+**Category → Field → Metric Hierarchy:**
 - Categories organize Fields
 - Fields have `slug` (unique per category), `weight`, and optional `analysis_periodicity_days`
+- Metrics belong to Fields and define what data to collect (e.g., "GitHub Stars")
+- Metrics have `slug` (unique per field), `weight`, and `collection_enabled`
 
 **Software → Blocks:**
 - Software has state workflow: draft → in_review → published
@@ -71,6 +74,7 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 
 **Key constraints:**
 - `UNIQUE(category_id, slug)` on Field
+- `UNIQUE(field_id, slug)` on Metric
 - `UNIQUE(software_id, kind, locale)` on Block
 - `UNIQUE(slug)` on Tag and Software
 
@@ -78,6 +82,61 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 - Links Software to Field with a score (1.00 to 5.00)
 - Has `is_published` flag to control visibility
 - Scores are used to calculate category and overall scores
+
+**Metric Values:**
+- Links Software to Metric with a raw decimal value
+- Supports historical tracking (no unique constraint - multiple values over time)
+- Stores `collected_at` timestamp and `source` (e.g., "GitHub API", "qsos-lng")
+- All values stored as `NUMERIC(20, 4)` decimals (works for counts, percentages, ratings)
+
+### Metric Persistence System
+
+The metric system stores raw data collected from external sources (GitHub API, npm registry, etc.) separately from final scores in AnalysisResult.
+
+**Database Tables:**
+- `categories_metric` - Metric definitions (what to collect)
+- `categories_metrictranslation` - Multilingual names and descriptions
+- `categories_metricvalue` - Historical raw values
+
+**Workflow:**
+1. Create Metric definitions in admin (e.g., "GitHub Stars" for Popularity field)
+2. Add translations for each supported locale
+3. Automated tools (qsos-lng) insert MetricValue records with raw data
+4. AnalysisResult stores final calculated scores (manually or via automation)
+
+**Example:**
+```python
+# Metric: GitHub Stars
+field = Field.objects.get(slug="popularity")
+metric = Metric.objects.create(
+    field=field,
+    slug="github-stars",
+    weight=3
+)
+
+# Value: Django has 45,000 stars
+MetricValue.objects.create(
+    metric=metric,
+    software=Software.objects.get(slug="django"),
+    value=45000,
+    source="GitHub API"
+)
+
+# Score: Maps to 4.0 (40k-80k range)
+AnalysisResult.objects.create(
+    software=Software.objects.get(slug="django"),
+    field=field,
+    score=4.0,
+    is_published=True
+)
+```
+
+**Key Design:**
+- Metrics are field-specific (each field can have multiple metrics)
+- Values use simple decimal storage (not polymorphic)
+- Historical tracking enabled (no UNIQUE constraint on MetricValue)
+- Scores remain in AnalysisResult for display consistency
+- Integration-friendly for qsos-lng via direct SQL INSERT
 
 ## Public Pages Architecture
 

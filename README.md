@@ -2,10 +2,13 @@
 
 A Django application for managing and analyzing free and open-source software information with multilingual support.
 
+The analyzing part is done in another repository: [qsos-lng](https://github.com/linagora/qsos-lng).
+
 ## Features
 
 - Multilingual content management (English, French)
 - Software catalog with categories, fields, and tags
+- Metric persistence system for storing raw analysis data (GitHub stars, npm downloads, etc.)
 - Analysis results with weighted scoring system
 - Public-facing pages for browsing projects
 - OIDC authentication support for admin interface
@@ -69,6 +72,16 @@ ALTER ROLE argus_user SET client_encoding TO 'utf8';
 ALTER ROLE argus_user SET default_transaction_isolation TO 'read committed';
 ALTER ROLE argus_user SET timezone TO 'UTC';
 GRANT ALL PRIVILEGES ON DATABASE argus_du_libre TO argus_user;
+```
+
+Then connect to the database and grant schema permissions (required for PostgreSQL 15+):
+
+```sql
+\c argus_du_libre
+GRANT ALL ON SCHEMA public TO argus_user;
+GRANT CREATE ON SCHEMA public TO argus_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO argus_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO argus_user;
 ```
 
 ### 5. Configure environment variables

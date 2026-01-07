@@ -10,6 +10,9 @@ from projects.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Metric,
+    MetricTranslation,
+    MetricValue,
     Software,
     Tag,
 )
@@ -171,4 +174,77 @@ class AnalysisResultAdmin(admin.ModelAdmin):
     ordering = ["-created_at"]
     fields = ["software", "field", "score", "is_published", "is_manual"]
     readonly_fields = ["created_at"]
+    autocomplete_fields = ["software"]
+
+
+class MetricTranslationInline(admin.TabularInline):
+    """Inline admin for metric translations."""
+
+    model = MetricTranslation
+    extra = 0
+    min_num = 2
+    max_num = 10
+    fields = ["locale", "name", "description"]
+
+
+@admin.register(Metric, site=admin_site)
+class MetricAdmin(admin.ModelAdmin):
+    """Admin interface for metrics with multilingual support."""
+
+    list_display = [
+        "id",
+        "field",
+        "get_name_en",
+        "get_name_fr",
+        "slug",
+        "weight",
+        "collection_enabled",
+    ]
+    list_editable = ["weight", "collection_enabled"]
+    list_filter = ["field__category", "field", "collection_enabled"]
+    ordering = ["field", "weight", "id"]
+    inlines = [MetricTranslationInline]
+    fields = [
+        "field",
+        "slug",
+        "weight",
+        "collection_enabled",
+    ]
+
+    def get_name_en(self, obj):
+        """Get English name."""
+        translation = obj.get_translation("en")
+        return translation.name if translation else "-"
+
+    get_name_en.short_description = "Name (English)"
+
+    def get_name_fr(self, obj):
+        """Get French name."""
+        translation = obj.get_translation("fr")
+        return translation.name if translation else "-"
+
+    get_name_fr.short_description = "Name (French)"
+
+
+@admin.register(MetricValue, site=admin_site)
+class MetricValueAdmin(admin.ModelAdmin):
+    """Admin interface for metric values."""
+
+    list_display = [
+        "id",
+        "software",
+        "metric",
+        "value",
+        "collected_at",
+        "source",
+    ]
+    list_filter = [
+        "metric__field__category",
+        "metric__field",
+        "metric",
+        "collected_at",
+    ]
+    search_fields = ["software__name", "metric__translations__name", "source"]
+    ordering = ["-collected_at"]
+    readonly_fields = ["collected_at"]
     autocomplete_fields = ["software"]
