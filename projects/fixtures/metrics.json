@@ -1,0 +1,242 @@
+[
+{
+  "model": "categories.metric",
+  "pk": 1,
+  "fields": {
+    "field": 1,
+    "slug": "activity_days",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 2,
+  "fields": {
+    "field": 2,
+    "slug": "maturity_days",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 3,
+  "fields": {
+    "field": 3,
+    "slug": "stars",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 4,
+  "fields": {
+    "field": 4,
+    "slug": "active_contributors",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 5,
+  "fields": {
+    "field": 5,
+    "slug": "lines_of_code",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 6,
+  "fields": {
+    "field": 6,
+    "slug": "complexity",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 7,
+  "fields": {
+    "field": 6,
+    "slug": "high_complexity_functions",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 8,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_vulnerabilities",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 9,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_security_policy",
+    "weight": 2,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 10,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_binary_artifacts",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 11,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_branch_protection",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 12,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_code_review",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 13,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_pinned_dependencies",
+    "weight": 2,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 14,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_packaging",
+    "weight": 2,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 15,
+  "fields": {
+    "field": 9,
+    "slug": "scorecard_signed_releases",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 16,
+  "fields": {
+    "field": 10,
+    "slug": "readme_quality",
+    "weight": 4,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 17,
+  "fields": {
+    "field": 10,
+    "slug": "readme_sections",
+    "weight": 2,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 18,
+  "fields": {
+    "field": 10,
+    "slug": "docs_directory",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 19,
+  "fields": {
+    "field": 10,
+    "slug": "accessibility",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 20,
+  "fields": {
+    "field": 10,
+    "slug": "multilang_readmes",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 21,
+  "fields": {
+    "field": 11,
+    "slug": "test_ratio",
+    "weight": 3,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 22,
+  "fields": {
+    "field": 11,
+    "slug": "test_lines_of_code",
+    "weight": 1,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 23,
+  "fields": {
+    "field": 3,
+    "slug": "is_mirror",
+    "weight": 0,
+    "collection_enabled": true
+  }
+},
+{
+  "model": "categories.metric",
+  "pk": 24,
+  "fields": {
+    "field": 6,
+    "slug": "functions",
+    "weight": 1,
+    "collection_enabled": true
+  }
+}
+]

@@ -1,0 +1,56 @@
+[
+{
+  "model": "categories.categorytranslation",
+  "pk": 1,
+  "fields": {
+    "category": 1,
+    "locale": "fr",
+    "name": "Communauté"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 2,
+  "fields": {
+    "category": 1,
+    "locale": "en",
+    "name": "Community"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 3,
+  "fields": {
+    "category": 2,
+    "locale": "fr",
+    "name": "Tech"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 4,
+  "fields": {
+    "category": 2,
+    "locale": "en",
+    "name": "Tech"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 5,
+  "fields": {
+    "category": 3,
+    "locale": "fr",
+    "name": "Sécurité"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 6,
+  "fields": {
+    "category": 3,
+    "locale": "en",
+    "name": "Security"
+  }
+}
+]

@@ -111,10 +111,13 @@ DB_PORT=5432
 OIDC_ENABLED=False  # Set to True to enable OIDC authentication
 ```
 
-### 6. Run database migrations
+### 6. Run database migrations and import fixtures
 
 ```bash
 uv run python manage.py migrate
+uv run python manage.py loaddata categories category_translations
+uv run python manage.py loaddata fields field_translations
+uv run python manage.py loaddata metrics metric_translations
 ```
 
 ### 7. Create a superuser (if not using OIDC)

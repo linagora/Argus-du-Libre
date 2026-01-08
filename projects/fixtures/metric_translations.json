@@ -1,0 +1,482 @@
+[
+{
+  "model": "categories.metrictranslation",
+  "pk": 1,
+  "fields": {
+    "metric": 1,
+    "locale": "en",
+    "name": "Days since last commit",
+    "description": "Number of days since the last commit to the repository"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 2,
+  "fields": {
+    "metric": 1,
+    "locale": "fr",
+    "name": "Jours depuis le dernier commit",
+    "description": "Nombre de jours depuis le dernier commit dans le dépôt"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 3,
+  "fields": {
+    "metric": 2,
+    "locale": "en",
+    "name": "Days since first commit",
+    "description": "Number of days since the first commit to the repository"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 4,
+  "fields": {
+    "metric": 2,
+    "locale": "fr",
+    "name": "Jours depuis le premier commit",
+    "description": "Nombre de jours depuis le premier commit dans le dépôt"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 5,
+  "fields": {
+    "metric": 3,
+    "locale": "en",
+    "name": "GitHub stars",
+    "description": "Number of stars on GitHub"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 6,
+  "fields": {
+    "metric": 3,
+    "locale": "fr",
+    "name": "Étoiles GitHub",
+    "description": "Nombre d'étoiles sur GitHub"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 7,
+  "fields": {
+    "metric": 4,
+    "locale": "en",
+    "name": "Active contributors",
+    "description": "Number of active contributors (>3 commits in last 6 months, excluding bots)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 8,
+  "fields": {
+    "metric": 4,
+    "locale": "fr",
+    "name": "Contributeurs actifs",
+    "description": "Nombre de contributeurs actifs (>3 commits dans les 6 derniers mois, hors bots)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 9,
+  "fields": {
+    "metric": 5,
+    "locale": "en",
+    "name": "Lines of code",
+    "description": "Total number of lines of code"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 10,
+  "fields": {
+    "metric": 5,
+    "locale": "fr",
+    "name": "Lignes de code",
+    "description": "Nombre total de lignes de code"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 11,
+  "fields": {
+    "metric": 6,
+    "locale": "en",
+    "name": "Average cyclomatic complexity",
+    "description": "Average cyclomatic complexity per function"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 12,
+  "fields": {
+    "metric": 6,
+    "locale": "fr",
+    "name": "Complexité cyclomatique moyenne",
+    "description": "Complexité cyclomatique moyenne par fonction"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 13,
+  "fields": {
+    "metric": 7,
+    "locale": "en",
+    "name": "High complexity functions",
+    "description": "Number of functions with cyclomatic complexity > 15"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 14,
+  "fields": {
+    "metric": 7,
+    "locale": "fr",
+    "name": "Fonctions à haute complexité",
+    "description": "Nombre de fonctions avec une complexité cyclomatique > 15"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 15,
+  "fields": {
+    "metric": 8,
+    "locale": "en",
+    "name": "Vulnerabilities (OpenSSF)",
+    "description": "OpenSSF Scorecard: Vulnerabilities check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 16,
+  "fields": {
+    "metric": 8,
+    "locale": "fr",
+    "name": "Vulnérabilités (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification des vulnérabilités (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 17,
+  "fields": {
+    "metric": 9,
+    "locale": "en",
+    "name": "Security policy (OpenSSF)",
+    "description": "OpenSSF Scorecard: Security-Policy check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 18,
+  "fields": {
+    "metric": 9,
+    "locale": "fr",
+    "name": "Politique de sécurité (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification de la politique de sécurité (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 19,
+  "fields": {
+    "metric": 10,
+    "locale": "en",
+    "name": "Binary artifacts (OpenSSF)",
+    "description": "OpenSSF Scorecard: Binary-Artifacts check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 20,
+  "fields": {
+    "metric": 10,
+    "locale": "fr",
+    "name": "Artefacts binaires (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification des artefacts binaires (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 21,
+  "fields": {
+    "metric": 11,
+    "locale": "en",
+    "name": "Branch protection (OpenSSF)",
+    "description": "OpenSSF Scorecard: Branch-Protection check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 22,
+  "fields": {
+    "metric": 11,
+    "locale": "fr",
+    "name": "Protection des branches (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification de la protection des branches (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 23,
+  "fields": {
+    "metric": 12,
+    "locale": "en",
+    "name": "Code review (OpenSSF)",
+    "description": "OpenSSF Scorecard: Code-Review check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 24,
+  "fields": {
+    "metric": 12,
+    "locale": "fr",
+    "name": "Revue de code (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification de la revue de code (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 25,
+  "fields": {
+    "metric": 13,
+    "locale": "en",
+    "name": "Pinned dependencies (OpenSSF)",
+    "description": "OpenSSF Scorecard: Pinned-Dependencies check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 26,
+  "fields": {
+    "metric": 13,
+    "locale": "fr",
+    "name": "Dépendances épinglées (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification des dépendances épinglées (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 27,
+  "fields": {
+    "metric": 14,
+    "locale": "en",
+    "name": "Packaging (OpenSSF)",
+    "description": "OpenSSF Scorecard: Packaging check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 28,
+  "fields": {
+    "metric": 14,
+    "locale": "fr",
+    "name": "Empaquetage (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification de l'empaquetage (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 29,
+  "fields": {
+    "metric": 15,
+    "locale": "en",
+    "name": "Signed releases (OpenSSF)",
+    "description": "OpenSSF Scorecard: Signed-Releases check score (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 30,
+  "fields": {
+    "metric": 15,
+    "locale": "fr",
+    "name": "Versions signées (OpenSSF)",
+    "description": "OpenSSF Scorecard : score de vérification des versions signées (0-10)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 31,
+  "fields": {
+    "metric": 16,
+    "locale": "en",
+    "name": "README quality",
+    "description": "Quality score of the README file based on content and structure"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 32,
+  "fields": {
+    "metric": 16,
+    "locale": "fr",
+    "name": "Qualité du README",
+    "description": "Score de qualité du fichier README basé sur le contenu et la structure"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 33,
+  "fields": {
+    "metric": 17,
+    "locale": "en",
+    "name": "README sections",
+    "description": "Number of complete sections in README (Installation, Usage, Contributing, etc.)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 34,
+  "fields": {
+    "metric": 17,
+    "locale": "fr",
+    "name": "Sections du README",
+    "description": "Nombre de sections complètes dans le README (Installation, Utilisation, Contribution, etc.)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 35,
+  "fields": {
+    "metric": 18,
+    "locale": "en",
+    "name": "Documentation directory",
+    "description": "Presence and quality of documentation directory (docs/, documentation/, etc.)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 36,
+  "fields": {
+    "metric": 18,
+    "locale": "fr",
+    "name": "Répertoire de documentation",
+    "description": "Présence et qualité du répertoire de documentation (docs/, documentation/, etc.)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 37,
+  "fields": {
+    "metric": 19,
+    "locale": "en",
+    "name": "Documentation accessibility",
+    "description": "Accessibility score of documentation (links, formatting, examples)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 38,
+  "fields": {
+    "metric": 19,
+    "locale": "fr",
+    "name": "Accessibilité de la documentation",
+    "description": "Score d'accessibilité de la documentation (liens, formatage, exemples)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 39,
+  "fields": {
+    "metric": 20,
+    "locale": "en",
+    "name": "Multilingual READMEs",
+    "description": "Presence of README files in multiple languages"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 40,
+  "fields": {
+    "metric": 20,
+    "locale": "fr",
+    "name": "README multilingues",
+    "description": "Présence de fichiers README dans plusieurs langues"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 41,
+  "fields": {
+    "metric": 21,
+    "locale": "en",
+    "name": "Test ratio",
+    "description": "Ratio of test lines of code to total lines of code"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 42,
+  "fields": {
+    "metric": 21,
+    "locale": "fr",
+    "name": "Ratio de tests",
+    "description": "Ratio des lignes de code de tests par rapport aux lignes de code totales"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 43,
+  "fields": {
+    "metric": 22,
+    "locale": "en",
+    "name": "Test lines of code",
+    "description": "Total number of lines of test code"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 44,
+  "fields": {
+    "metric": 22,
+    "locale": "fr",
+    "name": "Lignes de code de tests",
+    "description": "Nombre total de lignes de code de tests"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 45,
+  "fields": {
+    "metric": 23,
+    "locale": "en",
+    "name": "Is mirror repository",
+    "description": "Boolean flag indicating if the repository is a mirror (0 or 1)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 46,
+  "fields": {
+    "metric": 23,
+    "locale": "fr",
+    "name": "Dépôt miroir",
+    "description": "Indicateur booléen si le dépôt est un miroir (0 ou 1)"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 47,
+  "fields": {
+    "metric": 24,
+    "locale": "en",
+    "name": "Number of functions",
+    "description": "Total number of functions in the codebase"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 48,
+  "fields": {
+    "metric": 24,
+    "locale": "fr",
+    "name": "Nombre de fonctions",
+    "description": "Nombre total de fonctions dans le code"
+  }
+}
+]

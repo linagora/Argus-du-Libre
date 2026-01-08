@@ -89,6 +89,9 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 - Stores `collected_at` timestamp and `source` (e.g., "GitHub API", "qsos-lng")
 - All values stored as `NUMERIC(20, 4)` decimals (works for counts, percentages, ratings)
 
+**Fixtures:**
+- Fixtures are present in projects/fixtures/ directory
+
 ### Metric Persistence System
 
 The metric system stores raw data collected from external sources (GitHub API, npm registry, etc.) separately from final scores in AnalysisResult.

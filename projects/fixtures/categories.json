@@ -1,0 +1,23 @@
+[
+{
+  "model": "categories.category",
+  "pk": 1,
+  "fields": {
+    "weight": 1
+  }
+},
+{
+  "model": "categories.category",
+  "pk": 2,
+  "fields": {
+    "weight": 1
+  }
+},
+{
+  "model": "categories.category",
+  "pk": 3,
+  "fields": {
+    "weight": 1
+  }
+}
+]

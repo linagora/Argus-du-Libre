@@ -1,0 +1,200 @@
+[
+{
+  "model": "categories.fieldtranslation",
+  "pk": 1,
+  "fields": {
+    "field": 1,
+    "locale": "fr",
+    "name": "Activité"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 2,
+  "fields": {
+    "field": 1,
+    "locale": "en",
+    "name": "Activity"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 3,
+  "fields": {
+    "field": 2,
+    "locale": "fr",
+    "name": "Ancienneté"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 4,
+  "fields": {
+    "field": 2,
+    "locale": "en",
+    "name": "Maturity"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 5,
+  "fields": {
+    "field": 3,
+    "locale": "fr",
+    "name": "Popularité"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 6,
+  "fields": {
+    "field": 3,
+    "locale": "en",
+    "name": "Popularity"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 7,
+  "fields": {
+    "field": 4,
+    "locale": "en",
+    "name": "Number of contributors"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 8,
+  "fields": {
+    "field": 4,
+    "locale": "fr",
+    "name": "Nombre de contributeurs"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 9,
+  "fields": {
+    "field": 5,
+    "locale": "fr",
+    "name": "Taille globale"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 10,
+  "fields": {
+    "field": 5,
+    "locale": "en",
+    "name": "Global size"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 11,
+  "fields": {
+    "field": 6,
+    "locale": "fr",
+    "name": "Complexité"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 12,
+  "fields": {
+    "field": 6,
+    "locale": "en",
+    "name": "Complexity"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 13,
+  "fields": {
+    "field": 7,
+    "locale": "fr",
+    "name": "Duplication de code"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 14,
+  "fields": {
+    "field": 7,
+    "locale": "en",
+    "name": "Code duplication"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 15,
+  "fields": {
+    "field": 8,
+    "locale": "fr",
+    "name": "Nombre de code smells"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 16,
+  "fields": {
+    "field": 8,
+    "locale": "en",
+    "name": "Number of code smells"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 17,
+  "fields": {
+    "field": 9,
+    "locale": "fr",
+    "name": "Intégration des pratiques de sécurité"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 18,
+  "fields": {
+    "field": 9,
+    "locale": "en",
+    "name": "Integration of security practices"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 19,
+  "fields": {
+    "field": 10,
+    "locale": "fr",
+    "name": "Documentation technique"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 20,
+  "fields": {
+    "field": 10,
+    "locale": "en",
+    "name": "Technical documentation"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 21,
+  "fields": {
+    "field": 11,
+    "locale": "fr",
+    "name": "Couverture des tests"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 22,
+  "fields": {
+    "field": 11,
+    "locale": "en",
+    "name": "Test coverage"
+  }
+}
+]

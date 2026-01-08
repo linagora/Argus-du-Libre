@@ -1,0 +1,112 @@
+[
+{
+  "model": "categories.field",
+  "pk": 1,
+  "fields": {
+    "category": 1,
+    "slug": "activity",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 2,
+  "fields": {
+    "category": 1,
+    "slug": "maturity",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 3,
+  "fields": {
+    "category": 1,
+    "slug": "popularity",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 4,
+  "fields": {
+    "category": 1,
+    "slug": "contributors",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 5,
+  "fields": {
+    "category": 2,
+    "slug": "size",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 6,
+  "fields": {
+    "category": 2,
+    "slug": "complexity",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 7,
+  "fields": {
+    "category": 2,
+    "slug": "duplication",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 8,
+  "fields": {
+    "category": 2,
+    "slug": "code-smells",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 9,
+  "fields": {
+    "category": 3,
+    "slug": "scorecard",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 10,
+  "fields": {
+    "category": 1,
+    "slug": "documentation",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 11,
+  "fields": {
+    "category": 2,
+    "slug": "tests",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+}
+]
