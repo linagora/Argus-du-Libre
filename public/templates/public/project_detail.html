@@ -65,7 +65,10 @@
                     <ul class="list-unstyled mb-0">
                         {% for field_data in category_data.fields %}
                         <li class="d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ field_data.field_name }}</span>
+                            <a href="{% url 'public:field_metrics' software_slug=software.slug field_slug=field_data.field.slug %}"
+                               class="text-decoration-none text-dark flex-grow-1 field-link">
+                                {{ field_data.field_name }}
+                            </a>
                             <span class="score-badge score-{{ field_data.score|floatformat:0 }}">
                                 {{ field_data.score|floatformat:1 }}
                             </span>
@@ -81,7 +84,7 @@
 
     <!-- Overview Section -->
     {% if overview_block %}
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-5">
         <div class="card-header">
             <h3 class="mb-0">{% trans "Overview" %}</h3>
         </div>
@@ -186,6 +189,15 @@ document.getElementById('compareForm').addEventListener('submit', function(e) {
 
 .card-header h5 {
     color: #212529;
+}
+
+.field-link {
+    transition: color 0.2s;
+}
+
+.field-link:hover {
+    color: #0d6efd !important;
+    text-decoration: underline !important;
 }
 </style>
 {% endblock %}

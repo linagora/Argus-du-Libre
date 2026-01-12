@@ -1,0 +1,192 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ field_name }} - {{ software.name }} - Argus du Libre{% endblock %}
+
+{% block extra_css %}
+<style>
+.metric-card {
+    margin-bottom: 2rem;
+}
+
+.metric-chart {
+    position: relative;
+    height: 400px;
+}
+
+.breadcrumb-nav {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 2rem;
+}
+
+.metric-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .metric-chart {
+        height: 300px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="breadcrumb-nav">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'public:home' %}">{% trans "Home" %}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'public:project_detail' slug=software.slug %}">{{ software.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {{ category_name }} - {{ field_name }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 mb-2">{{ field_name }}</h1>
+        <h2 class="h4 text-muted mb-3">{{ software.name }}</h2>
+        <p class="lead text-muted">{% trans "Historical metric trends" %}</p>
+    </div>
+
+    {% if has_data %}
+    <!-- Metrics Charts -->
+    {% for metric in metrics_data %}
+    <div class="card metric-card shadow-sm">
+        <div class="card-header">
+            <h3 class="h5 mb-0">{{ metric.metric_name }}</h3>
+        </div>
+        <div class="card-body">
+            {% if metric.metric_description %}
+            <p class="metric-description">{{ metric.metric_description }}</p>
+            {% endif %}
+            <div class="metric-chart">
+                <canvas id="chart-{{ metric.metric_id }}"></canvas>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <!-- No Data Message -->
+    <div class="alert alert-info text-center" role="alert">
+        <h4 class="alert-heading">{% trans "No metric data available" %}</h4>
+        <p class="mb-0">
+            {% trans "There is currently no historical data collected for this field." %}
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div class="text-center mt-5">
+        <a href="{% url 'public:project_detail' slug=software.slug %}" class="btn btn-outline-primary">
+            {% trans "Back to Project" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if has_data %}
+<!-- Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+// Chart.js configuration
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+Chart.defaults.color = '#495057';
+
+// Render charts for each metric
+{% for metric in metrics_data %}
+(function() {
+    const ctx = document.getElementById('chart-{{ metric.metric_id }}').getContext('2d');
+
+    // Prepare data from Django context
+    const rawData = {{ metric.values }};
+
+    // Extract labels (dates) and values
+    const labels = rawData.map(item => {
+        const date = new Date(item.collected_at);
+        return date.toLocaleDateString('{{ LANGUAGE_CODE }}', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+    });
+
+    const values = rawData.map(item => parseFloat(item.value));
+
+    // Create the chart
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '{{ metric.metric_name|escapejs }}',
+                data: values,
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#0d6efd',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            const source = rawData[context.dataIndex].source;
+                            let label = '{{ metric.metric_name|escapejs }}: ' + value.toLocaleString('{{ LANGUAGE_CODE }}');
+                            if (source) {
+                                label += ' ({% trans "Source" %}: ' + source + ')';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 45,
+                        minRotation: 45
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+})();
+{% endfor %}
+</script>
+{% endif %}
+{% endblock %}

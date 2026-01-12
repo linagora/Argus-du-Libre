@@ -13,6 +13,9 @@ from projects.models import (
     CategoryTranslation,
     Field,
     FieldTranslation,
+    Metric,
+    MetricTranslation,
+    MetricValue,
     Software,
     Tag,
 )
@@ -483,7 +486,7 @@ class ProjectDetailViewTestCase(TestCase):
         # Find the overall score badge
         self.assertIn("Overall Score", content)
         # The score should be displayed with a color badge
-        self.assertRegex(content, r'score-badge score-\d+')
+        self.assertRegex(content, r"score-badge score-\d+")
 
     def test_project_detail_without_scores_no_overall_score(self):
         """Test that overall score is None when no analysis results exist."""
@@ -499,7 +502,7 @@ class ProjectDetailViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIsNone(response.context["overall_score"])
         # Check that the score badge is not displayed (not just the comment)
-        self.assertNotContains(response, 'Overall Score:</span>')
+        self.assertNotContains(response, "Overall Score:</span>")
 
     def test_project_detail_overall_score_with_different_category_weights(self):
         """Test overall score calculation with various category weights."""
@@ -547,6 +550,53 @@ class ProjectDetailViewTestCase(TestCase):
         # Overall = (2.0 * 3 + 4.0 * 1) / (3 + 1) = 10.0 / 4 = 2.5
         expected_score = Decimal("2.50")
         self.assertEqual(response.context["overall_score"], expected_score)
+
+    def test_project_detail_shows_most_recent_score_when_duplicates(self):
+        """Test that when multiple results exist for a field, the most recent is shown."""
+        from time import sleep
+
+        # Create an older result with score 2.0
+        older_result = AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field_code_quality,
+            score=Decimal("2.00"),
+            is_published=True,
+        )
+
+        # Small delay to ensure different created_at timestamps
+        sleep(0.01)
+
+        # Create a newer result with score 5.0
+        newer_result = AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field_code_quality,
+            score=Decimal("5.00"),
+            is_published=True,
+        )
+
+        response = self.client.get(
+            reverse("public:project_detail", kwargs={"slug": "test-software"})
+        )
+
+        # Should use the newer score (5.0) not the older one (2.0)
+        categories_data = response.context["categories_with_scores"]
+        tech_data = next(
+            c for c in categories_data if c["category"] == self.category_tech
+        )
+
+        # Find the code quality field score
+        code_quality_field = next(
+            f for f in tech_data["fields"] if f["field"] == self.field_code_quality
+        )
+
+        # Should have the newer score (5.0)
+        self.assertEqual(code_quality_field["score"], Decimal("5.00"))
+
+        # Field should appear only once
+        code_quality_count = sum(
+            1 for f in tech_data["fields"] if f["field"] == self.field_code_quality
+        )
+        self.assertEqual(code_quality_count, 1)
 
 
 class TagDetailViewTestCase(TestCase):
@@ -646,9 +696,7 @@ class TagDetailViewTestCase(TestCase):
 
     def test_tag_detail_shows_read_more_links(self):
         """Test that read more links point to project detail."""
-        response = self.client.get(
-            "/en/tag/database/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/tag/database/", HTTP_ACCEPT_LANGUAGE="en")
         project_url = "/en/project/software-1/"
         self.assertContains(response, project_url)
         self.assertContains(response, "Read More")
@@ -657,9 +705,7 @@ class TagDetailViewTestCase(TestCase):
         """Test that empty state is shown when no projects have the tag."""
         tag_no_projects = Tag.objects.create(name="Empty Tag", slug="empty-tag")
 
-        response = self.client.get(
-            "/en/tag/empty-tag/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/tag/empty-tag/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No projects found with this tag")
 
@@ -751,18 +797,14 @@ class SearchViewTestCase(TestCase):
 
     def test_search_finds_projects_by_name(self):
         """Test that search finds projects by name."""
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
         self.assertNotContains(response, "Flask Application")
         self.assertNotContains(response, "FastAPI Service")
 
     def test_search_finds_projects_by_block_content(self):
         """Test that search finds projects by block content."""
-        response = self.client.get(
-            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en")
         # Both Django and Flask have "framework" in their content
         self.assertContains(response, "Django Project")
         self.assertContains(response, "Flask Application")
@@ -770,29 +812,21 @@ class SearchViewTestCase(TestCase):
 
     def test_search_finds_projects_by_specific_content(self):
         """Test that search finds projects by specific content."""
-        response = self.client.get(
-            "/en/search/?q=APIs", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=APIs", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Flask Application")
         self.assertNotContains(response, "Django Project")
 
     def test_search_is_case_insensitive(self):
         """Test that search is case insensitive."""
-        response = self.client.get(
-            "/en/search/?q=django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
 
-        response = self.client.get(
-            "/en/search/?q=DJANGO", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=DJANGO", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
 
     def test_search_only_shows_published_projects(self):
         """Test that only published projects appear in search results."""
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
         self.assertNotContains(response, "Draft Django Tool")
 
@@ -804,17 +838,13 @@ class SearchViewTestCase(TestCase):
             state=Software.STATE_IN_REVIEW,
         )
 
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
         self.assertNotContains(response, "Review Django App")
 
     def test_search_shows_results_count(self):
         """Test that search shows the number of results."""
-        response = self.client.get(
-            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "projects found")
 
     def test_search_shows_no_results_message(self):
@@ -835,9 +865,7 @@ class SearchViewTestCase(TestCase):
             content="Django features include ORM, admin, and security.",
         )
 
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         results = response.context["results"]
 
         # Count occurrences of software1
@@ -846,9 +874,7 @@ class SearchViewTestCase(TestCase):
 
     def test_search_orders_by_featured_at_then_created_at(self):
         """Test that results are ordered by featured_at, then created_at."""
-        response = self.client.get(
-            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en")
         content = response.content.decode("utf-8")
 
         # Django (Jan 15) should appear before Flask (Jan 10) and FastAPI (Jan 5)
@@ -866,25 +892,19 @@ class SearchViewTestCase(TestCase):
         self.software1.logo_url = "https://example.com/django-logo.png"
         self.software1.save()
 
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, self.software1.logo_url)
 
     def test_search_shows_read_more_links(self):
         """Test that read more links point to project detail."""
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "/en/project/django-project/")
         self.assertContains(response, "Read More")
 
     def test_search_respects_locale_in_blocks(self):
         """Test that search searches in blocks of current locale."""
         # Search in English (should find "framework")
-        response = self.client.get(
-            "/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=framework", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
 
         # Search in French (should find "framework" from French content)
@@ -902,22 +922,16 @@ class SearchViewTestCase(TestCase):
     def test_search_in_name_works_regardless_of_locale(self):
         """Test that name search works in any locale."""
         # Search by name in English
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Django Project")
 
         # Search by name in French should also work
-        response = self.client.get(
-            "/fr/search/?q=Django", HTTP_ACCEPT_LANGUAGE="fr"
-        )
+        response = self.client.get("/fr/search/?q=Django", HTTP_ACCEPT_LANGUAGE="fr")
         self.assertContains(response, "Django Project")
 
     def test_search_shows_query_in_page_title(self):
         """Test that search query is displayed in the page."""
-        response = self.client.get(
-            "/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, 'Results for "Django"')
 
     def test_search_with_special_characters(self):
@@ -929,9 +943,7 @@ class SearchViewTestCase(TestCase):
             state=Software.STATE_PUBLISHED,
         )
 
-        response = self.client.get(
-            "/en/search/?q=C++", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/search/?q=C++", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "C++ Compiler")
 
     def test_search_with_multiple_words(self):
@@ -1279,3 +1291,401 @@ class CompareViewTestCase(TestCase):
         self.assertNotContains(response, "Draft Project")
         # Should not show current project
         # (Actually, it might not contain "Project A" in the selector, only in the header)
+
+    def test_compare_shows_most_recent_score_when_duplicates(self):
+        """Test that compare view uses most recent scores when duplicates exist."""
+        from time import sleep
+
+        # Create an older result for software1
+        AnalysisResult.objects.create(
+            software=self.software1,
+            field=self.field_code_quality,
+            score=Decimal("2.00"),
+            is_published=True,
+        )
+
+        sleep(0.01)
+
+        # Create a newer result for software1 (should override the older one)
+        AnalysisResult.objects.create(
+            software=self.software1,
+            field=self.field_code_quality,
+            score=Decimal("4.80"),
+            is_published=True,
+        )
+
+        response = self.client.get(
+            "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
+        )
+
+        # Find the Code Quality field in comparison
+        categories_comparison = response.context["categories_comparison"]
+        tech_category = next(
+            c for c in categories_comparison if c["category_name"] == "Technology"
+        )
+
+        code_quality_field = next(
+            f for f in tech_category["fields"] if "Code Quality" in f["field_name"]
+        )
+
+        # First score (project-a) should be the newer one (4.80)
+        self.assertEqual(code_quality_field["scores"][0], Decimal("4.80"))
+
+
+class FieldMetricsViewTestCase(TestCase):
+    """Test cases for field_metrics view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        # Create category with translations
+        self.category = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category, locale="en", name="Performance"
+        )
+        CategoryTranslation.objects.create(
+            category=self.category, locale="fr", name="Performance"
+        )
+
+        # Create field with translations
+        self.field = Field.objects.create(
+            category=self.category, slug="popularity", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Popularity"
+        )
+        FieldTranslation.objects.create(
+            field=self.field, locale="fr", name="Popularité"
+        )
+
+        # Create software
+        self.software = Software.objects.create(
+            name="Test Project",
+            slug="test-project",
+            state=Software.STATE_PUBLISHED,
+        )
+
+        # Create metrics with translations
+        self.metric1 = Metric.objects.create(
+            field=self.field,
+            slug="github-stars",
+            weight=1,
+            collection_enabled=True,
+        )
+        MetricTranslation.objects.create(
+            metric=self.metric1, locale="en", name="GitHub Stars"
+        )
+        MetricTranslation.objects.create(
+            metric=self.metric1, locale="fr", name="Étoiles GitHub"
+        )
+
+        self.metric2 = Metric.objects.create(
+            field=self.field,
+            slug="npm-downloads",
+            weight=1,
+            collection_enabled=True,
+        )
+        MetricTranslation.objects.create(
+            metric=self.metric2,
+            locale="en",
+            name="NPM Downloads",
+            description="Monthly download count from NPM registry",
+        )
+
+        # Create metric values
+        MetricValue.objects.create(
+            metric=self.metric1,
+            software=self.software,
+            value=Decimal("45000"),
+            source="GitHub API",
+            collected_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+        MetricValue.objects.create(
+            metric=self.metric1,
+            software=self.software,
+            value=Decimal("46000"),
+            source="GitHub API",
+            collected_at=datetime(2024, 2, 1, tzinfo=UTC),
+        )
+        MetricValue.objects.create(
+            metric=self.metric2,
+            software=self.software,
+            value=Decimal("1000000"),
+            source="NPM Registry",
+            collected_at=datetime(2024, 1, 1, tzinfo=UTC),
+        )
+
+    def test_field_metrics_page_loads_successfully(self):
+        """Test that field metrics page returns 200 status."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/field_metrics.html")
+
+    def test_field_metrics_shows_software_name(self):
+        """Test that software name is displayed."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "Test Project")
+
+    def test_field_metrics_shows_field_name(self):
+        """Test that field name is displayed."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "Popularity")
+
+    def test_field_metrics_shows_category_name(self):
+        """Test that category name is displayed in breadcrumb."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "Performance")
+
+    def test_field_metrics_shows_metric_names(self):
+        """Test that metric names are displayed."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "GitHub Stars")
+        self.assertContains(response, "NPM Downloads")
+
+    def test_field_metrics_shows_metric_description(self):
+        """Test that metric description is displayed when available."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "Monthly download count from NPM registry")
+
+    def test_field_metrics_includes_chart_js(self):
+        """Test that Chart.js CDN is included when data exists."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "chart.js")
+        self.assertContains(response, "canvas")
+
+    def test_field_metrics_returns_404_for_nonexistent_software(self):
+        """Test that 404 is returned for non-existent software."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={
+                    "software_slug": "does-not-exist",
+                    "field_slug": "popularity",
+                },
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_field_metrics_returns_404_for_draft_software(self):
+        """Test that draft software is not accessible."""
+        draft = Software.objects.create(
+            name="Draft Software", slug="draft", state=Software.STATE_DRAFT
+        )
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "draft", "field_slug": "popularity"},
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_field_metrics_returns_404_for_nonexistent_field(self):
+        """Test that 404 is returned for non-existent field."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={
+                    "software_slug": "test-project",
+                    "field_slug": "does-not-exist",
+                },
+            )
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_field_metrics_shows_no_data_message_when_no_metrics(self):
+        """Test that no data message is shown when field has no metrics."""
+        # Create field without metrics
+        field_no_metrics = Field.objects.create(
+            category=self.category, slug="no-metrics", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=field_no_metrics, locale="en", name="No Metrics"
+        )
+
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "no-metrics"},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No metric data available")
+        # Chart.js should not be loaded when no data
+        self.assertNotContains(response, "chart.js")
+
+    def test_field_metrics_shows_no_data_message_when_no_values(self):
+        """Test that no data message is shown when metrics have no values."""
+        # Create metric without values
+        metric_no_values = Metric.objects.create(
+            field=self.field,
+            slug="no-values",
+            weight=1,
+            collection_enabled=True,
+        )
+        MetricTranslation.objects.create(
+            metric=metric_no_values, locale="en", name="No Values"
+        )
+
+        # Delete all metric values to test empty state
+        MetricValue.objects.all().delete()
+
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No metric data available")
+
+    def test_field_metrics_only_shows_enabled_metrics(self):
+        """Test that only collection_enabled metrics are shown."""
+        # Create disabled metric
+        disabled_metric = Metric.objects.create(
+            field=self.field,
+            slug="disabled",
+            weight=1,
+            collection_enabled=False,
+        )
+        MetricTranslation.objects.create(
+            metric=disabled_metric, locale="en", name="Disabled Metric"
+        )
+        MetricValue.objects.create(
+            metric=disabled_metric,
+            software=self.software,
+            value=Decimal("100"),
+            source="Test",
+        )
+
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertNotContains(response, "Disabled Metric")
+
+    def test_field_metrics_respects_locale(self):
+        """Test that field and metric names are localized."""
+        # Test French locale
+        response = self.client.get(
+            "/fr/project/test-project/field/popularity/",
+            HTTP_ACCEPT_LANGUAGE="fr",
+        )
+        self.assertContains(response, "Popularité")
+        self.assertContains(response, "Étoiles GitHub")
+
+    def test_field_metrics_shows_breadcrumb_navigation(self):
+        """Test that breadcrumb navigation is present."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "breadcrumb")
+        self.assertContains(response, "Home")
+        self.assertContains(response, reverse("public:home"))
+        self.assertContains(
+            response, reverse("public:project_detail", kwargs={"slug": "test-project"})
+        )
+
+    def test_field_metrics_shows_back_button(self):
+        """Test that back to project button is displayed."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertContains(response, "Back to Project")
+        self.assertContains(
+            response, reverse("public:project_detail", kwargs={"slug": "test-project"})
+        )
+
+    def test_field_metrics_context_has_correct_data(self):
+        """Test that context has all required data."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        self.assertEqual(response.context["software"].slug, "test-project")
+        self.assertEqual(response.context["field"].slug, "popularity")
+        self.assertEqual(response.context["field_name"], "Popularity")
+        self.assertEqual(response.context["category_name"], "Performance")
+        self.assertTrue(response.context["has_data"])
+        self.assertEqual(len(response.context["metrics_data"]), 2)
+
+    def test_field_metrics_chart_data_includes_values(self):
+        """Test that metric values are included in chart data."""
+        response = self.client.get(
+            reverse(
+                "public:field_metrics",
+                kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+            )
+        )
+        metrics_data = response.context["metrics_data"]
+
+        # Find GitHub Stars metric
+        github_metric = next(
+            m for m in metrics_data if m["metric_slug"] == "github-stars"
+        )
+        # Values should be present (2 values for GitHub Stars)
+        self.assertIn("values", github_metric)
+
+    def test_project_detail_field_links_to_metrics(self):
+        """Test that field names on project detail link to metrics page."""
+        # Create analysis result
+        AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field,
+            score=Decimal("4.5"),
+            is_published=True,
+        )
+
+        response = self.client.get(
+            reverse("public:project_detail", kwargs={"slug": "test-project"})
+        )
+
+        # Check that field link exists
+        field_metrics_url = reverse(
+            "public:field_metrics",
+            kwargs={"software_slug": "test-project", "field_slug": "popularity"},
+        )
+        self.assertContains(response, field_metrics_url)
