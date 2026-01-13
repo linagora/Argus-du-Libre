@@ -103,51 +103,135 @@
             <h3 class="mb-0">{% trans "Compare with Other Projects" %}</h3>
         </div>
         <div class="card-body">
-            <form id="compareForm" method="get" action="{% url 'public:compare' %}">
-                <div class="mb-3">
-                    <label for="projectSelect" class="form-label">{% trans "Select projects to compare (1-4):" %}</label>
-                    <select multiple class="form-select" id="projectSelect" name="compare_projects" size="8">
-                        {% for project in other_projects %}
-                        <option value="{{ project.slug }}">{{ project.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <small class="form-text text-muted">
-                        {% trans "Hold Ctrl (Windows) or Cmd (Mac) to select multiple projects" %}
-                    </small>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#compareModal">
+                <i class="bi bi-bar-chart"></i> {% trans "Compare Projects" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Compare Modal -->
+    <div class="modal fade" id="compareModal" tabindex="-1" aria-labelledby="compareModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="compareModalLabel">{% trans "Select Projects to Compare" %}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
                 </div>
-                <button type="submit" class="btn btn-primary" id="compareBtn">
-                    <i class="bi bi-bar-chart"></i> {% trans "Compare Projects" %}
-                </button>
-            </form>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-3" id="projectSearch" placeholder="{% trans 'Search projects...' %}">
+                    <div class="mb-3 text-muted small">
+                        <span id="selectionCount">{% trans "Selected:" %} 0/4</span>
+                    </div>
+                    <div id="projectList">
+                        {% for project in other_projects %}
+                        <div class="form-check project-item" data-project-name="{{ project.name|lower }}">
+                            <input class="form-check-input" type="checkbox" value="{{ project.slug }}" id="project-{{ project.slug }}">
+                            <label class="form-check-label" for="project-{{ project.slug }}">
+                                {{ project.name }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="emptyState" class="text-center text-muted py-3" style="display: none;">
+                        {% trans "No projects match your search" %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="button" class="btn btn-primary" id="compareSubmit" disabled>{% trans "Compare Selected Projects" %}</button>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
 </div>
 
 <script>
-document.getElementById('compareForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+// Search filter
+document.getElementById('projectSearch').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('.project-item');
+    let visibleCount = 0;
 
-    const select = document.getElementById('projectSelect');
-    const selectedOptions = Array.from(select.selectedOptions).map(opt => opt.value);
+    items.forEach(item => {
+        const projectName = item.getAttribute('data-project-name');
+        if (projectName.includes(searchTerm)) {
+            item.style.display = 'block';
+            visibleCount++;
+        } else {
+            item.style.display = 'none';
+        }
+    });
 
-    // Validate: need 1-4 other projects selected
-    if (selectedOptions.length < 1 || selectedOptions.length > 4) {
+    document.getElementById('emptyState').style.display = visibleCount === 0 ? 'block' : 'none';
+    document.getElementById('projectList').style.display = visibleCount === 0 ? 'none' : 'block';
+});
+
+// Checkbox change handler
+function updateSelection() {
+    const checked = document.querySelectorAll('.form-check-input:checked');
+    const count = checked.length;
+
+    document.getElementById('selectionCount').textContent = '{% trans "Selected:" %} ' + count + '/4';
+
+    if (count >= 4) {
+        document.querySelectorAll('.form-check-input:not(:checked)').forEach(cb => {
+            cb.disabled = true;
+        });
+    } else {
+        document.querySelectorAll('.form-check-input').forEach(cb => {
+            cb.disabled = false;
+        });
+    }
+
+    document.getElementById('compareSubmit').disabled = (count < 1);
+}
+
+document.querySelectorAll('.form-check-input').forEach(checkbox => {
+    checkbox.addEventListener('change', updateSelection);
+});
+
+// Submit handler
+document.getElementById('compareSubmit').addEventListener('click', function() {
+    const selectedSlugs = Array.from(document.querySelectorAll('.form-check-input:checked')).map(cb => cb.value);
+
+    if (selectedSlugs.length < 1 || selectedSlugs.length > 4) {
         alert('{% trans "Please select between 1 and 4 projects to compare." %}');
         return;
     }
 
-    // Add current project slug to the list
     const currentSlug = '{{ software.slug }}';
-    const allSlugs = [currentSlug, ...selectedOptions];
+    const allSlugs = [currentSlug, ...selectedSlugs];
+    const compareUrl = '{% url "public:compare" %}?projects=' + allSlugs.join(',');
 
-    // Build comparison URL
-    const compareUrl = this.action + '?projects=' + allSlugs.join(',');
     window.location.href = compareUrl;
 });
 </script>
 
 <style>
+.project-item {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.project-item:hover {
+    background-color: #f8f9fa;
+}
+
+.modal-body {
+    max-height: 60vh;
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+    }
+    .modal-body {
+        max-height: 50vh;
+    }
+}
+
 .score-badge {
     display: inline-block;
     padding: 0.35rem 0.65rem;

@@ -159,11 +159,23 @@ class Software(models.Model):
     featured_at = models.DateTimeField(
         null=True, blank=True, help_text="When the software was featured"
     )
+    last_metrics_update_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When metrics were last updated for this software",
+    )
 
     class Meta:
         verbose_name = "Software"
         verbose_name_plural = "Softwares"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(
+                fields=["state", "last_metrics_update_at"],
+                name="idx_soft_last_metrics_upd",
+                condition=models.Q(state="published"),
+            ),
+        ]
 
     def __str__(self):
         """Return the software name."""

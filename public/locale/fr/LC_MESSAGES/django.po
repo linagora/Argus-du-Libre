@@ -146,3 +146,21 @@ msgstr "Projets avec ce tag"
 
 msgid "No projects found with this tag."
 msgstr "Aucun projet trouvé avec ce tag."
+
+msgid "Select Projects to Compare"
+msgstr "Sélectionner des projets à comparer"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Selected:"
+msgstr "Sélectionnés :"
+
+msgid "No projects match your search"
+msgstr "Aucun projet ne correspond à votre recherche"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Compare Selected Projects"
+msgstr "Comparer les projets sélectionnés"
