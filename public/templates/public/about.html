@@ -1,0 +1,78 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "About" %} - Argus du Libre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-4 mb-4">{% trans "About Argus du Libre" %}</h1>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{% trans "Developed and Operated by LINAGORA" %}</h2>
+                    <p>
+                        {% blocktrans %}
+                        Argus du Libre is developed and operated by <a href="https://linagora.com/" target="_blank" rel="noopener">LINAGORA</a>,
+                        a company specialized in free and open-source software solutions.
+                        {% endblocktrans %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{% trans "Beta Version" %}</h2>
+                    <p>
+                        {% trans "This service is currently in beta. We are actively working on improvements and new features." %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{% trans "Open Source Projects" %}</h2>
+                    <p>{% trans "Argus du Libre is built on two main GitHub repositories:" %}</p>
+                    <ul class="list-unstyled ms-3">
+                        <li class="mb-2">
+                            <strong>
+                                <a href="https://github.com/linagora/Argus-du-Libre" target="_blank" rel="noopener">
+                                    Argus-du-Libre
+                                </a>
+                            </strong> - {% trans "The website you are currently using" %}
+                        </li>
+                        <li class="mb-2">
+                            <strong>
+                                <a href="https://github.com/linagora/qsos-lng" target="_blank" rel="noopener">
+                                    qsos-lng
+                                </a>
+                            </strong> - {% trans "The tool that fetches metrics and calculates scores" %}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h4 mb-3">{% trans "Feedback Welcome" %}</h2>
+                    <p>
+                        {% blocktrans %}
+                        We welcome your feedback and contributions! If you encounter any issues or have suggestions,
+                        please feel free to open an issue on our GitHub repositories.
+                        {% endblocktrans %}
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a href="https://github.com/linagora/Argus-du-Libre/issues"
+                           class="btn btn-primary"
+                           target="_blank"
+                           rel="noopener">
+                            {% trans "Report an Issue" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -442,3 +442,8 @@ def field_metrics(request, software_slug, field_slug):
     }
 
     return render(request, "public/field_metrics.html", context)
+
+
+def about(request):
+    """About page with project information."""
+    return render(request, "public/about.html")

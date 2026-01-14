@@ -164,3 +164,58 @@ msgstr "Annuler"
 
 msgid "Compare Selected Projects"
 msgstr "Comparer les projets sélectionnés"
+
+msgid "About"
+msgstr "À propos"
+
+msgid "About Argus du Libre"
+msgstr "À propos d'Argus du Libre"
+
+msgid "Developed and Operated by LINAGORA"
+msgstr "Développé et exploité par LINAGORA"
+
+msgid ""
+"Argus du Libre is developed and operated by <a href=\"https://linagora.com/"
+"\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>, a company specialized in "
+"free and open-source software solutions."
+msgstr ""
+"Argus du Libre est développé et exploité par <a href=\"https://linagora.com/"
+"\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>, une entreprise "
+"spécialisée dans les solutions logicielles libres et open source."
+
+msgid "Beta Version"
+msgstr "Version bêta"
+
+msgid ""
+"This service is currently in beta. We are actively working on improvements "
+"and new features."
+msgstr ""
+"Ce service est actuellement en version bêta. Nous travaillons activement "
+"sur des améliorations et de nouvelles fonctionnalités."
+
+msgid "Open Source Projects"
+msgstr "Projets open source"
+
+msgid "Argus du Libre is built on two main GitHub repositories:"
+msgstr "Argus du Libre repose sur deux dépôts GitHub principaux :"
+
+msgid "The website you are currently using"
+msgstr "Le site web que vous utilisez actuellement"
+
+msgid "The tool that fetches metrics and calculates scores"
+msgstr "L'outil qui récupère les métriques et calcule les scores"
+
+msgid "Feedback Welcome"
+msgstr "Commentaires bienvenus"
+
+msgid ""
+"We welcome your feedback and contributions! If you encounter any issues or "
+"have suggestions, please feel free to open an issue on our GitHub "
+"repositories."
+msgstr ""
+"Nous accueillons volontiers vos commentaires et contributions ! Si vous "
+"rencontrez des problèmes ou avez des suggestions, n'hésitez pas à ouvrir un "
+"ticket sur nos dépôts GitHub."
+
+msgid "Report an Issue"
+msgstr "Signaler un problème"
