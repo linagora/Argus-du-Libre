@@ -81,16 +81,6 @@
 },
 {
   "model": "categories.field",
-  "pk": 9,
-  "fields": {
-    "category": 3,
-    "slug": "scorecard",
-    "weight": 1,
-    "analysis_periodicity_days": null
-  }
-},
-{
-  "model": "categories.field",
   "pk": 10,
   "fields": {
     "category": 1,
@@ -106,6 +96,86 @@
     "category": 2,
     "slug": "tests",
     "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 12,
+  "fields": {
+    "category": 3,
+    "slug": "vulnerabilities",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 13,
+  "fields": {
+    "category": 3,
+    "slug": "security-policy",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 14,
+  "fields": {
+    "category": 3,
+    "slug": "binary-artifacts",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 15,
+  "fields": {
+    "category": 3,
+    "slug": "branch-protection",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 16,
+  "fields": {
+    "category": 3,
+    "slug": "code-review",
+    "weight": 3,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 17,
+  "fields": {
+    "category": 3,
+    "slug": "pinned-dependencies",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 18,
+  "fields": {
+    "category": 3,
+    "slug": "packaging",
+    "weight": 2,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 19,
+  "fields": {
+    "category": 3,
+    "slug": "signed-releases",
+    "weight": 3,
     "analysis_periodicity_days": null
   }
 }

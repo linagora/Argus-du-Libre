@@ -145,24 +145,6 @@
 },
 {
   "model": "categories.fieldtranslation",
-  "pk": 17,
-  "fields": {
-    "field": 9,
-    "locale": "fr",
-    "name": "Intégration des pratiques de sécurité"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
-  "pk": 18,
-  "fields": {
-    "field": 9,
-    "locale": "en",
-    "name": "Integration of security practices"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
   "pk": 19,
   "fields": {
     "field": 10,
@@ -195,6 +177,150 @@
     "field": 11,
     "locale": "en",
     "name": "Test coverage"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 23,
+  "fields": {
+    "field": 12,
+    "locale": "en",
+    "name": "Vulnerabilities"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 24,
+  "fields": {
+    "field": 12,
+    "locale": "fr",
+    "name": "Vulnérabilités"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 25,
+  "fields": {
+    "field": 13,
+    "locale": "en",
+    "name": "Security policy"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 26,
+  "fields": {
+    "field": 13,
+    "locale": "fr",
+    "name": "Politique de sécurité"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 27,
+  "fields": {
+    "field": 14,
+    "locale": "en",
+    "name": "Binary artifacts"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 28,
+  "fields": {
+    "field": 14,
+    "locale": "fr",
+    "name": "Artefacts binaires"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 29,
+  "fields": {
+    "field": 15,
+    "locale": "en",
+    "name": "Branch protection"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 30,
+  "fields": {
+    "field": 15,
+    "locale": "fr",
+    "name": "Protection des branches"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 31,
+  "fields": {
+    "field": 16,
+    "locale": "en",
+    "name": "Code review"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 32,
+  "fields": {
+    "field": 16,
+    "locale": "fr",
+    "name": "Revue de code"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 33,
+  "fields": {
+    "field": 17,
+    "locale": "en",
+    "name": "Pinned dependencies"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 34,
+  "fields": {
+    "field": 17,
+    "locale": "fr",
+    "name": "Dépendances épinglées"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 35,
+  "fields": {
+    "field": 18,
+    "locale": "en",
+    "name": "Packaging"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 36,
+  "fields": {
+    "field": 18,
+    "locale": "fr",
+    "name": "Empaquetage"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 37,
+  "fields": {
+    "field": 19,
+    "locale": "en",
+    "name": "Signed releases"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 38,
+  "fields": {
+    "field": 19,
+    "locale": "fr",
+    "name": "Versions signées"
   }
 }
 ]
