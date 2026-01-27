@@ -44,8 +44,8 @@ powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd argus_du_libre
+git clone https://github.com/linagora/Argus-du-Libre.git
+cd Argus-du-Libre
 ```
 
 ### 2. Create and activate virtual environment
@@ -202,16 +202,20 @@ Users authenticated via OIDC are automatically granted admin privileges.
 
 ## Production Deployment
 
-For production deployment:
+For production deployment with gunicorn and systemd:
 
-1. Set `DEBUG=False` in your `.env` file
-2. Generate a strong `SECRET_KEY`
-3. Configure `ALLOWED_HOSTS` with your domain names
-4. Use a production-grade database configuration
-5. Set up static file serving (configure `STATIC_ROOT` and run `collectstatic`)
-6. Use a production WSGI server (e.g., gunicorn, uwsgi)
-7. Configure HTTPS
-8. Set up proper database backups
+**Recommended**: See **[CADDY.md](CADDY.md)** for deployment with Caddy (automatic HTTPS)
+
+**Alternative**: See **[DEPLOYMENT.md](DEPLOYMENT.md)** for deployment with Nginx
+
+Key production requirements:
+- Set `DEBUG=False` in `.env`
+- Generate a strong `SECRET_KEY`
+- Configure `ALLOWED_HOSTS` with your domain names
+- Run `collectstatic` for static files
+- Set up database backups
+- Use gunicorn with systemd for process management
+- Use Caddy or Nginx for reverse proxy and HTTPS
 
 ## Project Structure
 
