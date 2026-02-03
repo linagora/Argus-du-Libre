@@ -15,8 +15,28 @@ def home(request):
         state=Software.STATE_PUBLISHED, featured_at__isnull=False
     ).order_by("-featured_at")[:20]
 
+    # Get all published software grouped by first letter
+    all_projects = Software.objects.filter(state=Software.STATE_PUBLISHED).order_by(
+        "name"
+    )
+    projects_by_letter = defaultdict(list)
+    for project in all_projects:
+        first_letter = project.name[0].upper() if project.name else "#"
+        if not first_letter.isalpha():
+            first_letter = "#"
+        projects_by_letter[first_letter].append(project)
+
+    # Sort letters alphabetically, with # at the end
+    sorted_letters = sorted(
+        projects_by_letter.keys(), key=lambda x: (x == "#", x)
+    )
+    projects_by_letter_sorted = [
+        (letter, projects_by_letter[letter]) for letter in sorted_letters
+    ]
+
     context = {
         "featured_projects": featured_projects,
+        "projects_by_letter": projects_by_letter_sorted,
     }
 
     return render(request, "public/home.html", context)

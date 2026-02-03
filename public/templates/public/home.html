@@ -54,6 +54,29 @@
         <p class="text-muted">{% trans "No featured projects available at the moment." %}</p>
     </div>
     {% endif %}
+
+    {% if projects_by_letter %}
+    <hr class="my-5">
+    <div class="mb-4">
+        <h2 class="h4">{% trans "All Projects" %}</h2>
+    </div>
+    <div class="row">
+        {% for letter, projects in projects_by_letter %}
+        <div class="col-6 col-md-4 col-lg-3 mb-4">
+            <h3 class="h5 text-primary border-bottom pb-2">{{ letter }}</h3>
+            <ul class="list-unstyled">
+                {% for project in projects %}
+                <li class="mb-1">
+                    <a href="{% url 'public:project_detail' slug=project.slug %}" class="text-decoration-none">
+                        {{ project.name }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 
 <style>

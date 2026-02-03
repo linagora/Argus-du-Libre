@@ -219,3 +219,6 @@ msgstr ""
 
 msgid "Report an Issue"
 msgstr "Signaler un problème"
+
+msgid "All Projects"
+msgstr "Tous les projets"
