@@ -129,11 +129,13 @@ class Software(models.Model):
     STATE_DRAFT = "draft"
     STATE_IN_REVIEW = "in_review"
     STATE_PUBLISHED = "published"
+    STATE_ERROR = "error"
 
     STATE_CHOICES = [
         (STATE_DRAFT, "Draft"),
         (STATE_IN_REVIEW, "In Review"),
         (STATE_PUBLISHED, "Published"),
+        (STATE_ERROR, "Error"),
     ]
 
     name = models.CharField(max_length=255, help_text="Software name")
