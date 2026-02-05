@@ -131,6 +131,7 @@ class SoftwareAdmin(admin.ModelAdmin):
         "featured_at",
     ]
     list_filter = ["state", "tags", "created_at"]
+    actions = ["set_state_draft", "set_state_in_review", "set_state_published"]
     search_fields = ["name", "slug", "repository_url", "website_url"]
     ordering = ["-created_at"]
     filter_horizontal = ["tags"]
@@ -153,6 +154,21 @@ class SoftwareAdmin(admin.ModelAdmin):
         return ", ".join([tag.name for tag in obj.tags.all()])
 
     get_tags.short_description = "Tags"
+
+    @admin.action(description="Set state to Draft")
+    def set_state_draft(self, request, queryset):
+        count = queryset.update(state=Software.STATE_DRAFT)
+        self.message_user(request, f"{count} software(s) set to draft.")
+
+    @admin.action(description="Set state to In Review")
+    def set_state_in_review(self, request, queryset):
+        count = queryset.update(state=Software.STATE_IN_REVIEW)
+        self.message_user(request, f"{count} software(s) set to in review.")
+
+    @admin.action(description="Set state to Published")
+    def set_state_published(self, request, queryset):
+        count = queryset.update(state=Software.STATE_PUBLISHED)
+        self.message_user(request, f"{count} software(s) set to published.")
 
 
 @admin.register(AnalysisResult, site=admin_site)
