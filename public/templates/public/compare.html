@@ -18,6 +18,11 @@
         </div>
     </div>
     {% elif projects %}
+    <!-- Reset Weights Button -->
+    <div class="text-end mb-3">
+        <button id="reset-weights" class="btn btn-sm btn-outline-secondary">{% trans "Reset weights" %}</button>
+    </div>
+
     <!-- Comparison Table -->
     <div class="table-responsive">
         <table class="table table-bordered comparison-table">
@@ -45,10 +50,10 @@
             </thead>
             <tbody>
                 <!-- Overall Score Row -->
-                <tr class="overall-row">
+                <tr class="overall-row" data-row="overall">
                     <td class="metric-name fw-bold">{% trans "Overall Score" %}</td>
                     {% for proj_data in projects_data %}
-                    <td class="text-center">
+                    <td class="text-center" data-overall-proj="{{ forloop.counter0 }}">
                         {% if proj_data.overall_score %}
                         <span class="score-badge score-{{ proj_data.overall_score|floatformat:0 }}">
                             {{ proj_data.overall_score|floatformat:1 }}
@@ -63,10 +68,10 @@
                 <!-- Category and Field Rows -->
                 {% for category_data in categories_comparison %}
                 <!-- Category Header Row -->
-                <tr class="category-row">
+                <tr class="category-row" data-category-idx="{{ forloop.counter0 }}">
                     <td class="metric-name fw-bold category-name">{{ category_data.category_name }}</td>
                     {% for score in category_data.category_scores %}
-                    <td class="text-center">
+                    <td class="text-center" data-cat-proj="{{ forloop.counter0 }}">
                         {% if score %}
                         <span class="score-badge score-{{ score|floatformat:0 }}">
                             {{ score|floatformat:1 }}
@@ -80,8 +85,13 @@
 
                 <!-- Field Rows -->
                 {% for field_data in category_data.fields %}
-                <tr class="field-row">
-                    <td class="metric-name field-name">{{ field_data.field_name }}</td>
+                <tr class="field-row" data-category-idx="{{ forloop.parentloop.counter0 }}" data-field-idx="{{ forloop.counter0 }}">
+                    <td class="metric-name field-name">
+                        {{ field_data.field_name }}
+                        <input type="number" class="weight-input" min="1" max="10" step="1"
+                               data-category-idx="{{ forloop.parentloop.counter0 }}"
+                               data-field-idx="{{ forloop.counter0 }}">
+                    </td>
                     {% for score in field_data.scores %}
                     <td class="text-center">
                         {% if score %}
@@ -194,6 +204,19 @@
 .field-name {
     padding-left: 2rem;
     font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weight-input {
+    width: 3rem;
+    padding: 0.1rem 0.25rem;
+    font-size: 0.75rem;
+    text-align: center;
+    border: 1px solid #ced4da;
+    border-radius: 0.2rem;
+    flex-shrink: 0;
 }
 
 .score-badge {
@@ -266,4 +289,113 @@
     }
 }
 </style>
+
+{% if categories_comparison %}
+<script>
+(function() {
+    var data = {{ comparison_data_json }};
+    var numProjects = {{ projects|length }};
+
+    // Initialize weight inputs with default values from DB
+    data.categories.forEach(function(cat, ci) {
+        cat.fields.forEach(function(field, fi) {
+            var input = document.querySelector(
+                'input[data-category-idx="' + ci + '"][data-field-idx="' + fi + '"]'
+            );
+            if (input) input.value = field.weight;
+        });
+    });
+
+    function getScoreClass(score) {
+        return 'score-' + Math.min(5, Math.max(1, Math.round(score)));
+    }
+
+    function updateBadge(cell, score) {
+        if (score === null) {
+            cell.innerHTML = '<span class="text-muted">\u2014</span>';
+            return;
+        }
+        var cls = getScoreClass(score);
+        cell.innerHTML = '<span class="score-badge ' + cls + '">' +
+            score.toFixed(1) + '</span>';
+    }
+
+    function recalculate() {
+        var categoryScores = [];  // [catIdx][projIdx]
+
+        data.categories.forEach(function(cat, ci) {
+            var projScores = [];
+
+            for (var pi = 0; pi < numProjects; pi++) {
+                var totalWeighted = 0;
+                var totalWeight = 0;
+
+                cat.fields.forEach(function(field, fi) {
+                    var input = document.querySelector(
+                        'input[data-category-idx="' + ci + '"][data-field-idx="' + fi + '"]'
+                    );
+                    var w = input ? parseInt(input.value, 10) || 1 : field.weight;
+                    var score = field.scores[pi];
+                    if (score !== null) {
+                        totalWeighted += score * w;
+                        totalWeight += w;
+                    }
+                });
+
+                projScores.push(totalWeight > 0 ? totalWeighted / totalWeight : null);
+            }
+
+            categoryScores.push(projScores);
+
+            // Update category row cells
+            var catRow = document.querySelector('tr[data-category-idx="' + ci + '"]:not(.field-row)');
+            if (catRow) {
+                var cells = catRow.querySelectorAll('td[data-cat-proj]');
+                cells.forEach(function(cell) {
+                    var pi = parseInt(cell.getAttribute('data-cat-proj'), 10);
+                    updateBadge(cell, projScores[pi]);
+                });
+            }
+        });
+
+        // Overall scores
+        for (var pi = 0; pi < numProjects; pi++) {
+            var totalWeighted = 0;
+            var totalWeight = 0;
+
+            data.categories.forEach(function(cat, ci) {
+                var catScore = categoryScores[ci][pi];
+                if (catScore !== null) {
+                    totalWeighted += catScore * cat.weight;
+                    totalWeight += cat.weight;
+                }
+            });
+
+            var overall = totalWeight > 0 ? totalWeighted / totalWeight : null;
+            var cell = document.querySelector('td[data-overall-proj="' + pi + '"]');
+            if (cell) updateBadge(cell, overall);
+        }
+    }
+
+    // Listen for weight changes
+    document.querySelectorAll('.weight-input').forEach(function(input) {
+        input.addEventListener('change', recalculate);
+        input.addEventListener('input', recalculate);
+    });
+
+    // Reset button
+    document.getElementById('reset-weights').addEventListener('click', function() {
+        data.categories.forEach(function(cat, ci) {
+            cat.fields.forEach(function(field, fi) {
+                var input = document.querySelector(
+                    'input[data-category-idx="' + ci + '"][data-field-idx="' + fi + '"]'
+                );
+                if (input) input.value = field.weight;
+            });
+        });
+        recalculate();
+    });
+})();
+</script>
+{% endif %}
 {% endblock %}

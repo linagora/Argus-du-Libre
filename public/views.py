@@ -1,9 +1,11 @@
 """Views for public-facing pages."""
 
+import json
 from collections import defaultdict
 from decimal import Decimal
 
 from django.shortcuts import get_object_or_404, render
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
 from projects.models import Block, Field, MetricValue, Software
@@ -315,8 +317,9 @@ def compare(request):
             }
         )
 
-    # Build comparison table structure
+    # Build comparison table structure and JSON data for client-side recalculation
     categories_comparison = []
+    comparison_data = {"categories": []}
 
     # Sort categories by weight
     sorted_categories = sorted(all_categories.values(), key=lambda c: (c.weight, c.id))
@@ -334,11 +337,11 @@ def compare(request):
             category_scores_list.append(proj_data["category_scores"].get(category.id))
 
         # Get all fields in this category
-
         field_ids = all_fields_by_category[category.id]
         fields = Field.objects.filter(id__in=field_ids).order_by("weight", "id")
 
         fields_comparison = []
+        fields_json = []
         for field in fields:
             # Get localized field name
             field_translation = field.get_translation(locale)
@@ -346,15 +349,20 @@ def compare(request):
 
             # Get field scores for each project
             field_scores_list = []
+            field_scores_json = []
             for proj_data in projects_data:
                 field_data = proj_data["categories_data"][category.id]["fields"].get(
                     field.id
                 )
                 field_scores_list.append(field_data["score"] if field_data else None)
+                field_scores_json.append(
+                    float(field_data["score"]) if field_data else None
+                )
 
             fields_comparison.append(
                 {"field_name": field_name, "scores": field_scores_list}
             )
+            fields_json.append({"weight": field.weight, "scores": field_scores_json})
 
         categories_comparison.append(
             {
@@ -363,11 +371,15 @@ def compare(request):
                 "fields": fields_comparison,
             }
         )
+        comparison_data["categories"].append(
+            {"weight": category.weight, "fields": fields_json}
+        )
 
     context = {
         "projects": projects,
         "projects_data": projects_data,
         "categories_comparison": categories_comparison,
+        "comparison_data_json": mark_safe(json.dumps(comparison_data)),
         "error": None,
     }
 
@@ -376,10 +388,8 @@ def compare(request):
 
 def field_metrics(request, software_slug, field_slug):
     """Field metrics detail view showing time-series charts for metrics."""
-    import json
 
     from django.db.models import Prefetch
-    from django.utils.safestring import mark_safe
 
     # Fetch software and field with 404 handling
     software = get_object_or_404(
