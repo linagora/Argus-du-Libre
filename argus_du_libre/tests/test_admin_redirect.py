@@ -17,18 +17,18 @@ class AdminOIDCRedirectTestCase(TestCase):
     def test_admin_redirects_to_oidc_when_not_authenticated(self):
         """Test that /admin redirects to OIDC authentication when user is not logged in."""
         # First, /admin/ redirects to /admin/login/
-        response = self.client.get("/admin/", follow=False)
+        response = self.client.get("/en/admin/", follow=False)
         self.assertEqual(response.status_code, 302)
-        self.assertIn("/admin/login/", response.url)
+        self.assertIn("/en/admin/login/", response.url)
 
         # Then, /admin/login/ redirects to OIDC
-        response = self.client.get("/admin/login/", follow=False)
+        response = self.client.get("/en/admin/login/", follow=False)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("oidc_authentication_init"))
 
     def test_admin_login_page_redirects_to_oidc(self):
         """Test that /admin/login/ redirects to OIDC authentication."""
-        response = self.client.get("/admin/login/", follow=False)
+        response = self.client.get("/en/admin/login/", follow=False)
 
         # Should redirect to OIDC authentication
         self.assertEqual(response.status_code, 302)
@@ -45,7 +45,7 @@ class AdminOIDCRedirectTestCase(TestCase):
         self.client.force_login(user)
 
         # Access a specific admin page (user change list)
-        response = self.client.get("/admin/auth/user/")
+        response = self.client.get("/en/admin/auth/user/")
 
         # Should show admin page (or redirect to /admin/ index)
         self.assertIn(response.status_code, [200, 302])
@@ -63,7 +63,7 @@ class AdminStandardLoginTestCase(TestCase):
 
     def test_admin_shows_login_form_when_oidc_disabled(self):
         """Test that /admin shows standard login form when OIDC is disabled."""
-        response = self.client.get("/admin/login/", follow=True)
+        response = self.client.get("/en/admin/login/", follow=True)
 
         # Should show login form
         self.assertEqual(response.status_code, 200)
@@ -86,7 +86,7 @@ class AdminStandardLoginTestCase(TestCase):
         self.assertTrue(login_successful)
 
         # Access admin to verify authentication
-        response = self.client.get("/admin/")
+        response = self.client.get("/en/admin/")
 
         # Should be authenticated
         self.assertTrue(response.wsgi_request.user.is_authenticated)
@@ -103,7 +103,7 @@ class AdminStandardLoginTestCase(TestCase):
         self.client.force_login(user)
 
         # Access a specific admin page (user change list)
-        response = self.client.get("/admin/auth/user/")
+        response = self.client.get("/en/admin/auth/user/")
 
         # Should show admin page (or redirect to /admin/ index)
         self.assertIn(response.status_code, [200, 302])

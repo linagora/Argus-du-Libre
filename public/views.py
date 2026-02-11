@@ -81,10 +81,16 @@ def project_detail(request, slug):
         field_translation = field.get_translation(locale)
         field_name = field_translation.name if field_translation else str(field)
 
+        # Get field description
+        field_description = (
+            field_translation.description if field_translation else ""
+        )
+
         # Add field score
         categories_data[category]["fields"][field.id] = {
             "field": field,
             "field_name": field_name,
+            "field_description": field_description,
             "score": result.score,
         }
 
@@ -472,6 +478,55 @@ def field_metrics(request, software_slug, field_slug):
     }
 
     return render(request, "public/field_metrics.html", context)
+
+
+def scores_help(request):
+    """Help page listing scoring methodology for all fields."""
+    from projects.models import Category
+
+    locale = get_language()
+
+    categories = Category.objects.prefetch_related("fields__translations").order_by(
+        "weight", "id"
+    )
+
+    categories_data = []
+    for category in categories:
+        category_translation = category.get_translation(locale)
+        category_name = (
+            category_translation.name if category_translation else str(category)
+        )
+
+        fields_data = []
+        for field in category.fields.order_by("weight", "id"):
+            field_translation = field.get_translation(locale)
+            field_name = field_translation.name if field_translation else str(field)
+            field_description = (
+                field_translation.description if field_translation else ""
+            )
+
+            fields_data.append(
+                {
+                    "field": field,
+                    "field_name": field_name,
+                    "field_description": field_description,
+                }
+            )
+
+        if fields_data:
+            categories_data.append(
+                {
+                    "category": category,
+                    "category_name": category_name,
+                    "fields": fields_data,
+                }
+            )
+
+    context = {
+        "categories_data": categories_data,
+    }
+
+    return render(request, "public/scores_help.html", context)
 
 
 def about(request):

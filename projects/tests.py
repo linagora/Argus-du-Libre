@@ -182,31 +182,31 @@ class CategoryAdminTestCase(TestCase):
 
     def test_category_list_view_accessible(self):
         """Test that category list view is accessible."""
-        response = self.client.get("/admin/categories/category/")
+        response = self.client.get("/en/admin/categories/category/")
         self.assertEqual(response.status_code, 200)
 
     def test_category_list_displays_translations(self):
         """Test that category list displays English and French names."""
-        response = self.client.get("/admin/categories/category/")
+        response = self.client.get("/en/admin/categories/category/")
         self.assertContains(response, "Security")
         self.assertContains(response, "Sécurité")
 
     def test_category_add_view_accessible(self):
         """Test that category add view is accessible."""
-        response = self.client.get("/admin/categories/category/add/")
+        response = self.client.get("/en/admin/categories/category/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_category_edit_view_accessible(self):
         """Test that category edit view is accessible."""
         response = self.client.get(
-            f"/admin/categories/category/{self.category.id}/change/"
+            f"/en/admin/categories/category/{self.category.id}/change/"
         )
         self.assertEqual(response.status_code, 200)
 
     def test_category_edit_view_shows_translations(self):
         """Test that edit view shows existing translations."""
         response = self.client.get(
-            f"/admin/categories/category/{self.category.id}/change/"
+            f"/en/admin/categories/category/{self.category.id}/change/"
         )
         self.assertContains(response, "Security")
         self.assertContains(response, "Sécurité")
@@ -229,7 +229,7 @@ class CategoryAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            "/admin/categories/category/add/", data, follow=True
+            "/en/admin/categories/category/add/", data, follow=True
         )
 
         # Check that category was created
@@ -267,7 +267,7 @@ class CategoryAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/category/{self.category.id}/change/", data, follow=True
+            f"/en/admin/categories/category/{self.category.id}/change/", data, follow=True
         )
 
         # Refresh from database
@@ -288,7 +288,7 @@ class CategoryAdminTestCase(TestCase):
         category_id = self.category.id
 
         response = self.client.post(
-            f"/admin/categories/category/{category_id}/delete/",
+            f"/en/admin/categories/category/{category_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -468,6 +468,25 @@ class FieldTranslationModelTestCase(TestCase):
         self.assertIsNotNone(translation2.id)
         self.assertNotEqual(translation1.id, translation2.id)
 
+    def test_description_blank_by_default(self):
+        """Test that description defaults to blank."""
+        translation = FieldTranslation.objects.create(
+            field=self.field, locale="en", name="Test Field"
+        )
+        self.assertEqual(translation.description, "")
+
+    def test_description_can_be_set(self):
+        """Test that description can be set."""
+        translation = FieldTranslation.objects.create(
+            field=self.field,
+            locale="en",
+            name="Test Field",
+            description="This field measures code quality.",
+        )
+        self.assertEqual(
+            translation.description, "This field measures code quality."
+        )
+
 
 @override_settings(
     OIDC_ENABLED=False,
@@ -499,23 +518,23 @@ class FieldAdminTestCase(TestCase):
 
     def test_field_list_view_accessible(self):
         """Test that field list view is accessible."""
-        response = self.client.get("/admin/categories/field/")
+        response = self.client.get("/en/admin/categories/field/")
         self.assertEqual(response.status_code, 200)
 
     def test_field_list_displays_translations(self):
         """Test that field list displays English and French names."""
-        response = self.client.get("/admin/categories/field/")
+        response = self.client.get("/en/admin/categories/field/")
         self.assertContains(response, "License")
         self.assertContains(response, "Licence")
 
     def test_field_add_view_accessible(self):
         """Test that field add view is accessible."""
-        response = self.client.get("/admin/categories/field/add/")
+        response = self.client.get("/en/admin/categories/field/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_field_edit_view_accessible(self):
         """Test that field edit view is accessible."""
-        response = self.client.get(f"/admin/categories/field/{self.field.id}/change/")
+        response = self.client.get(f"/en/admin/categories/field/{self.field.id}/change/")
         self.assertEqual(response.status_code, 200)
 
     def test_create_field_with_translations(self):
@@ -535,7 +554,7 @@ class FieldAdminTestCase(TestCase):
             "translations-1-name": "Politique de confidentialité",
         }
 
-        response = self.client.post("/admin/categories/field/add/", data, follow=True)
+        response = self.client.post("/en/admin/categories/field/add/", data, follow=True)
 
         self.assertEqual(Field.objects.count(), 2)
         new_field = Field.objects.get(slug="privacy-policy")
@@ -574,7 +593,7 @@ class FieldAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/field/{self.field.id}/change/", data, follow=True
+            f"/en/admin/categories/field/{self.field.id}/change/", data, follow=True
         )
 
         self.field.refresh_from_db()
@@ -593,7 +612,7 @@ class FieldAdminTestCase(TestCase):
         field_id = self.field.id
 
         response = self.client.post(
-            f"/admin/categories/field/{field_id}/delete/",
+            f"/en/admin/categories/field/{field_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -659,23 +678,23 @@ class TagAdminTestCase(TestCase):
 
     def test_tag_list_view_accessible(self):
         """Test that tag list view is accessible."""
-        response = self.client.get("/admin/categories/tag/")
+        response = self.client.get("/en/admin/categories/tag/")
         self.assertEqual(response.status_code, 200)
 
     def test_tag_list_displays_tag(self):
         """Test that tag list displays tag name."""
-        response = self.client.get("/admin/categories/tag/")
+        response = self.client.get("/en/admin/categories/tag/")
         self.assertContains(response, "Open Source")
         self.assertContains(response, "open-source")
 
     def test_tag_add_view_accessible(self):
         """Test that tag add view is accessible."""
-        response = self.client.get("/admin/categories/tag/add/")
+        response = self.client.get("/en/admin/categories/tag/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_tag_edit_view_accessible(self):
         """Test that tag edit view is accessible."""
-        response = self.client.get(f"/admin/categories/tag/{self.tag.id}/change/")
+        response = self.client.get(f"/en/admin/categories/tag/{self.tag.id}/change/")
         self.assertEqual(response.status_code, 200)
 
     def test_create_tag(self):
@@ -685,7 +704,7 @@ class TagAdminTestCase(TestCase):
             "slug": "privacy",
         }
 
-        response = self.client.post("/admin/categories/tag/add/", data, follow=True)
+        response = self.client.post("/en/admin/categories/tag/add/", data, follow=True)
 
         self.assertEqual(Tag.objects.count(), 2)
         new_tag = Tag.objects.get(slug="privacy")
@@ -699,7 +718,7 @@ class TagAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/tag/{self.tag.id}/change/", data, follow=True
+            f"/en/admin/categories/tag/{self.tag.id}/change/", data, follow=True
         )
 
         self.tag.refresh_from_db()
@@ -711,7 +730,7 @@ class TagAdminTestCase(TestCase):
         tag_id = self.tag.id
 
         response = self.client.post(
-            f"/admin/categories/tag/{tag_id}/delete/",
+            f"/en/admin/categories/tag/{tag_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -723,7 +742,7 @@ class TagAdminTestCase(TestCase):
         Tag.objects.create(name="Privacy", slug="privacy")
         Tag.objects.create(name="Security", slug="security")
 
-        response = self.client.get("/admin/categories/tag/?q=Privacy")
+        response = self.client.get("/en/admin/categories/tag/?q=Privacy")
         self.assertContains(response, "Privacy")
         self.assertNotContains(response, "Security")
 
@@ -732,7 +751,7 @@ class TagAdminTestCase(TestCase):
         Tag.objects.create(name="Privacy", slug="privacy")
         Tag.objects.create(name="Security", slug="security")
 
-        response = self.client.get("/admin/categories/tag/?q=security")
+        response = self.client.get("/en/admin/categories/tag/?q=security")
         self.assertContains(response, "Security")
         self.assertNotContains(response, "Privacy")
 
@@ -853,24 +872,24 @@ class SoftwareAdminTestCase(TestCase):
 
     def test_software_list_view_accessible(self):
         """Test that software list view is accessible."""
-        response = self.client.get("/admin/categories/software/")
+        response = self.client.get("/en/admin/categories/software/")
         self.assertEqual(response.status_code, 200)
 
     def test_software_list_displays_software(self):
         """Test that software list displays software."""
-        response = self.client.get("/admin/categories/software/")
+        response = self.client.get("/en/admin/categories/software/")
         self.assertContains(response, "Firefox")
         self.assertContains(response, "firefox")
 
     def test_software_add_view_accessible(self):
         """Test that software add view is accessible."""
-        response = self.client.get("/admin/categories/software/add/")
+        response = self.client.get("/en/admin/categories/software/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_software_edit_view_accessible(self):
         """Test that software edit view is accessible."""
         response = self.client.get(
-            f"/admin/categories/software/{self.software.id}/change/"
+            f"/en/admin/categories/software/{self.software.id}/change/"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -893,7 +912,7 @@ class SoftwareAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            "/admin/categories/software/add/", data, follow=True
+            "/en/admin/categories/software/add/", data, follow=True
         )
 
         self.assertEqual(Software.objects.count(), 2)
@@ -921,7 +940,7 @@ class SoftwareAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
         )
 
         self.software.refresh_from_db()
@@ -936,7 +955,7 @@ class SoftwareAdminTestCase(TestCase):
         software_id = self.software.id
 
         response = self.client.post(
-            f"/admin/categories/software/{software_id}/delete/",
+            f"/en/admin/categories/software/{software_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -952,7 +971,7 @@ class SoftwareAdminTestCase(TestCase):
         )
 
         response = self.client.get(
-            f"/admin/categories/software/?state={Software.STATE_PUBLISHED}"
+            f"/en/admin/categories/software/?state={Software.STATE_PUBLISHED}"
         )
         self.assertContains(response, "Published App")
         self.assertNotContains(response, "Firefox")
@@ -963,7 +982,7 @@ class SoftwareAdminTestCase(TestCase):
         software2.tags.add(self.tag2)
 
         response = self.client.get(
-            f"/admin/categories/software/?tags__id__exact={self.tag2.id}"
+            f"/en/admin/categories/software/?tags__id__exact={self.tag2.id}"
         )
         self.assertContains(response, "Tor Browser")
         self.assertNotContains(response, "Firefox")
@@ -972,7 +991,7 @@ class SoftwareAdminTestCase(TestCase):
         """Test searching softwares by name."""
         Software.objects.create(name="Thunderbird", slug="thunderbird")
 
-        response = self.client.get("/admin/categories/software/?q=Thunderbird")
+        response = self.client.get("/en/admin/categories/software/?q=Thunderbird")
         self.assertContains(response, "Thunderbird")
 
 
@@ -1148,7 +1167,7 @@ class BlockAdminTestCase(TestCase):
     def test_block_inline_in_software_admin(self):
         """Test that blocks appear as inline in software admin."""
         response = self.client.get(
-            f"/admin/categories/software/{self.software.id}/change/"
+            f"/en/admin/categories/software/{self.software.id}/change/"
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Blocks")
@@ -1182,7 +1201,7 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
         )
 
         # Should have 2 blocks now
@@ -1218,7 +1237,7 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
         )
 
         self.block.refresh_from_db()
@@ -1252,7 +1271,7 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
         )
 
         self.assertFalse(Block.objects.filter(id=block_id).exists())
@@ -1400,24 +1419,24 @@ class AnalysisResultAdminTestCase(TestCase):
 
     def test_analysis_result_list_view_accessible(self):
         """Test that analysis result list view is accessible."""
-        response = self.client.get("/admin/categories/analysisresult/")
+        response = self.client.get("/en/admin/categories/analysisresult/")
         self.assertEqual(response.status_code, 200)
 
     def test_analysis_result_list_displays_data(self):
         """Test that list view displays result data."""
-        response = self.client.get("/admin/categories/analysisresult/")
+        response = self.client.get("/en/admin/categories/analysisresult/")
         self.assertContains(response, "Firefox")
         self.assertContains(response, "4.5")
 
     def test_analysis_result_add_view_accessible(self):
         """Test that add view is accessible."""
-        response = self.client.get("/admin/categories/analysisresult/add/")
+        response = self.client.get("/en/admin/categories/analysisresult/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_analysis_result_edit_view_accessible(self):
         """Test that edit view is accessible."""
         response = self.client.get(
-            f"/admin/categories/analysisresult/{self.result.id}/change/"
+            f"/en/admin/categories/analysisresult/{self.result.id}/change/"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -1432,7 +1451,7 @@ class AnalysisResultAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            "/admin/categories/analysisresult/add/", data, follow=True
+            "/en/admin/categories/analysisresult/add/", data, follow=True
         )
 
         # Check that result was created
@@ -1454,7 +1473,7 @@ class AnalysisResultAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/analysisresult/{self.result.id}/change/",
+            f"/en/admin/categories/analysisresult/{self.result.id}/change/",
             data,
             follow=True,
         )
@@ -1470,7 +1489,7 @@ class AnalysisResultAdminTestCase(TestCase):
         result_id = self.result.id
 
         response = self.client.post(
-            f"/admin/categories/analysisresult/{result_id}/delete/",
+            f"/en/admin/categories/analysisresult/{result_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -1487,7 +1506,7 @@ class AnalysisResultAdminTestCase(TestCase):
             is_published=True,
         )
 
-        response = self.client.get("/admin/categories/analysisresult/?is_published=1")
+        response = self.client.get("/en/admin/categories/analysisresult/?is_published=1")
         self.assertEqual(response.status_code, 200)
 
     def test_filter_by_is_manual(self):
@@ -1496,7 +1515,7 @@ class AnalysisResultAdminTestCase(TestCase):
             software=self.software, field=self.field, score=3.0, is_manual=True
         )
 
-        response = self.client.get("/admin/categories/analysisresult/?is_manual=1")
+        response = self.client.get("/en/admin/categories/analysisresult/?is_manual=1")
         self.assertEqual(response.status_code, 200)
 
 
@@ -1805,28 +1824,28 @@ class MetricAdminTestCase(TestCase):
 
     def test_metric_list_view_accessible(self):
         """Test that metric list view is accessible."""
-        response = self.client.get("/admin/categories/metric/")
+        response = self.client.get("/en/admin/categories/metric/")
         self.assertEqual(response.status_code, 200)
 
     def test_metric_list_displays_translations(self):
         """Test that metric list displays English and French names."""
-        response = self.client.get("/admin/categories/metric/")
+        response = self.client.get("/en/admin/categories/metric/")
         self.assertContains(response, "GitHub Stars")
         self.assertContains(response, "Étoiles GitHub")
 
     def test_metric_add_view_accessible(self):
         """Test that metric add view is accessible."""
-        response = self.client.get("/admin/categories/metric/add/")
+        response = self.client.get("/en/admin/categories/metric/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_metric_edit_view_accessible(self):
         """Test that metric edit view is accessible."""
-        response = self.client.get(f"/admin/categories/metric/{self.metric.id}/change/")
+        response = self.client.get(f"/en/admin/categories/metric/{self.metric.id}/change/")
         self.assertEqual(response.status_code, 200)
 
     def test_metric_edit_view_shows_translations(self):
         """Test that edit view shows existing translations."""
-        response = self.client.get(f"/admin/categories/metric/{self.metric.id}/change/")
+        response = self.client.get(f"/en/admin/categories/metric/{self.metric.id}/change/")
         self.assertContains(response, "GitHub Stars")
         self.assertContains(response, "Étoiles GitHub")
 
@@ -1852,7 +1871,7 @@ class MetricAdminTestCase(TestCase):
             "translations-1-description": "Nombre de téléchargements du package npm",
         }
 
-        response = self.client.post("/admin/categories/metric/add/", data, follow=True)
+        response = self.client.post("/en/admin/categories/metric/add/", data, follow=True)
 
         # Check that metric was created
         self.assertEqual(Metric.objects.count(), 2)
@@ -1897,7 +1916,7 @@ class MetricAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/metric/{self.metric.id}/change/", data, follow=True
+            f"/en/admin/categories/metric/{self.metric.id}/change/", data, follow=True
         )
 
         self.metric.refresh_from_db()
@@ -1912,7 +1931,7 @@ class MetricAdminTestCase(TestCase):
         metric_id = self.metric.id
 
         response = self.client.post(
-            f"/admin/categories/metric/{metric_id}/delete/",
+            f"/en/admin/categories/metric/{metric_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -1925,7 +1944,7 @@ class MetricAdminTestCase(TestCase):
         metric2 = Metric.objects.create(field=field2, slug="code-coverage")
 
         response = self.client.get(
-            f"/admin/categories/metric/?field__id__exact={field2.id}"
+            f"/en/admin/categories/metric/?field__id__exact={field2.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -1935,7 +1954,7 @@ class MetricAdminTestCase(TestCase):
             field=self.field, slug="disabled-metric", collection_enabled=False
         )
 
-        response = self.client.get("/admin/categories/metric/?collection_enabled=1")
+        response = self.client.get("/en/admin/categories/metric/?collection_enabled=1")
         self.assertEqual(response.status_code, 200)
 
 
@@ -1966,24 +1985,24 @@ class MetricValueAdminTestCase(TestCase):
 
     def test_metric_value_list_view_accessible(self):
         """Test that metric value list view is accessible."""
-        response = self.client.get("/admin/categories/metricvalue/")
+        response = self.client.get("/en/admin/categories/metricvalue/")
         self.assertEqual(response.status_code, 200)
 
     def test_metric_value_list_displays_data(self):
         """Test that list view displays value data."""
-        response = self.client.get("/admin/categories/metricvalue/")
+        response = self.client.get("/en/admin/categories/metricvalue/")
         self.assertContains(response, "Django")
         self.assertContains(response, "45000")
 
     def test_metric_value_add_view_accessible(self):
         """Test that add view is accessible."""
-        response = self.client.get("/admin/categories/metricvalue/add/")
+        response = self.client.get("/en/admin/categories/metricvalue/add/")
         self.assertEqual(response.status_code, 200)
 
     def test_metric_value_edit_view_accessible(self):
         """Test that edit view is accessible."""
         response = self.client.get(
-            f"/admin/categories/metricvalue/{self.value.id}/change/"
+            f"/en/admin/categories/metricvalue/{self.value.id}/change/"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -1997,7 +2016,7 @@ class MetricValueAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            "/admin/categories/metricvalue/add/", data, follow=True
+            "/en/admin/categories/metricvalue/add/", data, follow=True
         )
 
         # Check that value was created
@@ -2015,7 +2034,7 @@ class MetricValueAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/admin/categories/metricvalue/{self.value.id}/change/",
+            f"/en/admin/categories/metricvalue/{self.value.id}/change/",
             data,
             follow=True,
         )
@@ -2029,7 +2048,7 @@ class MetricValueAdminTestCase(TestCase):
         value_id = self.value.id
 
         response = self.client.post(
-            f"/admin/categories/metricvalue/{value_id}/delete/",
+            f"/en/admin/categories/metricvalue/{value_id}/delete/",
             {"post": "yes"},
             follow=True,
         )
@@ -2042,7 +2061,7 @@ class MetricValueAdminTestCase(TestCase):
         MetricValue.objects.create(metric=metric2, software=self.software, value=1000)
 
         response = self.client.get(
-            f"/admin/categories/metricvalue/?metric__id__exact={self.metric.id}"
+            f"/en/admin/categories/metricvalue/?metric__id__exact={self.metric.id}"
         )
         self.assertEqual(response.status_code, 200)
 
@@ -2051,7 +2070,7 @@ class MetricValueAdminTestCase(TestCase):
         software2 = Software.objects.create(name="Flask", slug="flask")
         MetricValue.objects.create(metric=self.metric, software=software2, value=5000)
 
-        response = self.client.get("/admin/categories/metricvalue/?q=Flask")
+        response = self.client.get("/en/admin/categories/metricvalue/?q=Flask")
         self.assertContains(response, "Flask")
 
     def test_search_by_source(self):
@@ -2063,5 +2082,5 @@ class MetricValueAdminTestCase(TestCase):
             source="Custom Scraper",
         )
 
-        response = self.client.get("/admin/categories/metricvalue/?q=Scraper")
+        response = self.client.get("/en/admin/categories/metricvalue/?q=Scraper")
         self.assertContains(response, "Scraper")

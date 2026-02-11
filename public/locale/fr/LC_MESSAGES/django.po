@@ -222,3 +222,20 @@ msgstr "Signaler un problème"
 
 msgid "All Projects"
 msgstr "Tous les projets"
+
+msgid "Scoring Methodology"
+msgstr "Méthodologie de notation"
+
+msgid "Learn how we evaluate open source projects across different criteria."
+msgstr ""
+"Découvrez comment nous évaluons les projets open source selon différents "
+"critères."
+
+msgid "No description available."
+msgstr "Aucune description disponible."
+
+msgid "No scoring criteria available at the moment."
+msgstr "Aucun critère de notation disponible pour le moment."
+
+msgid "View all scoring criteria"
+msgstr "Voir tous les critères de notation"

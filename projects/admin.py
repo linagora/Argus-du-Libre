@@ -59,7 +59,7 @@ class FieldTranslationInline(admin.TabularInline):
     extra = 0
     min_num = 2
     max_num = 10
-    fields = ["locale", "name"]
+    fields = ["locale", "name", "description"]
 
 
 @admin.register(Field, site=admin_site)

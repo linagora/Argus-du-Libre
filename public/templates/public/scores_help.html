@@ -1,0 +1,50 @@
+{% extends "public/base.html" %}
+{% load i18n %}
+{% load markdown_extras %}
+
+{% block title %}{% trans "Scoring Methodology" %} - Argus du Libre{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">{% trans "Scoring Methodology" %}</h1>
+    <p class="lead mb-5">{% trans "Learn how we evaluate open source projects across different criteria." %}</p>
+
+    {% if categories_data %}
+    {% for category_data in categories_data %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">{{ category_data.category_name }}</h2>
+        </div>
+        <div class="card-body">
+            {% for field_data in category_data.fields %}
+            <div class="{% if not forloop.last %}mb-4 pb-4 border-bottom{% endif %}">
+                <h3 class="h6 fw-bold">{{ field_data.field_name }}</h3>
+                {% if field_data.field_description %}
+                <div class="markdown-content text-muted">
+                    {{ field_data.field_description|markdown }}
+                </div>
+                {% else %}
+                <p class="text-muted fst-italic">{% trans "No description available." %}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <p>{% trans "No scoring criteria available at the moment." %}</p>
+    </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'public:home' %}" class="btn btn-outline-secondary">{% trans "Back to Homepage" %}</a>
+    </div>
+</div>
+
+<style>
+.markdown-content {
+    line-height: 1.6;
+}
+</style>
+{% endblock %}

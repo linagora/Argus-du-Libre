@@ -93,6 +93,9 @@ class FieldTranslation(models.Model):
         max_length=10, help_text="Language code (e.g., 'en', 'fr', 'de')"
     )
     name = models.CharField(max_length=255, help_text="Field name in this language")
+    description = models.TextField(
+        blank=True, help_text="Field description in this language"
+    )
 
     class Meta:
         verbose_name = "Field Translation"

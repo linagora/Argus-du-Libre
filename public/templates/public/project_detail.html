@@ -69,6 +69,16 @@
                                class="text-decoration-none text-dark flex-grow-1 field-link">
                                 {{ field_data.field_name }}
                             </a>
+                            {% if field_data.field_description %}
+                            <button type="button" class="btn btn-link btn-sm p-0 mx-2 text-muted field-info-btn"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#fieldDescriptionModal"
+                                    data-field-name="{{ field_data.field_name }}"
+                                    data-field-id="{{ field_data.field.id }}">
+                                <i class="bi bi-info-circle"></i>
+                            </button>
+                            <template id="field-desc-{{ field_data.field.id }}">{{ field_data.field_description|markdown }}</template>
+                            {% endif %}
                             <span class="score-badge score-{{ field_data.score|floatformat:0 }}">
                                 {{ field_data.score|floatformat:1 }}
                             </span>
@@ -144,9 +154,38 @@
         </div>
     </div>
     {% endif %}
+
+    <!-- Field Description Modal -->
+    <div class="modal fade" id="fieldDescriptionModal" tabindex="-1" aria-labelledby="fieldDescriptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="fieldDescriptionModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                </div>
+                <div class="modal-body markdown-content" id="fieldDescriptionModalBody">
+                </div>
+                <div class="modal-footer">
+                    <a href="{% url 'public:scores_help' %}" class="btn btn-outline-primary">{% trans "View all scoring criteria" %}</a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
+// Field description modal
+document.getElementById('fieldDescriptionModal').addEventListener('show.bs.modal', function(event) {
+    var button = event.relatedTarget;
+    var fieldName = button.getAttribute('data-field-name');
+    var fieldId = button.getAttribute('data-field-id');
+    var template = document.getElementById('field-desc-' + fieldId);
+
+    this.querySelector('#fieldDescriptionModalLabel').textContent = fieldName;
+    this.querySelector('#fieldDescriptionModalBody').innerHTML = template ? template.innerHTML : '';
+});
+
 // Search filter
 document.getElementById('projectSearch').addEventListener('input', function(e) {
     const searchTerm = e.target.value.toLowerCase();

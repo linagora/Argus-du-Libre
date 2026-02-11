@@ -5,6 +5,19 @@ from decimal import Decimal
 
 from django.test import TestCase
 from django.urls import reverse
+from django.utils.translation import activate, deactivate
+
+
+class LocaleTestCase(TestCase):
+    """Base test case that ensures English locale is active and cleaned up."""
+
+    def setUp(self):
+        super().setUp()
+        activate("en")
+
+    def tearDown(self):
+        deactivate()
+        super().tearDown()
 
 from projects.models import (
     AnalysisResult,
@@ -21,7 +34,7 @@ from projects.models import (
 )
 
 
-class HomeViewTestCase(TestCase):
+class HomeViewTestCase(LocaleTestCase):
     """Test cases for home view."""
 
     def setUp(self):
@@ -53,11 +66,14 @@ class HomeViewTestCase(TestCase):
         self.assertTemplateUsed(response, "public/home.html")
 
     def test_home_page_shows_published_featured_projects(self):
-        """Test that only published and featured projects are shown."""
+        """Test that only published and featured projects are in featured section."""
         response = self.client.get(reverse("public:home"))
         self.assertContains(response, "Featured Project")
-        self.assertNotContains(response, "Not Featured")
-        self.assertNotContains(response, "Draft Featured")
+        # Check featured_projects context (not full page, which has "All Projects")
+        featured_names = [p.name for p in response.context["featured_projects"]]
+        self.assertIn("Featured Project", featured_names)
+        self.assertNotIn("Not Featured", featured_names)
+        self.assertNotIn("Draft Featured", featured_names)
 
     def test_home_page_orders_by_featured_at_desc(self):
         """Test that projects are ordered by featured_at descending."""
@@ -122,7 +138,7 @@ class HomeViewTestCase(TestCase):
         self.assertContains(response, "Read More")
 
 
-class ProjectDetailViewTestCase(TestCase):
+class ProjectDetailViewTestCase(LocaleTestCase):
     """Test cases for project detail view."""
 
     def setUp(self):
@@ -599,7 +615,7 @@ class ProjectDetailViewTestCase(TestCase):
         self.assertEqual(code_quality_count, 1)
 
 
-class TagDetailViewTestCase(TestCase):
+class TagDetailViewTestCase(LocaleTestCase):
     """Test cases for tag detail view."""
 
     def setUp(self):
@@ -720,7 +736,7 @@ class TagDetailViewTestCase(TestCase):
         self.assertContains(response, f'<a href="{tag_url}"')
 
 
-class SearchViewTestCase(TestCase):
+class SearchViewTestCase(LocaleTestCase):
     """Test cases for search view."""
 
     def setUp(self):
@@ -968,7 +984,7 @@ class SearchViewTestCase(TestCase):
         self.assertContains(response, 'action="/fr/search/"')
 
 
-class CompareViewTestCase(TestCase):
+class CompareViewTestCase(LocaleTestCase):
     """Test cases for compare view."""
 
     def setUp(self):
@@ -1277,7 +1293,7 @@ class CompareViewTestCase(TestCase):
             reverse("public:project_detail", kwargs={"slug": "project-a"})
         )
         self.assertContains(response, "Compare with Other Projects")
-        self.assertContains(response, "projectSelect")
+        self.assertContains(response, "compareModal")
 
     def test_project_detail_compare_selector_lists_other_projects(self):
         """Test that compare selector shows other published projects."""
@@ -1332,7 +1348,7 @@ class CompareViewTestCase(TestCase):
         self.assertEqual(code_quality_field["scores"][0], Decimal("4.80"))
 
 
-class FieldMetricsViewTestCase(TestCase):
+class FieldMetricsViewTestCase(LocaleTestCase):
     """Test cases for field_metrics view."""
 
     def setUp(self):
@@ -1689,3 +1705,190 @@ class FieldMetricsViewTestCase(TestCase):
             kwargs={"software_slug": "test-project", "field_slug": "popularity"},
         )
         self.assertContains(response, field_metrics_url)
+
+
+class ScoresHelpViewTestCase(LocaleTestCase):
+    """Test cases for scores_help view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category, locale="en", name="Technology"
+        )
+        CategoryTranslation.objects.create(
+            category=self.category, locale="fr", name="Technologie"
+        )
+
+        self.field = Field.objects.create(
+            category=self.category, slug="code-quality", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=self.field,
+            locale="en",
+            name="Code Quality",
+            description="Measures the overall quality of the codebase.",
+        )
+        FieldTranslation.objects.create(
+            field=self.field,
+            locale="fr",
+            name="Qualité du code",
+            description="Mesure la qualité globale du code source.",
+        )
+
+        self.field_no_desc = Field.objects.create(
+            category=self.category, slug="performance", weight=2
+        )
+        FieldTranslation.objects.create(
+            field=self.field_no_desc, locale="en", name="Performance"
+        )
+
+    def test_scores_help_page_loads_successfully(self):
+        """Test that scores help page returns 200 status."""
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/scores_help.html")
+
+    def test_scores_help_shows_category_names(self):
+        """Test that category names are displayed."""
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Technology")
+
+    def test_scores_help_shows_field_names(self):
+        """Test that field names are displayed."""
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Code Quality")
+        self.assertContains(response, "Performance")
+
+    def test_scores_help_shows_field_descriptions(self):
+        """Test that field descriptions are displayed."""
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Measures the overall quality")
+
+    def test_scores_help_shows_no_description_message(self):
+        """Test that fields without descriptions show a message."""
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "No description available")
+
+    def test_scores_help_respects_locale(self):
+        """Test that scores help uses correct locale."""
+        response = self.client.get(
+            "/fr/help/scores/", HTTP_ACCEPT_LANGUAGE="fr"
+        )
+        self.assertContains(response, "Technologie")
+        self.assertContains(response, "Qualité du code")
+        self.assertContains(response, "qualité globale du code source")
+
+    def test_scores_help_empty_state(self):
+        """Test empty state when no categories exist."""
+        Category.objects.all().delete()
+
+        response = self.client.get(
+            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No scoring criteria available")
+
+    def test_scores_help_nav_link_in_base(self):
+        """Test that scores help link appears in navigation."""
+        response = self.client.get("/en/", HTTP_ACCEPT_LANGUAGE="en")
+        self.assertContains(response, "/en/help/scores/")
+        self.assertContains(response, "Scoring Methodology")
+
+
+class ProjectDetailFieldDescriptionTestCase(LocaleTestCase):
+    """Test cases for field description info icon on project detail."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.category = Category.objects.create(weight=1)
+        CategoryTranslation.objects.create(
+            category=self.category, locale="en", name="Technology"
+        )
+
+        self.field_with_desc = Field.objects.create(
+            category=self.category, slug="code-quality", weight=1
+        )
+        FieldTranslation.objects.create(
+            field=self.field_with_desc,
+            locale="en",
+            name="Code Quality",
+            description="Measures code quality.",
+        )
+
+        self.field_without_desc = Field.objects.create(
+            category=self.category, slug="performance", weight=2
+        )
+        FieldTranslation.objects.create(
+            field=self.field_without_desc, locale="en", name="Performance"
+        )
+
+        self.software = Software.objects.create(
+            name="Test Software",
+            slug="test-software",
+            state=Software.STATE_PUBLISHED,
+        )
+
+        AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field_with_desc,
+            score=Decimal("4.00"),
+            is_published=True,
+        )
+        AnalysisResult.objects.create(
+            software=self.software,
+            field=self.field_without_desc,
+            score=Decimal("3.00"),
+            is_published=True,
+        )
+
+    def test_info_icon_shown_for_field_with_description(self):
+        """Test that info icon appears for fields with description."""
+        response = self.client.get(
+            "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "bi-info-circle")
+        self.assertContains(
+            response, f"field-desc-{self.field_with_desc.id}"
+        )
+
+    def test_info_icon_not_shown_for_field_without_description(self):
+        """Test that info icon does not appear for fields without description."""
+        response = self.client.get(
+            "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertNotContains(
+            response, f"field-desc-{self.field_without_desc.id}"
+        )
+
+    def test_field_description_modal_present(self):
+        """Test that the field description modal is present on the page."""
+        response = self.client.get(
+            "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "fieldDescriptionModal")
+
+    def test_field_description_in_template_tag(self):
+        """Test that field description content is in a template element."""
+        response = self.client.get(
+            "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "Measures code quality.")
+
+    def test_modal_links_to_scores_help(self):
+        """Test that modal footer links to scores help page."""
+        response = self.client.get(
+            "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
+        )
+        self.assertContains(response, "/en/help/scores/")
+        self.assertContains(response, "View all scoring criteria")
