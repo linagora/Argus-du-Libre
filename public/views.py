@@ -365,8 +365,19 @@ def compare(request):
                     float(field_data["score"]) if field_data else None
                 )
 
+            field_description = (
+                field_translation.description
+                if field_translation and field_translation.description
+                else ""
+            )
+
             fields_comparison.append(
-                {"field_name": field_name, "scores": field_scores_list}
+                {
+                    "field_name": field_name,
+                    "field_id": field.id,
+                    "field_description": field_description,
+                    "scores": field_scores_list,
+                }
             )
             fields_json.append({"weight": field.weight, "scores": field_scores_json})
 

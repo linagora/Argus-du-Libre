@@ -5,7 +5,8 @@
   "fields": {
     "field": 1,
     "locale": "fr",
-    "name": "Activité"
+    "name": "Activité",
+    "description": "Le score d'activité mesure la date de la dernière mise à jour d'un projet, en se basant sur le nombre de jours depuis le dernier commit sur sa branche par défaut. Des commits réguliers indiquent un projet activement maintenu, réactif face aux bugs, aux problèmes de sécurité et aux besoins évolutifs des utilisateurs.\n\nUn projet obtient 5 si son dernier commit date de moins de 30 jours, 4 si de moins de 6 mois, 3 si de moins d'un an, et 2 si de moins de 2 ans. Les projets n'ayant reçu aucun commit depuis plus de 2 ans obtiennent 1, ce qui peut signaler un abandon ou une transition vers une phase de maintenance uniquement."
   }
 },
 {
@@ -14,7 +15,8 @@
   "fields": {
     "field": 1,
     "locale": "en",
-    "name": "Activity"
+    "name": "Activity",
+    "description": "The activity score measures how recently a project has been updated, based on the number of days since the last commit on its default branch. Regular commits indicate an actively maintained project, responsive to bugs, security issues, and evolving user needs.\n\nA project scores 5 if its last commit was within the past 30 days, 4 if within 6 months, 3 if within a year, and 2 if within 2 years. Projects that have not received any commit in over 2 years score 1, which may signal abandonment or a transition to a maintenance-only phase."
   }
 },
 {
@@ -23,7 +25,8 @@
   "fields": {
     "field": 2,
     "locale": "fr",
-    "name": "Ancienneté"
+    "name": "Ancienneté",
+    "description": "Le score d'ancienneté reflète depuis combien de temps un projet existe, mesuré par le temps écoulé depuis son tout premier commit. Un long historique est le signe d'un projet qui a résisté à l'épreuve du temps, accumulé un savoir institutionnel et s'est stabilisé au fil de plusieurs cycles de publication.\n\nLes projets reçoivent un score de 1 si leur premier commit date de moins d'un an, indiquant un projet très jeune. Un score de 2 est attribué à partir d'un an, 3 à partir de 5 ans, 4 à partir de 10 ans, et le score maximal de 5 est réservé aux projets ayant 20 ans ou plus d'historique. Ces seuils récompensent la durabilité à long terme sans pénaliser trop sévèrement les projets plus récents."
   }
 },
 {
@@ -32,7 +35,8 @@
   "fields": {
     "field": 2,
     "locale": "en",
-    "name": "Maturity"
+    "name": "Maturity",
+    "description": "The maturity score reflects how long a project has been in existence, measured by the time elapsed since its very first commit. A long track record is a sign of a project that has withstood the test of time, accumulated institutional knowledge, and stabilized through multiple release cycles.\n\nProjects receive a score of 1 if their first commit is less than a year old, indicating a very young project. A score of 2 is given starting at 1 year, 3 at 5 years, 4 at 10 years, and the maximum score of 5 is reserved for projects with 20 years or more of history. These thresholds reward long-term sustainability without penalizing newer projects too harshly."
   }
 },
 {
@@ -41,7 +45,8 @@
   "fields": {
     "field": 3,
     "locale": "fr",
-    "name": "Popularité"
+    "name": "Popularité",
+    "description": "Le score de popularité est basé sur le nombre d'étoiles GitHub que le projet a reçues. Bien que les étoiles soient un indicateur imparfait de l'adoption, elles restent l'un des signaux les plus largement disponibles et comparables de l'intérêt communautaire et de la visibilité.\n\nUn projet ayant moins de 5 000 étoiles obtient 1. Le score passe à 2 à 5 000 étoiles, 3 à 20 000, 4 à 40 000, et atteint le maximum de 5 à 80 000 étoiles ou plus. Ces seuils sont volontairement élevés pour différencier les projets open source les plus connus."
   }
 },
 {
@@ -50,7 +55,8 @@
   "fields": {
     "field": 3,
     "locale": "en",
-    "name": "Popularity"
+    "name": "Popularity",
+    "description": "The popularity score is based on the number of GitHub stars the project has received. While stars are an imperfect proxy for adoption, they remain one of the most widely available and comparable signals of community interest and visibility.\n\nA project with fewer than 5,000 stars scores 1. The score increases to 2 at 5,000 stars, 3 at 20,000, 4 at 40,000, and reaches the maximum of 5 at 80,000 stars or more. These thresholds are intentionally high to differentiate among well-known open-source projects."
   }
 },
 {
@@ -59,7 +65,8 @@
   "fields": {
     "field": 4,
     "locale": "en",
-    "name": "Number of contributors"
+    "name": "Number of contributors",
+    "description": "The contributors score evaluates how many people are actively working on the project. Rather than counting all historical contributors, it focuses on those who have made more than 3 commits in the last 6 months, excluding bots. This filters out one-time contributors and automated accounts.\n\nA project with no qualifying active contributor scores 1. A score of 2 requires at least 1 active contributor, 3 requires 5, 4 requires 20, and the highest score of 5 is awarded to projects with 50 or more active contributors. This reflects the breadth and health of the development community around the project.\n\nA diverse contributor base reduces the \"bus factor\" risk: the chance that the project stalls if a single maintainer steps away. Projects with many active contributors are generally more resilient, better reviewed, and more likely to sustain long-term development."
   }
 },
 {
@@ -68,7 +75,8 @@
   "fields": {
     "field": 4,
     "locale": "fr",
-    "name": "Nombre de contributeurs"
+    "name": "Nombre de contributeurs",
+    "description": "Le score de contributeurs évalue le nombre de personnes travaillant activement sur le projet. Plutôt que de compter tous les contributeurs historiques, il se concentre sur ceux ayant effectué plus de 3 commits au cours des 6 derniers mois, en excluant les bots. Cela filtre les contributeurs ponctuels et les comptes automatisés.\n\nUn projet sans contributeur actif éligible obtient 1. Un score de 2 nécessite au moins 1 contributeur actif, 3 en nécessite 5, 4 en nécessite 20, et le score le plus élevé de 5 est attribué aux projets comptant 50 contributeurs actifs ou plus. Cela reflète l'étendue et la santé de la communauté de développement autour du projet.\n\nUne base de contributeurs diversifiée réduit le risque du « bus factor » : la probabilité que le projet s'arrête si un seul mainteneur se retire. Les projets avec de nombreux contributeurs actifs sont généralement plus résilients, mieux révisés et plus susceptibles de maintenir un développement à long terme."
   }
 },
 {
@@ -77,7 +85,8 @@
   "fields": {
     "field": 5,
     "locale": "fr",
-    "name": "Taille globale"
+    "name": "Taille globale",
+    "description": "Le score de taille reflète le volume de code de production du projet, mesuré en lignes de code (LOC). Le comptage des lignes est effectué par [Tokei](https://github.com/XAMPPRocky/tokei), un outil rapide et précis qui ne compte que les lignes de code effectives, en excluant les commentaires et les lignes vides. Les fichiers de tests sont exclus de ce décompte.\n\nLes projets de moins de 1 000 lignes de code obtiennent 5, tandis que ceux dépassant 1 000 000 de lignes obtiennent 1. Les seuils intermédiaires sont 10 000 (score 4), 100 000 (score 3) et 1 000 000 (score 2).\n\nUn code source plus petit est généralement plus facile à comprendre, à auditer et à maintenir. Les bases de code volumineuses ont tendance à accumuler de la dette technique et sont plus difficiles à aborder pour les nouveaux contributeurs. Cependant, ce score doit être interprété en contexte : un grand projet n'est pas intrinsèquement mauvais si sa complexité et sa couverture de tests restent saines. Certains domaines nécessitent tout simplement plus de code."
   }
 },
 {
@@ -86,7 +95,8 @@
   "fields": {
     "field": 5,
     "locale": "en",
-    "name": "Global size"
+    "name": "Global size",
+    "description": "The size score reflects the volume of production code in the project, measured in lines of code (LOC). Line counting is performed by [Tokei](https://github.com/XAMPPRocky/tokei), a fast and accurate tool that counts only actual code lines, excluding comments and blanks. Test files are excluded from this count.\n\nProjects with fewer than 1,000 lines of code score 5, while those exceeding 1,000,000 lines score 1. The intermediate thresholds are 10,000 (score 4), 100,000 (score 3), and 1,000,000 (score 2).\n\nA smaller codebase is generally easier to understand, audit, and maintain. Large codebases tend to accumulate technical debt and are harder for new contributors to approach. However, this score should be interpreted in context: a large project is not inherently bad if its complexity and test coverage remain healthy. Some domains simply require more code."
   }
 },
 {
@@ -95,7 +105,8 @@
   "fields": {
     "field": 6,
     "locale": "fr",
-    "name": "Complexité"
+    "name": "Complexité",
+    "description": "Le score de complexité mesure la proportion de fonctions dans le code source présentant une complexité cyclomatique élevée, telle qu'analysée par [Lizard](https://github.com/terryyin/lizard). La complexité cyclomatique compte le nombre de chemins d'exécution indépendants à travers une fonction. Une fonction est considérée comme très complexe lorsque sa complexité cyclomatique dépasse 15.\n\nLa métrique utilisée est le pourcentage de fonctions à haute complexité par rapport au nombre total de fonctions. L'analyse se concentre sur les 1 000 plus gros fichiers de production, en filtrant le code tiers (vendored), les fichiers générés, les scripts de build, la documentation et les autres répertoires non essentiels. Cela garantit que le score reflète le code propre du projet plutôt que les dépendances tierces.\n\nLe score utilise une logique « plus petit est mieux » : un projet où 5 % ou moins des fonctions sont très complexes obtient 5. Le score diminue à 4 à 10 %, 3 à 20 %, 2 à 30 %, et 1 au-delà de 30 %. Une complexité cyclomatique élevée est souvent corrélée à du code plus difficile à tester, plus sujet aux bugs et plus difficile à maintenir."
   }
 },
 {
@@ -104,43 +115,8 @@
   "fields": {
     "field": 6,
     "locale": "en",
-    "name": "Complexity"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
-  "pk": 13,
-  "fields": {
-    "field": 7,
-    "locale": "fr",
-    "name": "Duplication de code"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
-  "pk": 14,
-  "fields": {
-    "field": 7,
-    "locale": "en",
-    "name": "Code duplication"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
-  "pk": 15,
-  "fields": {
-    "field": 8,
-    "locale": "fr",
-    "name": "Nombre de code smells"
-  }
-},
-{
-  "model": "categories.fieldtranslation",
-  "pk": 16,
-  "fields": {
-    "field": 8,
-    "locale": "en",
-    "name": "Number of code smells"
+    "name": "Complexity",
+    "description": "The complexity score measures the proportion of functions in the codebase that exhibit high cyclomatic complexity, as analyzed by [Lizard](https://github.com/terryyin/lizard). Cyclomatic complexity counts the number of independent execution paths through a function. A function is considered highly complex when its cyclomatic complexity exceeds 15.\n\nThe metric used is the percentage of high-complexity functions relative to the total number of functions. The analysis focuses on the 1,000 largest production files, filtering out vendored code, generated files, build scripts, documentation, and other non-essential directories. This ensures the score reflects the project's own code rather than third-party dependencies.\n\nThe score uses a \"smaller is better\" logic: a project where 5% or fewer of functions are highly complex scores 5. The score decreases to 4 at 10%, 3 at 20%, 2 at 30%, and 1 above 30%. High cyclomatic complexity often correlates with code that is harder to test, more prone to bugs, and more difficult to maintain."
   }
 },
 {
@@ -149,7 +125,8 @@
   "fields": {
     "field": 10,
     "locale": "fr",
-    "name": "Documentation technique"
+    "name": "Documentation technique",
+    "description": "Le score de documentation est une évaluation composite de la qualité de la documentation d'un projet, combinant quatre sous-métriques avec des pondérations différentes : qualité du README (40 %), présence et richesse d'un répertoire docs (30 %), nombre de sections clés du README (20 %) et fonctionnalités d'accessibilité (10 %).\n\nLa qualité du README est évaluée sur sa longueur et sa structure. Un README complet de plus de 3 000 mots et comportant au moins 8 sections clés (telles que installation, utilisation, configuration, contribution, exemples et licence) obtiendra le score le plus élevé. La sous-métrique du répertoire docs récompense les projets maintenant un dossier de documentation dédié, avec des points supplémentaires pour un plus grand nombre de fichiers. L'accessibilité vérifie la présence d'un fichier CONTRIBUTING.md et de modèles d'issues GitHub, qui abaissent la barrière d'entrée pour les nouveaux contributeurs.\n\nCes quatre sous-métriques sont combinées en une valeur pondérée unique (0-100), puis converties en un score de 1 à 5 à l'aide de seuils à 20, 40, 60 et 80 points. Un projet ne disposant que d'un court README et d'aucun répertoire docs obtiendra un score faible, tandis qu'un projet avec une documentation approfondie dans toutes les dimensions atteindra le score maximal. Une bonne documentation est l'un des indicateurs les plus forts d'un projet soucieux de ses utilisateurs et contributeurs."
   }
 },
 {
@@ -158,7 +135,8 @@
   "fields": {
     "field": 10,
     "locale": "en",
-    "name": "Technical documentation"
+    "name": "Technical documentation",
+    "description": "The documentation score is a composite evaluation of how well a project is documented, combining four sub-metrics with different weights: README quality (40%), the presence and richness of a docs directory (30%), the number of key README sections (20%), and accessibility features (10%).\n\nREADME quality is assessed on length and structure. A comprehensive README with over 3,000 words and at least 8 key sections (such as installation, usage, configuration, contributing, examples, and license) will score highest. The docs directory sub-metric rewards projects that maintain a dedicated documentation folder, with extra points for having more files. Accessibility checks for the presence of a CONTRIBUTING.md file and GitHub issue templates, which lower the barrier for new contributors.\n\nThese four sub-metrics are combined into a single weighted value (0-100), then mapped to a 1-5 score using thresholds at 20, 40, 60, and 80 points. A project that only has a short README and no docs directory will score low, while a project with thorough documentation across all dimensions will achieve the maximum score. Good documentation is one of the strongest indicators of a project that cares about its users and contributors."
   }
 },
 {
@@ -167,7 +145,8 @@
   "fields": {
     "field": 11,
     "locale": "fr",
-    "name": "Couverture des tests"
+    "name": "Couverture des tests",
+    "description": "Le score de tests évalue l'investissement du projet dans les tests automatisés, mesuré par le ratio entre les lignes de code de test et les lignes de code de production. Les fichiers de tests sont identifiés par des conventions de nommage courantes (_test, .test., .spec.) et des motifs de répertoires (/tests/, /__tests__/, /t/, etc.).\n\nUn ratio de 0,1 (10 % de code de test par rapport au code de production) donne un score de 2, 0,4 (40 %) donne 3, 0,8 (80 %) donne 4, et un ratio de 1,6 ou plus (160 %, soit plus de code de test que de code de production) donne le score maximal de 5. Les projets avec un ratio de tests inférieur à 10 % obtiennent 1.\n\nUn ratio de tests sain est l'un des signaux les plus forts de qualité logicielle. Les projets disposant de suites de tests étendues sont plus susceptibles de détecter les régressions, plus faciles à refactoriser en toute sécurité et plus accueillants pour les contributeurs qui peuvent valider leurs modifications. Les seuils sont volontairement progressifs : atteindre un ratio test/code de 1:1 ou au-delà démontre un engagement exceptionnel envers la fiabilité."
   }
 },
 {
@@ -176,7 +155,8 @@
   "fields": {
     "field": 11,
     "locale": "en",
-    "name": "Test coverage"
+    "name": "Test coverage",
+    "description": "The tests score evaluates the project's investment in automated testing, measured as the ratio of test lines of code to production lines of code. Test files are identified by common naming conventions (_test, .test., .spec.) and directory patterns (/tests/, /__tests__/, /t/, etc.).\n\nA ratio of 0.1 (10% of test code relative to production code) earns a score of 2, 0.4 (40%) earns 3, 0.8 (80%) earns 4, and a ratio of 1.6 or more (160%, meaning more test code than production code) earns the maximum score of 5. Projects with a test ratio below 10% score 1.\n\nA healthy test ratio is one of the strongest signals of software quality. Projects with extensive test suites are more likely to catch regressions, easier to refactor safely, and more welcoming to contributors who can validate their changes. The thresholds are deliberately progressive: achieving a 1:1 test-to-code ratio or beyond demonstrates an exceptional commitment to reliability."
   }
 },
 {
@@ -185,7 +165,8 @@
   "fields": {
     "field": 12,
     "locale": "en",
-    "name": "Vulnerabilities"
+    "name": "Vulnerabilities",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check determines whether the project has open, unfixed vulnerabilities in its own codebase or its dependencies using the OSV (Open Source Vulnerabilities) service. An open vulnerability is readily exploited by attackers and should be fixed as soon as possible."
   }
 },
 {
@@ -194,7 +175,8 @@
   "fields": {
     "field": 12,
     "locale": "fr",
-    "name": "Vulnérabilités"
+    "name": "Vulnérabilités",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification détermine si le projet présente des vulnérabilités ouvertes et non corrigées dans son propre code ou ses dépendances, en utilisant le service OSV (Open Source Vulnerabilities). Une vulnérabilité ouverte est facilement exploitable par des attaquants et doit être corrigée dès que possible."
   }
 },
 {
@@ -203,7 +185,8 @@
   "fields": {
     "field": 13,
     "locale": "en",
-    "name": "Security policy"
+    "name": "Security policy",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check tries to determine if the project has published a security policy. It works by looking for a file named SECURITY.md (case-insensitive) in a few well-known directories.\n\nA security policy (typically a SECURITY.md file) can give users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible.\n\nThis check examines the contents of the security policy file awarding points for those policies that express vulnerability process(es), disclosure timelines, and have links (e.g., URL(s) and email(s)) to support the users."
   }
 },
 {
@@ -212,7 +195,8 @@
   "fields": {
     "field": 13,
     "locale": "fr",
-    "name": "Politique de sécurité"
+    "name": "Politique de sécurité",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification tente de déterminer si le projet a publié une politique de sécurité. Elle fonctionne en recherchant un fichier nommé SECURITY.md (insensible à la casse) dans quelques répertoires bien connus.\n\nUne politique de sécurité (généralement un fichier SECURITY.md) peut fournir aux utilisateurs des informations sur ce qui constitue une vulnérabilité et comment en signaler une de manière sécurisée, afin que les informations sur un bug ne soient pas publiquement visibles.\n\nCette vérification examine le contenu du fichier de politique de sécurité en attribuant des points aux politiques qui décrivent les processus de gestion des vulnérabilités, les délais de divulgation et contiennent des liens (par exemple, URL et adresses e-mail) pour accompagner les utilisateurs."
   }
 },
 {
@@ -221,7 +205,8 @@
   "fields": {
     "field": 14,
     "locale": "en",
-    "name": "Binary artifacts"
+    "name": "Binary artifacts",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check determines whether the project has generated executable (binary) artifacts in the source repository.\n\nIncluding generated executables in the source repository increases user risk. Many programming language systems can generate executables from source code (e.g., C/C++ generated machine code, Java .class files, Python .pyc files, and minified JavaScript). Users will often directly use executables if they are included in the source repository, leading to many dangerous behaviors.\n\nProblems with generated executable (binary) artifacts:\n\n* Binary artifacts cannot be reviewed, allowing possible obsolete or maliciously subverted executables. Reviews generally review source code, not executables, since it's difficult to audit executables to ensure that they correspond to the source code. Over time the included executables might not correspond to the source code.\n* Generated executables allow the executable generation process to atrophy, which can lead to an inability to create working executables. These problems can be countered with verified reproducible builds, but it's easier to implement verified reproducible builds when executables are not included in the source repository (since the executable generation process is less likely to have atrophied).\n\nAllowed by Scorecard:\n\n* Files in the source repository that are simultaneously reviewable source code and executables, since these are reviewable. (Some interpretive systems, such as many operating system shells, don't have a mechanism for storing generated executables that are different from the source file.)\n* Source code in the source repository generated by other tools (e.g., by bison, yacc, flex, and lex). There are potential downsides to generated source code, but generated source code tends to be much easier to review and thus presents a lower risk. Generated source code is also often difficult for external tools to detect.\n* Generated documentation in source repositories. Generated documentation is intended for use by humans (not computers) who can evaluate the context. Thus, generated documentation doesn't pose the same level of risk."
   }
 },
 {
@@ -230,7 +215,8 @@
   "fields": {
     "field": 14,
     "locale": "fr",
-    "name": "Artefacts binaires"
+    "name": "Artefacts binaires",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification détermine si le projet a généré des artefacts exécutables (binaires) dans le dépôt source.\n\nInclure des exécutables générés dans le dépôt source augmente les risques pour les utilisateurs. De nombreux systèmes de langages de programmation peuvent générer des exécutables à partir du code source (par exemple, le code machine généré par C/C++, les fichiers .class Java, les fichiers .pyc Python et le JavaScript minifié). Les utilisateurs utilisent souvent directement les exécutables s'ils sont inclus dans le dépôt source, ce qui conduit à de nombreux comportements dangereux.\n\nProblèmes liés aux artefacts exécutables (binaires) générés :\n\n* Les artefacts binaires ne peuvent pas être révisés, permettant la présence possible d'exécutables obsolètes ou malicieusement altérés. Les revues examinent généralement le code source, pas les exécutables, car il est difficile d'auditer les exécutables pour s'assurer qu'ils correspondent au code source. Avec le temps, les exécutables inclus pourraient ne plus correspondre au code source.\n* Les exécutables générés permettent au processus de génération de s'atrophier, ce qui peut conduire à l'impossibilité de créer des exécutables fonctionnels. Ces problèmes peuvent être contrebalancés par des builds reproductibles vérifiés, mais il est plus facile de mettre en place des builds reproductibles vérifiés lorsque les exécutables ne sont pas inclus dans le dépôt source (car le processus de génération est moins susceptible de s'être atrophié).\n\nAutorisés par Scorecard :\n\n* Les fichiers dans le dépôt source qui sont simultanément du code source révisable et des exécutables, car ils sont révisables. (Certains systèmes interprétatifs, comme de nombreux shells de systèmes d'exploitation, n'ont pas de mécanisme pour stocker des exécutables générés différents du fichier source.)\n* Le code source dans le dépôt source généré par d'autres outils (par exemple, par bison, yacc, flex et lex). Le code source généré présente des inconvénients potentiels, mais il tend à être beaucoup plus facile à réviser et présente donc un risque moindre. Le code source généré est aussi souvent difficile à détecter pour les outils externes.\n* La documentation générée dans les dépôts source. La documentation générée est destinée à être utilisée par des humains (pas des ordinateurs) qui peuvent évaluer le contexte. Ainsi, la documentation générée ne présente pas le même niveau de risque."
   }
 },
 {
@@ -239,7 +225,8 @@
   "fields": {
     "field": 15,
     "locale": "en",
-    "name": "Branch protection"
+    "name": "Branch protection",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check determines whether a project's default and release branches are protected with GitHub's branch protection or repository rules settings. Branch protection allows maintainers to define rules that enforce certain workflows for branches, such as requiring review or passing certain status checks before acceptance into a main branch, or preventing rewriting of public history.\n\nDifferent types of branch protection protect against different risks:\n\n* Require code review:\n  * requires at least one reviewer, which greatly reduces the risk that a compromised contributor can inject malicious code. Review also increases the likelihood that an unintentional vulnerability in a contribution will be detected and fixed before the change is accepted.\n  * requiring two or more reviewers protects even more from the insider risk whereby a compromised contributor can be used by an attacker to LGTM the attacker PR and inject a malicious code as if it was legit.\n* Prevent force push: prevents use of the --force command on public branches, which overwrites code irrevocably. This protection prevents the rewriting of public history without external notice.\n* Require status checks: ensures that all required CI tests are met before a change is accepted."
   }
 },
 {
@@ -248,7 +235,8 @@
   "fields": {
     "field": 15,
     "locale": "fr",
-    "name": "Protection des branches"
+    "name": "Protection des branches",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification détermine si les branches par défaut et de publication du projet sont protégées par les paramètres de protection de branche ou les règles de dépôt de GitHub. La protection de branche permet aux mainteneurs de définir des règles imposant certains workflows pour les branches, comme exiger une revue ou le passage de certaines vérifications de statut avant l'acceptation dans une branche principale, ou empêcher la réécriture de l'historique public.\n\nDifférents types de protection de branche protègent contre différents risques :\n\n* Exiger une revue de code :\n  * exiger au moins un réviseur réduit considérablement le risque qu'un contributeur compromis puisse injecter du code malveillant. La revue augmente également la probabilité qu'une vulnérabilité involontaire dans une contribution soit détectée et corrigée avant que la modification ne soit acceptée.\n  * exiger deux réviseurs ou plus protège encore davantage contre le risque interne où un contributeur compromis peut être utilisé par un attaquant pour approuver la PR de l'attaquant et injecter du code malveillant comme s'il était légitime.\n* Empêcher le force push : empêche l'utilisation de la commande --force sur les branches publiques, qui écrase le code de manière irréversible. Cette protection empêche la réécriture de l'historique public sans notification externe.\n* Exiger des vérifications de statut : garantit que tous les tests CI requis sont satisfaits avant qu'une modification ne soit acceptée."
   }
 },
 {
@@ -257,7 +245,8 @@
   "fields": {
     "field": 16,
     "locale": "en",
-    "name": "Code review"
+    "name": "Code review",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check determines whether the project requires human code review before pull requests (merge requests) are merged.\n\nReviews detect various unintentional problems, including vulnerabilities that can be fixed immediately before they are merged, which improves the quality of the code. Reviews may also detect or deter an attacker trying to insert malicious code (either as a malicious contributor or as an attacker who has subverted a contributor's account), because a reviewer might detect the subversion.\n\nThe check determines whether the most recent changes (over the last ~30 commits) have an approval on GitHub or if the merger is different from the committer (implicit review). It also performs a similar check for reviews using Prow (labels \"lgtm\" or \"approved\") and Gerrit (\"Reviewed-on\" and \"Reviewed-by\"). If recent changes are solely bot activity (e.g. Dependabot, Renovate bot, or custom bots), the check returns inconclusively.\n\nScoring is leveled instead of proportional to make the check more predictable. If any bot-originated changes are unreviewed, 3 points are deducted. If any human changes are unreviewed, 7 points are deducted if a single change is unreviewed, and another 3 are deducted if multiple changes are unreviewed.\n\nReview by bots, including bots powered by artificial intelligence / machine learning (AI/ML), do not count as code review. Such reviews do not provide confidence that there will be a second person who understands the code change (e.g., if the originator suddenly becomes unavailable). However, analysis by bots may be able to meet (at least in part) the SAST criterion."
   }
 },
 {
@@ -266,7 +255,8 @@
   "fields": {
     "field": 16,
     "locale": "fr",
-    "name": "Revue de code"
+    "name": "Revue de code",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification détermine si le projet exige une revue de code humaine avant que les pull requests (merge requests) ne soient fusionnées.\n\nLes revues détectent divers problèmes involontaires, y compris des vulnérabilités qui peuvent être corrigées immédiatement avant leur fusion, ce qui améliore la qualité du code. Les revues peuvent également détecter ou dissuader un attaquant tentant d'insérer du code malveillant (soit en tant que contributeur malveillant, soit en tant qu'attaquant ayant compromis le compte d'un contributeur), car un réviseur pourrait détecter la subversion.\n\nLa vérification détermine si les modifications les plus récentes (sur les ~30 derniers commits) ont reçu une approbation sur GitHub ou si la personne qui fusionne est différente de celle qui a commité (revue implicite). Elle effectue également une vérification similaire pour les revues utilisant Prow (labels « lgtm » ou « approved ») et Gerrit (« Reviewed-on » et « Reviewed-by »). Si les modifications récentes sont uniquement de l'activité de bots (par exemple Dependabot, Renovate bot ou des bots personnalisés), la vérification renvoie un résultat non concluant.\n\nLe scoring est par paliers plutôt que proportionnel pour rendre la vérification plus prévisible. Si des modifications d'origine bot ne sont pas révisées, 3 points sont déduits. Si des modifications humaines ne sont pas révisées, 7 points sont déduits si une seule modification n'est pas révisée, et 3 points supplémentaires sont déduits si plusieurs modifications ne sont pas révisées.\n\nLes revues par des bots, y compris ceux utilisant l'intelligence artificielle / l'apprentissage automatique (IA/ML), ne comptent pas comme revue de code. De telles revues ne garantissent pas qu'une seconde personne comprenne la modification du code (par exemple, si l'auteur devient soudainement indisponible). Cependant, l'analyse par des bots peut être en mesure de satisfaire (au moins en partie) le critère SAST."
   }
 },
 {
@@ -275,7 +265,8 @@
   "fields": {
     "field": 17,
     "locale": "en",
-    "name": "Pinned dependencies"
+    "name": "Pinned dependencies",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check tries to determine if the project pins dependencies used during its build and release process. A \"pinned dependency\" is a dependency that is explicitly set to a specific hash instead of allowing a mutable version or range of versions. It is currently limited to repositories hosted on GitHub, and does not support other source hosting repositories (i.e., Forges).\n\nThe check works by looking for unpinned dependencies in Dockerfiles, shell scripts, and GitHub workflows which are used during the build and release process of a project. Special considerations for Go modules treat full semantic versions as pinned due to how the Go tool verifies downloaded content against the hashes when anyone first downloaded the module.\n\nPinned dependencies reduce several security risks:\n\n* They ensure that checking and deployment are all done with the same software, reducing deployment risks, simplifying debugging, and enabling reproducibility.\n* They can help mitigate compromised dependencies from undermining the security of the project (in the case where you've evaluated the pinned dependency, you are confident it's not compromised, and a later version is released that is compromised).\n* They are one way to counter dependency confusion (aka substitution) attacks, in which an application uses multiple feeds to acquire software packages (a \"hybrid configuration\"), and attackers fool the user into using a malicious package via a feed that was not expected for that package.\n\nHowever, pinning dependencies can inhibit software updates, either because of a security vulnerability or because the pinned version is compromised. Mitigate this risk by:\n\n* using automated tools to notify applications when their dependencies are outdated;\n* quickly updating applications that do pin dependencies."
   }
 },
 {
@@ -284,7 +275,8 @@
   "fields": {
     "field": 17,
     "locale": "fr",
-    "name": "Dépendances épinglées"
+    "name": "Dépendances épinglées",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification tente de déterminer si le projet épingle les dépendances utilisées lors de son processus de build et de publication. Une « dépendance épinglée » est une dépendance explicitement définie sur un hash spécifique au lieu d'autoriser une version mutable ou une plage de versions. Elle est actuellement limitée aux dépôts hébergés sur GitHub et ne prend pas en charge les autres plateformes d'hébergement de code source (c'est-à-dire les forges).\n\nLa vérification fonctionne en recherchant les dépendances non épinglées dans les Dockerfiles, les scripts shell et les workflows GitHub utilisés lors du processus de build et de publication d'un projet. Des considérations spéciales pour les modules Go traitent les versions sémantiques complètes comme épinglées en raison de la manière dont l'outil Go vérifie le contenu téléchargé par rapport aux hashs lors du premier téléchargement du module.\n\nLes dépendances épinglées réduisent plusieurs risques de sécurité :\n\n* Elles garantissent que la vérification et le déploiement sont tous effectués avec le même logiciel, réduisant les risques de déploiement, simplifiant le débogage et permettant la reproductibilité.\n* Elles peuvent aider à atténuer l'impact de dépendances compromises sur la sécurité du projet (dans le cas où vous avez évalué la dépendance épinglée, vous êtes confiant qu'elle n'est pas compromise, et qu'une version ultérieure publiée est compromise).\n* Elles constituent un moyen de contrer les attaques par confusion de dépendances (alias substitution), dans lesquelles une application utilise plusieurs sources pour acquérir des paquets logiciels (une « configuration hybride »), et les attaquants trompent l'utilisateur en lui faisant utiliser un paquet malveillant via une source inattendue pour ce paquet.\n\nCependant, épingler les dépendances peut freiner les mises à jour logicielles, que ce soit en raison d'une vulnérabilité de sécurité ou parce que la version épinglée est compromise. Atténuez ce risque en :\n\n* utilisant des outils automatisés pour notifier les applications lorsque leurs dépendances sont obsolètes ;\n* mettant à jour rapidement les applications qui épinglent leurs dépendances."
   }
 },
 {
@@ -293,7 +285,8 @@
   "fields": {
     "field": 18,
     "locale": "en",
-    "name": "Packaging"
+    "name": "Packaging",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check tries to determine if the project is published as a package. It is currently limited to repositories hosted on GitHub, and does not support other source hosting repositories (i.e., Forges).\n\nPackages give users of a project an easy way to download, install, update, and uninstall the software by a package manager. In particular, they make it easy for users to receive security patches as updates.\n\nThe check currently looks for GitHub packaging workflows and language-specific GitHub Actions that upload the package to a corresponding hub, e.g., Npm. We plan to add better support to query package manager hubs directly in the future, e.g., for Npm, PyPi.\n\nYou can create a package in several ways:\n\n* Many program language ecosystems have a generally-used packaging format supported by a language-level package manager tool and public package repository.\n* Many operating system platforms also have at least one package format, tool, and public repository (in some cases the source repository generates system-independent source packages, which are then used by others to generate system executable packages).\n* Using container images."
   }
 },
 {
@@ -302,7 +295,8 @@
   "fields": {
     "field": 18,
     "locale": "fr",
-    "name": "Empaquetage"
+    "name": "Empaquetage",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification tente de déterminer si le projet est publié sous forme de paquet. Elle est actuellement limitée aux dépôts hébergés sur GitHub et ne prend pas en charge les autres plateformes d'hébergement de code source (c'est-à-dire les forges).\n\nLes paquets offrent aux utilisateurs d'un projet un moyen simple de télécharger, installer, mettre à jour et désinstaller le logiciel via un gestionnaire de paquets. En particulier, ils facilitent la réception des correctifs de sécurité sous forme de mises à jour.\n\nLa vérification recherche actuellement les workflows de packaging GitHub et les GitHub Actions spécifiques aux langages qui téléversent le paquet vers un hub correspondant, par exemple Npm. Nous prévoyons d'ajouter un meilleur support pour interroger directement les hubs de gestionnaires de paquets à l'avenir, par exemple pour Npm, PyPi.\n\nVous pouvez créer un paquet de plusieurs manières :\n\n* De nombreux écosystèmes de langages de programmation ont un format de packaging couramment utilisé, supporté par un outil de gestion de paquets au niveau du langage et un dépôt public de paquets.\n* De nombreuses plateformes de systèmes d'exploitation disposent également d'au moins un format de paquet, un outil et un dépôt public (dans certains cas, le dépôt source génère des paquets source indépendants du système, qui sont ensuite utilisés par d'autres pour générer des paquets exécutables système).\n* En utilisant des images de conteneurs."
   }
 },
 {
@@ -311,7 +305,8 @@
   "fields": {
     "field": 19,
     "locale": "en",
-    "name": "Signed releases"
+    "name": "Signed releases",
+    "description": "We are using [Scorecard](https://scorecard.dev/)\n\nThis check tries to determine if the project cryptographically signs release artifacts. It is currently limited to repositories hosted on GitHub, and does not support other source hosting repositories (i.e., Forges).\n\nSigned releases attest to the provenance of the artifact.\n\nThis check looks for the following filenames in the project's last five release assets: `*.minisig`, `*.asc` (pgp), `*.sig`, `*.sign`, `*.sigstore`, `*.sigstore.json`, `*.intoto.jsonl`.\n\nIf a signature is found in the assets for each release, a score of 8 is given. If a SLSA provenance file is found in the assets for each release (*.intoto.jsonl), the maximum score of 10 is given.\n\nThis check looks for the 30 most recent releases associated with an artifact. It ignores the source code-only releases that are created automatically by GitHub."
   }
 },
 {
@@ -320,7 +315,8 @@
   "fields": {
     "field": 19,
     "locale": "fr",
-    "name": "Versions signées"
+    "name": "Versions signées",
+    "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification tente de déterminer si le projet signe cryptographiquement ses artefacts de publication. Elle est actuellement limitée aux dépôts hébergés sur GitHub et ne prend pas en charge les autres plateformes d'hébergement de code source (c'est-à-dire les forges).\n\nLes publications signées attestent de la provenance de l'artefact.\n\nCette vérification recherche les noms de fichiers suivants dans les cinq derniers assets de publication du projet : `*.minisig`, `*.asc` (pgp), `*.sig`, `*.sign`, `*.sigstore`, `*.sigstore.json`, `*.intoto.jsonl`.\n\nSi une signature est trouvée dans les assets de chaque publication, un score de 8 est attribué. Si un fichier de provenance SLSA est trouvé dans les assets de chaque publication (*.intoto.jsonl), le score maximal de 10 est attribué.\n\nCette vérification examine les 30 publications les plus récentes associées à un artefact. Elle ignore les publications contenant uniquement le code source qui sont créées automatiquement par GitHub."
   }
 }
 ]
