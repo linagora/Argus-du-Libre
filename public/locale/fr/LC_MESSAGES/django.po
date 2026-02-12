@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-12 11:48+0000\n"
+"POT-Creation-Date: 2026-02-12 17:09+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -16,11 +16,111 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "About"
+msgstr "À propos"
+
+msgid "About Argus du Libre"
+msgstr "À propos d'Argus du Libre"
+
+msgid "Developed and Operated by LINAGORA"
+msgstr "Développé et exploité par LINAGORA"
+
+msgid ""
+"\n"
+"                        Argus du Libre is developed and operated by <a "
+"href=\"https://linagora.com/\" target=\"_blank\" rel=\"noopener\">LINAGORA</"
+"a>,\n"
+"                        a company specialized in free and open-source "
+"software solutions.\n"
+"                        "
+msgstr ""
+"\n"
+"                        Argus du Libre est développé et exploité par <a "
+"href=\"https://linagora.com/\" target=\"_blank\" rel=\"noopener\">LINAGORA</"
+"a>,\n"
+"                        une entreprise spécialisée dans les solutions "
+"logicielles libres et open source.\n"
+"                        "
+
+msgid "Beta Version"
+msgstr "Version bêta"
+
+msgid ""
+"This service is currently in beta. We are actively working on improvements "
+"and new features."
+msgstr ""
+"Ce service est actuellement en version bêta. Nous travaillons activement sur "
+"des améliorations et de nouvelles fonctionnalités."
+
+msgid "Open Source Projects"
+msgstr "Projets open source"
+
+msgid "Argus du Libre is built on two main GitHub repositories:"
+msgstr "Argus du Libre repose sur deux dépôts GitHub principaux :"
+
+msgid "The website you are currently using"
+msgstr "Le site web que vous utilisez actuellement"
+
+msgid "The tool that fetches metrics and calculates scores"
+msgstr "L'outil qui récupère les métriques et calcule les scores"
+
+msgid "Feedback Welcome"
+msgstr "Commentaires bienvenus"
+
+msgid ""
+"\n"
+"                        We welcome your feedback and contributions! If you "
+"encounter any issues or have suggestions,\n"
+"                        please feel free to open an issue on our GitHub "
+"repositories.\n"
+"                        "
+msgstr ""
+"\n"
+"                        Nous accueillons volontiers vos commentaires et "
+"contributions ! Si vous rencontrez des problèmes ou avez des suggestions,\n"
+"                        n'hésitez pas à ouvrir un ticket sur nos dépôts "
+"GitHub.\n"
+"                        "
+
+msgid "Report an Issue"
+msgstr "Signaler un problème"
+
+msgid "Scoring Methodology"
+msgstr "Méthodologie de notation"
+
 msgid "Travailler dans l'Open Source"
 msgstr "Travailler dans l'Open Source"
 
 msgid "Expertise"
 msgstr "Expertise"
+
+msgid ""
+"The leading open-source software quality index, helping enterprise decision-"
+"makers choose sustainable technology stacks."
+msgstr ""
+"L'indice de référence des logiciels open source, aidant les décideurs à "
+"choisir des solutions technologiques durables."
+
+msgid "Directory"
+msgstr "Répertoire"
+
+msgid "Featured Projects"
+msgstr "Projets en vedette"
+
+msgid "Categories"
+msgstr "Catégories"
+
+msgid "Transparency"
+msgstr "Transparence"
+
+msgid "Our Scoring Methodology"
+msgstr "Notre méthodologie de notation"
+
+msgid "Get Updates"
+msgstr "Actualités"
+
+msgid "Stay informed about new high-quality projects."
+msgstr "Restez informé des nouveaux projets de qualité."
 
 msgid "Compare Projects"
 msgstr "Comparer les projets"
@@ -34,6 +134,12 @@ msgstr "Comparer les scores de plusieurs projets"
 msgid "Back to Homepage"
 msgstr "Retour à l'accueil"
 
+msgid "Reset weights"
+msgstr "Réinitialiser les poids"
+
+msgid "Export PDF"
+msgstr "Exporter en PDF"
+
 msgid "Metric"
 msgstr "Métrique"
 
@@ -42,6 +148,12 @@ msgstr "Score global"
 
 msgid "Score Legend:"
 msgstr "Légende des scores :"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "View all scoring criteria"
+msgstr "Voir tous les critères de notation"
 
 msgid "No projects selected for comparison."
 msgstr "Aucun projet sélectionné pour la comparaison."
@@ -56,7 +168,8 @@ msgid "No metric data available"
 msgstr "Aucune donnée de métrique disponible"
 
 msgid "There is currently no historical data collected for this field."
-msgstr "Il n'y a actuellement aucune donnée historique collectée pour ce champ."
+msgstr ""
+"Il n'y a actuellement aucune donnée historique collectée pour ce champ."
 
 msgid "Back to Project"
 msgstr "Retour au projet"
@@ -64,29 +177,33 @@ msgstr "Retour au projet"
 msgid "Source"
 msgstr "Source"
 
-msgid "Featured Projects"
-msgstr "Projets en vedette"
+msgid "RELIABLE OPEN SOURCE DIRECTORY"
+msgstr "ANNUAIRE OPEN SOURCE DE RÉFÉRENCE"
 
-msgid "Featured Open Source Projects"
-msgstr "Projets Open Source en vedette"
+msgid "Discover quality open source software"
+msgstr "Découvrez des logiciels open source de qualité"
 
-msgid "Discover our selection of quality open source software"
-msgstr "Découvrez notre sélection de logiciels open source de qualité"
+msgid ""
+"Expert evaluations and community health scores for professional IT decision-"
+"makers"
+msgstr ""
+"Évaluations expertes et scores de santé communautaire pour les décideurs IT "
+"professionnels"
 
-msgid "Search projects..."
-msgstr "Rechercher des projets..."
+msgid "Search projects, categories, or keywords..."
+msgstr "Rechercher des projets, catégories ou mots-clés..."
 
 msgid "Search projects"
 msgstr "Rechercher des projets"
 
-msgid "Search"
-msgstr "Rechercher"
-
-msgid "Read More"
+msgid "Read more"
 msgstr "En savoir plus"
 
 msgid "No featured projects available at the moment."
 msgstr "Aucun projet en vedette pour le moment."
+
+msgid "All Projects"
+msgstr "Tous les projets"
 
 msgid "Visit Website"
 msgstr "Visiter le site"
@@ -100,15 +217,37 @@ msgstr "Aperçu"
 msgid "Compare with Other Projects"
 msgstr "Comparer avec d'autres projets"
 
-msgid "Select projects to compare (1-4):"
-msgstr "Sélectionnez les projets à comparer (1-4) :"
+msgid "Select Projects to Compare"
+msgstr "Sélectionner des projets à comparer"
 
-msgid "Hold Ctrl (Windows) or Cmd (Mac) to select multiple projects"
-msgstr ""
-"Maintenez Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs projets"
+msgid "Search projects..."
+msgstr "Rechercher des projets..."
+
+msgid "Selected:"
+msgstr "Sélectionnés :"
+
+msgid "No projects match your search"
+msgstr "Aucun projet ne correspond à votre recherche"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Compare Selected Projects"
+msgstr "Comparer les projets sélectionnés"
 
 msgid "Please select between 1 and 4 projects to compare."
 msgstr "Veuillez sélectionner entre 1 et 4 projets à comparer."
+
+msgid "Learn how we evaluate open source projects across different criteria."
+msgstr ""
+"Découvrez comment nous évaluons les projets open source selon différents "
+"critères."
+
+msgid "No description available."
+msgstr "Aucune description disponible."
+
+msgid "No scoring criteria available at the moment."
+msgstr "Aucun critère de notation disponible pour le moment."
 
 msgid "Search Results"
 msgstr "Résultats de recherche"
@@ -116,6 +255,9 @@ msgstr "Résultats de recherche"
 #, python-format
 msgid "Results for \"%(query)s\""
 msgstr "Résultats pour \"%(query)s\""
+
+msgid "Search"
+msgstr "Rechercher"
 
 msgid "Enter a search query to find projects"
 msgstr "Entrez une requête pour trouver des projets"
@@ -138,6 +280,9 @@ msgstr[1] ""
 "                    %(counter)s projets trouvés\n"
 "                "
 
+msgid "Read More"
+msgstr "En savoir plus"
+
 msgid "No projects found matching your search."
 msgstr "Aucun projet ne correspond à votre recherche."
 
@@ -146,96 +291,3 @@ msgstr "Projets avec ce tag"
 
 msgid "No projects found with this tag."
 msgstr "Aucun projet trouvé avec ce tag."
-
-msgid "Select Projects to Compare"
-msgstr "Sélectionner des projets à comparer"
-
-msgid "Close"
-msgstr "Fermer"
-
-msgid "Selected:"
-msgstr "Sélectionnés :"
-
-msgid "No projects match your search"
-msgstr "Aucun projet ne correspond à votre recherche"
-
-msgid "Cancel"
-msgstr "Annuler"
-
-msgid "Compare Selected Projects"
-msgstr "Comparer les projets sélectionnés"
-
-msgid "About"
-msgstr "À propos"
-
-msgid "About Argus du Libre"
-msgstr "À propos d'Argus du Libre"
-
-msgid "Developed and Operated by LINAGORA"
-msgstr "Développé et exploité par LINAGORA"
-
-msgid ""
-"Argus du Libre is developed and operated by <a href=\"https://linagora.com/"
-"\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>, a company specialized in "
-"free and open-source software solutions."
-msgstr ""
-"Argus du Libre est développé et exploité par <a href=\"https://linagora.com/"
-"\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>, une entreprise "
-"spécialisée dans les solutions logicielles libres et open source."
-
-msgid "Beta Version"
-msgstr "Version bêta"
-
-msgid ""
-"This service is currently in beta. We are actively working on improvements "
-"and new features."
-msgstr ""
-"Ce service est actuellement en version bêta. Nous travaillons activement "
-"sur des améliorations et de nouvelles fonctionnalités."
-
-msgid "Open Source Projects"
-msgstr "Projets open source"
-
-msgid "Argus du Libre is built on two main GitHub repositories:"
-msgstr "Argus du Libre repose sur deux dépôts GitHub principaux :"
-
-msgid "The website you are currently using"
-msgstr "Le site web que vous utilisez actuellement"
-
-msgid "The tool that fetches metrics and calculates scores"
-msgstr "L'outil qui récupère les métriques et calcule les scores"
-
-msgid "Feedback Welcome"
-msgstr "Commentaires bienvenus"
-
-msgid ""
-"We welcome your feedback and contributions! If you encounter any issues or "
-"have suggestions, please feel free to open an issue on our GitHub "
-"repositories."
-msgstr ""
-"Nous accueillons volontiers vos commentaires et contributions ! Si vous "
-"rencontrez des problèmes ou avez des suggestions, n'hésitez pas à ouvrir un "
-"ticket sur nos dépôts GitHub."
-
-msgid "Report an Issue"
-msgstr "Signaler un problème"
-
-msgid "All Projects"
-msgstr "Tous les projets"
-
-msgid "Scoring Methodology"
-msgstr "Méthodologie de notation"
-
-msgid "Learn how we evaluate open source projects across different criteria."
-msgstr ""
-"Découvrez comment nous évaluons les projets open source selon différents "
-"critères."
-
-msgid "No description available."
-msgstr "Aucune description disponible."
-
-msgid "No scoring criteria available at the moment."
-msgstr "Aucun critère de notation disponible pour le moment."
-
-msgid "View all scoring criteria"
-msgstr "Voir tous les critères de notation"

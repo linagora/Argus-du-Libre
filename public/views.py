@@ -11,11 +11,70 @@ from django.utils.translation import get_language
 from projects.models import Block, Field, MetricValue, Software
 
 
+def _calculate_overall_score(software):
+    """Calculate overall weighted score (0-100) from prefetched analysis results."""
+    # Get most recent published result per field
+    latest_by_field = {}
+    for result in software.analysis_results.all():
+        if not result.is_published:
+            continue
+        fid = result.field_id
+        if fid not in latest_by_field or result.created_at > latest_by_field[fid].created_at:
+            latest_by_field[fid] = result
+
+    if not latest_by_field:
+        return None
+
+    # Calculate category scores (weighted mean of field scores)
+    cat_data = defaultdict(lambda: {"tw": 0, "w": 0, "cat": None})
+    for result in latest_by_field.values():
+        cat = result.field.category
+        cat_data[cat.id]["cat"] = cat
+        cat_data[cat.id]["tw"] += float(result.score) * result.field.weight
+        cat_data[cat.id]["w"] += result.field.weight
+
+    # Overall score (weighted mean of category scores) on 1-5 scale
+    total_tw = 0
+    total_w = 0
+    for d in cat_data.values():
+        if d["w"] > 0:
+            cat_score = d["tw"] / d["w"]
+            total_tw += cat_score * d["cat"].weight
+            total_w += d["cat"].weight
+
+    if total_w > 0:
+        return Decimal(str(total_tw / total_w)).quantize(Decimal("0.01"))
+    return None
+
+
 def home(request):
     """Homepage view showing the last 20 featured projects."""
-    featured_projects = Software.objects.filter(
-        state=Software.STATE_PUBLISHED, featured_at__isnull=False
-    ).order_by("-featured_at")[:20]
+    locale = get_language()
+
+    featured_projects = (
+        Software.objects.filter(
+            state=Software.STATE_PUBLISHED, featured_at__isnull=False
+        )
+        .prefetch_related("analysis_results__field__category", "blocks")
+        .order_by("-featured_at")[:20]
+    )
+
+    featured_list = []
+    for project in featured_projects:
+        # Get overview snippet for current locale
+        overview_text = ""
+        for block in project.blocks.all():
+            if block.kind == Block.KIND_OVERVIEW and block.locale == locale:
+                overview_text = block.content
+                break
+
+        featured_list.append(
+            {
+                "project": project,
+                "score": _calculate_overall_score(project),
+                "overview": overview_text,
+            }
+        )
 
     # Get all published software grouped by first letter
     all_projects = Software.objects.filter(state=Software.STATE_PUBLISHED).order_by(
@@ -37,7 +96,7 @@ def home(request):
     ]
 
     context = {
-        "featured_projects": featured_projects,
+        "featured_projects": featured_list,
         "projects_by_letter": projects_by_letter_sorted,
     }
 

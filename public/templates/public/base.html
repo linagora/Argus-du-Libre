@@ -4,34 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Argus du Libre - LINAGORA{% endblock %}</title>
+    <title>{% block title %}Argus du Libre{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
+    <style>
+        :root {
+            --argus-blue: #2563eb;
+            --argus-dark: #1e293b;
+            --argus-muted: #64748b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--argus-dark);
+        }
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--argus-blue);
+            color: white;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .navbar-brand strong {
+            color: var(--argus-dark);
+        }
+        .brand-accent {
+            color: var(--argus-blue);
+        }
+        .nav-link {
+            color: var(--argus-muted) !important;
+            font-size: 0.9rem;
+        }
+        .nav-link:hover {
+            color: var(--argus-dark) !important;
+        }
+        .footer {
+            background: var(--argus-dark);
+            color: #94a3b8;
+            padding: 4rem 0 0;
+        }
+        .footer h6 {
+            color: white;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .footer a {
+            color: #94a3b8;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: white;
+        }
+        .footer-bottom {
+            border-top: 1px solid #334155;
+            padding: 1.5rem 0;
+            margin-top: 3rem;
+            font-size: 0.85rem;
+        }
+        @media print {
+            .footer, header { display: none; }
+        }
+    </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Header with Navigation -->
-    <header class="bg-light border-bottom">
-        <nav class="navbar navbar-expand-lg navbar-light container">
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-white container">
             <div class="container-fluid">
-                <a class="navbar-brand" href="{% url 'public:home' %}">
-                    <strong>Argus du Libre</strong>
+                <a class="navbar-brand d-flex align-items-center" href="{% url 'public:home' %}">
+                    <span class="brand-icon">A</span>
+                    <strong>Argus <span class="brand-accent">du Libre</span></strong>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'public:about' %}">{% trans "About" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'public:scores_help' %}">{% trans "Scoring Methodology" %}</a>
-                        </li>
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item">
                             <a class="nav-link" href="https://linagora.com/" target="_blank" rel="noopener">LINAGORA</a>
                         </li>
@@ -53,6 +111,14 @@
                         <li class="nav-item">
                             <a class="nav-link" href="https://linagora.com/fr/services" target="_blank" rel="noopener">{% trans "Expertise" %}</a>
                         </li>
+                        <li class="nav-item ms-2">
+                            {% get_current_language as CURRENT_LANG %}
+                            {% if CURRENT_LANG == "fr" %}
+                            <a class="nav-link" href="/en{{ request.path_info|slice:'3:' }}"><i class="bi bi-globe2"></i> EN</a>
+                            {% else %}
+                            <a class="nav-link" href="/fr{{ request.path_info|slice:'3:' }}"><i class="bi bi-globe2"></i> FR</a>
+                            {% endif %}
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -63,6 +129,39 @@
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <span class="brand-icon">A</span>
+                        <strong class="text-white">Argus <span style="color: #93c5fd;">du Libre</span></strong>
+                    </div>
+                    <p class="small">{% trans "The leading open-source software quality index, helping enterprise decision-makers choose sustainable technology stacks." %}</p>
+                    <a href="https://github.com/linagora/Argus-du-Libre" target="_blank" rel="noopener" class="me-2"><i class="bi bi-github"></i></a>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6>{% trans "Directory" %}</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'public:home' %}">{% trans "Featured Projects" %}</a></li>
+                        <li class="mb-2"><a href="{% url 'public:scores_help' %}">{% trans "Categories" %}</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h6>{% trans "Transparency" %}</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{% url 'public:scores_help' %}">{% trans "Our Scoring Methodology" %}</a></li>
+                        <li class="mb-2"><a href="{% url 'public:about' %}">{% trans "About" %}</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; 2026 Argus du Libre.</span>
+            </div>
+        </div>
+    </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

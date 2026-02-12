@@ -70,7 +70,7 @@ class HomeViewTestCase(LocaleTestCase):
         response = self.client.get(reverse("public:home"))
         self.assertContains(response, "Featured Project")
         # Check featured_projects context (not full page, which has "All Projects")
-        featured_names = [p.name for p in response.context["featured_projects"]]
+        featured_names = [p["project"].name for p in response.context["featured_projects"]]
         self.assertIn("Featured Project", featured_names)
         self.assertNotIn("Not Featured", featured_names)
         self.assertNotIn("Draft Featured", featured_names)
@@ -135,7 +135,7 @@ class HomeViewTestCase(LocaleTestCase):
         response = self.client.get(reverse("public:home"))
         project_url = reverse("public:project_detail", kwargs={"slug": "featured"})
         self.assertContains(response, project_url)
-        self.assertContains(response, "Read More")
+        self.assertContains(response, "Read more")
 
 
 class ProjectDetailViewTestCase(LocaleTestCase):
