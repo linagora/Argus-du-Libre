@@ -725,6 +725,26 @@ class TagDetailViewTestCase(LocaleTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No projects found with this tag")
 
+    def test_tag_detail_shows_compare_checkboxes(self):
+        """Test that tag detail page shows compare checkboxes for each project."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertContains(response, "compare-checkbox")
+        # Should have one checkbox per published project (2 published in database tag)
+        self.assertEqual(
+            response.content.decode().count('class="compare-checkbox"'), 2
+        )
+
+    def test_tag_detail_has_compare_bar(self):
+        """Test that tag detail page has sticky compare bar markup."""
+        response = self.client.get(
+            reverse("public:tag_detail", kwargs={"slug": "database"})
+        )
+        self.assertContains(response, "compareBar")
+        self.assertContains(response, "compareLink")
+        self.assertContains(response, "Compare selected projects")
+
     def test_project_detail_tags_are_clickable(self):
         """Test that tags on project detail page are clickable links."""
         response = self.client.get(
@@ -1352,27 +1372,6 @@ class CompareViewTestCase(LocaleTestCase):
             "/en/compare/?projects=project-a,project-b", HTTP_ACCEPT_LANGUAGE="en"
         )
         self.assertContains(response, "Back to Homepage")
-
-    def test_project_detail_shows_compare_selector(self):
-        """Test that project detail page shows comparison selector."""
-        response = self.client.get(
-            reverse("public:project_detail", kwargs={"slug": "project-a"})
-        )
-        self.assertContains(response, "Compare with Other Projects")
-        self.assertContains(response, "compareModal")
-
-    def test_project_detail_compare_selector_lists_other_projects(self):
-        """Test that compare selector shows other published projects."""
-        response = self.client.get(
-            reverse("public:project_detail", kwargs={"slug": "project-a"})
-        )
-        # Should show other published projects
-        self.assertContains(response, "Project B")
-        self.assertContains(response, "Project C")
-        # Should not show draft projects
-        self.assertNotContains(response, "Draft Project")
-        # Should not show current project
-        # (Actually, it might not contain "Project A" in the selector, only in the header)
 
     def test_compare_shows_most_recent_score_when_duplicates(self):
         """Test that compare view uses most recent scores when duplicates exist."""

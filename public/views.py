@@ -195,13 +195,6 @@ def project_detail(request, slug):
                 Decimal("0.01")
             )
 
-    # Get other published projects for comparison selector
-    other_projects = (
-        Software.objects.filter(state=Software.STATE_PUBLISHED)
-        .exclude(id=software.id)
-        .order_by("name")[:50]  # Limit to 50 for performance
-    )
-
     # Build tag opinion sections
     tag_opinion_sections = []
     tag_opinions = TagOpinion.objects.filter(
@@ -232,7 +225,6 @@ def project_detail(request, slug):
         "overview_block": overview_block,
         "categories_with_scores": categories_with_scores,
         "overall_score": overall_score,
-        "other_projects": other_projects,
         "tag_opinion_sections": tag_opinion_sections,
     }
 

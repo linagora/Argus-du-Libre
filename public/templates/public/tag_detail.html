@@ -25,10 +25,23 @@
     {% endif %}
 
     {% if projects %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
         {% for item in projects %}
-        {% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
+        <div class="col compare-card-wrapper" style="position: relative;">
+            <label class="compare-checkbox-label" title="{% trans "Select to compare" %}">
+                <input type="checkbox" class="compare-checkbox" value="{{ item.project.slug }}">
+            </label>
+            {% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
+        </div>
         {% endfor %}
+    </div>
+
+    <!-- Sticky compare bar -->
+    <div id="compareBar" class="compare-bar" style="display: none;">
+        <div class="container d-flex align-items-center justify-content-between">
+            <span><strong id="compareCount">0</strong> {% trans "selected" %}</span>
+            <a id="compareLink" href="#" class="btn btn-primary">{% trans "Compare selected projects" %}</a>
+        </div>
     </div>
     {% else %}
     <div class="text-center py-5">
@@ -36,4 +49,75 @@
     </div>
     {% endif %}
 </div>
+
+{% if projects %}
+<script>
+(function() {
+    var checkboxes = document.querySelectorAll('.compare-checkbox');
+    var bar = document.getElementById('compareBar');
+    var countEl = document.getElementById('compareCount');
+    var link = document.getElementById('compareLink');
+    var maxSelection = 5;
+
+    function update() {
+        var selected = document.querySelectorAll('.compare-checkbox:checked');
+        var count = selected.length;
+        countEl.textContent = count;
+        bar.style.display = count >= 2 ? 'block' : 'none';
+
+        if (count >= maxSelection) {
+            checkboxes.forEach(function(cb) { if (!cb.checked) cb.disabled = true; });
+        } else {
+            checkboxes.forEach(function(cb) { cb.disabled = false; });
+        }
+
+        var slugs = Array.from(selected).map(function(cb) { return cb.value; });
+        link.href = '{% url "public:compare" %}?projects=' + slugs.join(',');
+    }
+
+    checkboxes.forEach(function(cb) { cb.addEventListener('change', update); });
+})();
+</script>
+{% endif %}
+
+<style>
+.compare-card-wrapper > .col {
+    /* The included card already provides a .col wrapper, override to remove extra nesting */
+}
+
+.compare-checkbox-label {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 2;
+    cursor: pointer;
+    background: white;
+    border-radius: 0.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.compare-checkbox {
+    width: 1rem;
+    height: 1rem;
+    cursor: pointer;
+    margin: 0;
+}
+
+.compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #212529;
+    color: #fff;
+    padding: 0.75rem 0;
+    z-index: 1050;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+}
+</style>
 {% endblock %}
