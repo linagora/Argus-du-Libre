@@ -294,3 +294,15 @@ msgstr "Projets avec ce tag"
 
 msgid "No projects found with this tag."
 msgstr "Aucun projet trouvé avec ce tag."
+
+msgid "Tags"
+msgstr "Tags"
+
+msgid "No tags available at the moment."
+msgstr "Aucun tag disponible pour le moment."
+
+#, python-format
+msgid "%(counter)s project"
+msgid_plural "%(counter)s projects"
+msgstr[0] "%(counter)s projet"
+msgstr[1] "%(counter)s projets"

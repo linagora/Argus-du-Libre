@@ -736,6 +736,70 @@ class TagDetailViewTestCase(LocaleTestCase):
         self.assertContains(response, f'<a href="{tag_url}"')
 
 
+class TagsListViewTestCase(LocaleTestCase):
+    """Test cases for tags_list view."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        super().setUp()
+        # Create tags
+        self.tag_db = Tag.objects.create(name="Database", slug="database")
+        self.tag_cache = Tag.objects.create(name="Cache", slug="cache")
+        self.tag_empty = Tag.objects.create(name="Empty", slug="empty")
+
+        # Create published software with tags
+        self.software1 = Software.objects.create(
+            name="Software 1",
+            slug="software-1",
+            state=Software.STATE_PUBLISHED,
+        )
+        self.software1.tags.add(self.tag_db, self.tag_cache)
+
+        self.software2 = Software.objects.create(
+            name="Software 2",
+            slug="software-2",
+            state=Software.STATE_PUBLISHED,
+        )
+        self.software2.tags.add(self.tag_db)
+
+        # Create draft software with tag (should not count)
+        self.draft_software = Software.objects.create(
+            name="Draft Software",
+            slug="draft-software",
+            state=Software.STATE_DRAFT,
+        )
+        self.draft_software.tags.add(self.tag_empty)
+
+    def test_tags_list_page_loads_successfully(self):
+        """Test that tags list page returns 200 status."""
+        response = self.client.get(reverse("public:tags_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "public/tags_list.html")
+
+    def test_tags_list_only_shows_tags_with_published_projects(self):
+        """Test that only tags with at least one published project appear."""
+        response = self.client.get(reverse("public:tags_list"))
+        self.assertContains(response, "Database")
+        self.assertContains(response, "Cache")
+        self.assertNotContains(response, "Empty")
+
+    def test_tags_list_shows_correct_project_count(self):
+        """Test that project count is correct for each tag."""
+        response = self.client.get("/en/tags/", HTTP_ACCEPT_LANGUAGE="en")
+        tags = response.context["tags"]
+        tag_db = next(t for t in tags if t.slug == "database")
+        tag_cache = next(t for t in tags if t.slug == "cache")
+        self.assertEqual(tag_db.project_count, 2)
+        self.assertEqual(tag_cache.project_count, 1)
+
+    def test_tags_list_ordered_by_name(self):
+        """Test that tags are ordered alphabetically by name."""
+        response = self.client.get(reverse("public:tags_list"))
+        tags = list(response.context["tags"])
+        self.assertEqual(tags[0].name, "Cache")
+        self.assertEqual(tags[1].name, "Database")
+
+
 class SearchViewTestCase(LocaleTestCase):
     """Test cases for search view."""
 

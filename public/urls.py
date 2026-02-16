@@ -18,5 +18,6 @@ urlpatterns = [
         views.field_metrics,
         name="field_metrics",
     ),
+    path("tags/", views.tags_list, name="tags_list"),
     path("tag/<slug:slug>/", views.tag_detail, name="tag_detail"),
 ]

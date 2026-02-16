@@ -4,11 +4,13 @@ import json
 from collections import defaultdict
 from decimal import Decimal
 
+from django.db import models
+from django.db.models import Count
 from django.shortcuts import get_object_or_404, render
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from projects.models import Block, Field, MetricValue, Software, TagOpinion
+from projects.models import Block, Field, MetricValue, Software, Tag, TagOpinion
 
 
 def _calculate_overall_score(software):
@@ -250,9 +252,29 @@ def project_detail(request, slug):
     return render(request, "public/project_detail.html", context)
 
 
+def tags_list(request):
+    """List all tags that have at least one published project."""
+
+    tags = (
+        Tag.objects.annotate(
+            project_count=Count(
+                "softwares",
+                filter=models.Q(softwares__state=Software.STATE_PUBLISHED),
+            )
+        )
+        .filter(project_count__gt=0)
+        .order_by("name")
+    )
+
+    context = {
+        "tags": tags,
+    }
+
+    return render(request, "public/tags_list.html", context)
+
+
 def tag_detail(request, slug):
     """Tag detail view showing all published projects with this tag."""
-    from projects.models import Tag
 
     tag = get_object_or_404(Tag, slug=slug)
     locale = get_language()
