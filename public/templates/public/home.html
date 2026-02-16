@@ -33,31 +33,7 @@
     {% if featured_projects %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
         {% for item in featured_projects %}
-        <div class="col">
-            <a href="{% url 'public:project_detail' slug=item.project.slug %}" class="card h-100 project-card text-decoration-none">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-start justify-content-between mb-3">
-                        {% if item.project.logo_url %}
-                        <div class="project-logo">
-                            <img src="{{ item.project.logo_url }}" alt="{{ item.project.name }}">
-                        </div>
-                        {% else %}
-                        <div class="project-logo-placeholder">
-                            {{ item.project.name|truncatechars:1 }}
-                        </div>
-                        {% endif %}
-                        {% if item.score %}
-                        <span class="score-badge">{{ item.score }}</span>
-                        {% endif %}
-                    </div>
-                    <h5 class="card-title text-dark mb-1">{{ item.project.name }}</h5>
-                    {% if item.overview %}
-                    <p class="card-text text-muted small mb-2">{{ item.overview|truncatewords:12 }}</p>
-                    {% endif %}
-                    <span class="read-more">{% trans "Read more" %} &rarr;</span>
-                </div>
-            </a>
-        </div>
+        {% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
         {% endfor %}
     </div>
     {% else %}
@@ -120,58 +96,6 @@
 .search-bar .form-control:focus {
     border-color: #93c5fd;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-.project-card {
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    transition: box-shadow 0.2s, transform 0.2s;
-}
-.project-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-}
-.project-logo {
-    width: 48px;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.project-logo img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 8px;
-}
-.project-logo-placeholder {
-    width: 48px;
-    height: 48px;
-    background: #e2e8f0;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    color: #64748b;
-    font-size: 1.2rem;
-}
-.score-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    height: 36px;
-    background: #2563eb;
-    color: white;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    padding: 0 8px;
-}
-.read-more {
-    color: #2563eb;
-    font-size: 0.85rem;
-    font-weight: 500;
 }
 .letter-heading {
     font-size: 2rem;

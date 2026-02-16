@@ -715,7 +715,7 @@ class TagDetailViewTestCase(LocaleTestCase):
         response = self.client.get("/en/tag/database/", HTTP_ACCEPT_LANGUAGE="en")
         project_url = "/en/project/software-1/"
         self.assertContains(response, project_url)
-        self.assertContains(response, "Read More")
+        self.assertContains(response, "Read more")
 
     def test_tag_detail_empty_state(self):
         """Test that empty state is shown when no projects have the tag."""
@@ -949,7 +949,9 @@ class SearchViewTestCase(LocaleTestCase):
         results = response.context["results"]
 
         # Count occurrences of software1
-        django_count = sum(1 for r in results if r.slug == "django-project")
+        django_count = sum(
+            1 for r in results if r["project"].slug == "django-project"
+        )
         self.assertEqual(django_count, 1)
 
     def test_search_orders_by_featured_at_then_created_at(self):
@@ -979,7 +981,7 @@ class SearchViewTestCase(LocaleTestCase):
         """Test that read more links point to project detail."""
         response = self.client.get("/en/search/?q=Django", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "/en/project/django-project/")
-        self.assertContains(response, "Read More")
+        self.assertContains(response, "Read more")
 
     def test_search_respects_locale_in_blocks(self):
         """Test that search searches in blocks of current locale."""

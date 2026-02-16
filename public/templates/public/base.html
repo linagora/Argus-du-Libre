@@ -70,6 +70,58 @@
             margin-top: 3rem;
             font-size: 0.85rem;
         }
+        .project-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+        .project-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+        .project-logo {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .project-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .project-logo-placeholder {
+            width: 48px;
+            height: 48px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #64748b;
+            font-size: 1.2rem;
+        }
+        .score-badge-blue {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+            background: #2563eb;
+            color: white;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 0 8px;
+        }
+        .read-more {
+            color: #2563eb;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
         @media print {
             .footer, header { display: none; }
         }

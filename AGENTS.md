@@ -182,6 +182,24 @@ All public URLs support i18n with language prefix (e.g., `/en/`, `/fr/`):
 - Handles missing scores gracefully (shows "—")
 - Accessed via multi-select dropdown on project detail pages
 
+### Shared Project Card Component
+
+All project listing pages use a single shared include template: `public/templates/public/_project_card.html`.
+
+**Usage:**
+```django
+{% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
+```
+
+**Variables:**
+- `project` — Software instance (required)
+- `score` — overall score Decimal (optional, shown as blue badge)
+- `overview` — text string (optional, shown truncated)
+
+**Data pattern:** Views use `_build_project_list(queryset, locale)` from `public/views.py` to build a list of dicts with `project`, `score`, and `overview` keys. This helper is used by `home`, `tag_detail`, `search`, and `project_detail` views.
+
+**CSS:** Card styles (`.project-card`, `.project-logo`, `.project-logo-placeholder`, `.score-badge-blue`, `.read-more`) live in `base.html`. Note: `.score-badge-blue` is distinct from the color-coded `.score-badge` / `.score-1` through `.score-5` classes used on the project detail page.
+
 ### Score Calculation System
 
 The project uses a **weighted mean** system for scoring:

@@ -1,0 +1,26 @@
+{% load i18n %}
+<div class="col">
+    <a href="{% url 'public:project_detail' slug=project.slug %}" class="card h-100 project-card text-decoration-none">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+                {% if project.logo_url %}
+                <div class="project-logo">
+                    <img src="{{ project.logo_url }}" alt="{{ project.name }}">
+                </div>
+                {% else %}
+                <div class="project-logo-placeholder">
+                    {{ project.name|truncatechars:1 }}
+                </div>
+                {% endif %}
+                {% if score %}
+                <span class="score-badge-blue">{{ score }}</span>
+                {% endif %}
+            </div>
+            <h5 class="card-title text-dark mb-1">{{ project.name }}</h5>
+            {% if overview %}
+            <p class="card-text text-muted small mb-2">{{ overview|truncatewords:12 }}</p>
+            {% endif %}
+            <span class="read-more">{% trans "Read more" %} &rarr;</span>
+        </div>
+    </a>
+</div>

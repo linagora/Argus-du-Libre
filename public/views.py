@@ -61,22 +61,7 @@ def home(request):
         .order_by("-featured_at")[:20]
     )
 
-    featured_list = []
-    for project in featured_projects:
-        # Get overview snippet for current locale
-        overview_text = ""
-        for block in project.blocks.all():
-            if block.kind == Block.KIND_OVERVIEW and block.locale == locale:
-                overview_text = block.content
-                break
-
-        featured_list.append(
-            {
-                "project": project,
-                "score": _calculate_overall_score(project),
-                "overview": overview_text,
-            }
-        )
+    featured_list = _build_project_list(featured_projects, locale)
 
     # Get all published software grouped by first letter
     all_projects = Software.objects.filter(state=Software.STATE_PUBLISHED).order_by(
@@ -223,11 +208,13 @@ def project_detail(request, slug):
         tag__in=software.tags.all(), locale=locale
     ).select_related("tag")
     for opinion in tag_opinions:
-        related_projects = list(
+        related_qs = (
             opinion.tag.softwares.filter(state=Software.STATE_PUBLISHED)
             .exclude(id=software.id)
+            .prefetch_related("analysis_results__field__category", "blocks")
             .order_by("-featured_at", "-created_at")[:8]
         )
+        related_projects = list(related_qs)
         show_more_link = len(related_projects) == 8
         if show_more_link:
             related_projects = related_projects[:7]
@@ -235,7 +222,7 @@ def project_detail(request, slug):
             {
                 "tag": opinion.tag,
                 "opinion_content": opinion.content,
-                "projects": related_projects,
+                "projects": _build_project_list(related_projects, locale),
                 "show_more_link": show_more_link,
             }
         )
@@ -273,6 +260,26 @@ def tags_list(request):
     return render(request, "public/tags_list.html", context)
 
 
+def _build_project_list(projects, locale):
+    """Build a list of dicts with project, score, and overview for card display."""
+    result = []
+    for project in projects:
+        overview_text = ""
+        for block in project.blocks.all():
+            if block.kind == Block.KIND_OVERVIEW and block.locale == locale:
+                overview_text = block.content
+                break
+
+        result.append(
+            {
+                "project": project,
+                "score": _calculate_overall_score(project),
+                "overview": overview_text,
+            }
+        )
+    return result
+
+
 def tag_detail(request, slug):
     """Tag detail view showing all published projects with this tag."""
 
@@ -283,14 +290,16 @@ def tag_detail(request, slug):
     opinion = tag.opinions.filter(locale=locale).first()
 
     # Get all published projects with this tag
-    projects = tag.softwares.filter(state=Software.STATE_PUBLISHED).order_by(
-        "-featured_at", "-created_at"
+    projects = (
+        tag.softwares.filter(state=Software.STATE_PUBLISHED)
+        .prefetch_related("analysis_results__field__category", "blocks")
+        .order_by("-featured_at", "-created_at")
     )
 
     context = {
         "tag": tag,
         "opinion": opinion,
-        "projects": projects,
+        "projects": _build_project_list(projects, locale),
     }
 
     return render(request, "public/tag_detail.html", context)
@@ -308,15 +317,17 @@ def search(request):
         locale = get_language()
 
         # Search in software name and block content for current locale
-        results = (
+        projects = (
             Software.objects.filter(
                 Q(name__icontains=query)
                 | Q(blocks__content__icontains=query, blocks__locale=locale),
                 state=Software.STATE_PUBLISHED,
             )
+            .prefetch_related("analysis_results__field__category", "blocks")
             .distinct()
             .order_by("-featured_at", "-created_at")
         )
+        results = _build_project_list(projects, locale)
 
     context = {
         "query": query,

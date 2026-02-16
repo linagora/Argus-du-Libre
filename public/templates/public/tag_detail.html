@@ -26,25 +26,8 @@
 
     {% if projects %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
-        {% for project in projects %}
-        <div class="col">
-            <div class="card h-100 text-center shadow-sm hover-shadow">
-                <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
-                    {% if project.logo_url %}
-                    <div class="mb-3" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-                        <img src="{{ project.logo_url }}"
-                             alt="{{ project.name }}"
-                             style="max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain;">
-                    </div>
-                    {% endif %}
-                    <h5 class="card-title mb-2">{{ project.name }}</h5>
-                    <a href="{% url 'public:project_detail' slug=project.slug %}"
-                       class="btn btn-sm btn-outline-primary mt-2">
-                        {% trans "Read More" %}
-                    </a>
-                </div>
-            </div>
-        </div>
+        {% for item in projects %}
+        {% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
         {% endfor %}
     </div>
     {% else %}
@@ -53,14 +36,4 @@
     </div>
     {% endif %}
 </div>
-
-<style>
-.hover-shadow {
-    transition: box-shadow 0.3s ease-in-out;
-}
-
-.hover-shadow:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-}
-</style>
 {% endblock %}
