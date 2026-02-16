@@ -15,6 +15,7 @@ from projects.models import (
     MetricValue,
     Software,
     Tag,
+    TagOpinion,
 )
 
 
@@ -96,6 +97,14 @@ class FieldAdmin(admin.ModelAdmin):
     get_name_fr.short_description = "Name (French)"
 
 
+class TagOpinionInline(admin.StackedInline):
+    """Inline admin for tag opinions."""
+
+    model = TagOpinion
+    extra = 0
+    fields = ["locale", "content"]
+
+
 @admin.register(Tag, site=admin_site)
 class TagAdmin(admin.ModelAdmin):
     """Admin interface for tags."""
@@ -105,6 +114,7 @@ class TagAdmin(admin.ModelAdmin):
     ordering = ["name"]
     fields = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
+    inlines = [TagOpinionInline]
 
 
 class BlockInline(admin.StackedInline):

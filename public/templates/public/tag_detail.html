@@ -1,5 +1,6 @@
 {% extends "public/base.html" %}
 {% load i18n %}
+{% load markdown_extras %}
 
 {% block title %}{{ tag.name }} - Argus du Libre{% endblock %}
 
@@ -9,6 +10,19 @@
         <h1 class="display-4">{{ tag.name }}</h1>
         <p class="lead text-muted">{% trans "Projects with this tag" %}</p>
     </div>
+
+    {% if opinion %}
+    <div class="card shadow-sm mb-5">
+        <div class="card-header">
+            <h3 class="mb-0">{% trans "Our opinion" %}</h3>
+        </div>
+        <div class="card-body">
+            <div class="markdown-content">
+                {{ opinion.content|markdown }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     {% if projects %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">

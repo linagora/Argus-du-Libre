@@ -126,6 +126,28 @@ class Tag(models.Model):
         return self.name
 
 
+class TagOpinion(models.Model):
+    """Locale-specific opinion content for a tag."""
+
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, related_name="opinions")
+    locale = models.CharField(
+        max_length=10, help_text="Language code (e.g., 'en', 'fr', 'de')"
+    )
+    content = models.TextField(help_text="Markdown content")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Tag Opinion"
+        verbose_name_plural = "Tag Opinions"
+        unique_together = [["tag", "locale"]]
+        ordering = ["tag", "locale"]
+
+    def __str__(self):
+        """Return tag opinion description."""
+        return f"{self.tag.name} ({self.locale})"
+
+
 class Software(models.Model):
     """Software/Project model being tracked."""
 

@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, render
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
 
-from projects.models import Block, Field, MetricValue, Software
+from projects.models import Block, Field, MetricValue, Software, TagOpinion
 
 
 def _calculate_overall_score(software):
@@ -215,12 +215,36 @@ def project_detail(request, slug):
         .order_by("name")[:50]  # Limit to 50 for performance
     )
 
+    # Build tag opinion sections
+    tag_opinion_sections = []
+    tag_opinions = TagOpinion.objects.filter(
+        tag__in=software.tags.all(), locale=locale
+    ).select_related("tag")
+    for opinion in tag_opinions:
+        related_projects = list(
+            opinion.tag.softwares.filter(state=Software.STATE_PUBLISHED)
+            .exclude(id=software.id)
+            .order_by("-featured_at", "-created_at")[:8]
+        )
+        show_more_link = len(related_projects) == 8
+        if show_more_link:
+            related_projects = related_projects[:7]
+        tag_opinion_sections.append(
+            {
+                "tag": opinion.tag,
+                "opinion_content": opinion.content,
+                "projects": related_projects,
+                "show_more_link": show_more_link,
+            }
+        )
+
     context = {
         "software": software,
         "overview_block": overview_block,
         "categories_with_scores": categories_with_scores,
         "overall_score": overall_score,
         "other_projects": other_projects,
+        "tag_opinion_sections": tag_opinion_sections,
     }
 
     return render(request, "public/project_detail.html", context)
@@ -231,6 +255,10 @@ def tag_detail(request, slug):
     from projects.models import Tag
 
     tag = get_object_or_404(Tag, slug=slug)
+    locale = get_language()
+
+    # Get opinion for current locale
+    opinion = tag.opinions.filter(locale=locale).first()
 
     # Get all published projects with this tag
     projects = tag.softwares.filter(state=Software.STATE_PUBLISHED).order_by(
@@ -239,6 +267,7 @@ def tag_detail(request, slug):
 
     context = {
         "tag": tag,
+        "opinion": opinion,
         "projects": projects,
     }
 

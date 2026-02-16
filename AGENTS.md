@@ -42,6 +42,7 @@ class CategoryTranslation(models.Model):
 - Field/FieldTranslation
 - Metric/MetricTranslation
 - Block (inline with Software, stores locale directly)
+- TagOpinion (inline with Tag, stores locale directly)
 
 **Key conventions:**
 - `__str__` methods prefer English ("en") translation, fall back to first available
@@ -72,10 +73,16 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 - Blocks store multilingual markdown content (overview, use_case, features)
 - Each Software can have one Block per (kind, locale) combination
 
+**Tag → TagOpinion:**
+- Tags have locale-specific markdown opinion content ("Our opinion" / "Notre avis")
+- Each Tag can have one TagOpinion per locale
+- Displayed on tag detail page and on project detail page for each tag with an opinion
+
 **Key constraints:**
 - `UNIQUE(category_id, slug)` on Field
 - `UNIQUE(field_id, slug)` on Metric
 - `UNIQUE(software_id, kind, locale)` on Block
+- `UNIQUE(tag_id, locale)` on TagOpinion
 - `UNIQUE(slug)` on Tag and Software
 
 **Analysis Results:**

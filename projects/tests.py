@@ -702,6 +702,10 @@ class TagAdminTestCase(TestCase):
         data = {
             "name": "Privacy",
             "slug": "privacy",
+            "opinions-TOTAL_FORMS": "0",
+            "opinions-INITIAL_FORMS": "0",
+            "opinions-MIN_NUM_FORMS": "0",
+            "opinions-MAX_NUM_FORMS": "1000",
         }
 
         response = self.client.post("/en/admin/categories/tag/add/", data, follow=True)
@@ -715,6 +719,10 @@ class TagAdminTestCase(TestCase):
         data = {
             "name": "Open Source Software",
             "slug": "open-source-software",
+            "opinions-TOTAL_FORMS": "0",
+            "opinions-INITIAL_FORMS": "0",
+            "opinions-MIN_NUM_FORMS": "0",
+            "opinions-MAX_NUM_FORMS": "1000",
         }
 
         response = self.client.post(
