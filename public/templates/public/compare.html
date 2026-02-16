@@ -6,9 +6,9 @@
 
 {% block content %}
 <div class="container py-5">
-    <div class="text-center mb-5">
-        <h1 class="display-4">{% trans "Project Comparison" %}</h1>
-        <p class="lead text-muted">{% trans "Compare scores across multiple projects" %}</p>
+    <div class="text-center mb-3">
+        <h1 class="h2">{% trans "Project Comparison" %}</h1>
+        <p class="text-muted small">{% trans "Compare scores across multiple projects" %}</p>
     </div>
 
     {% if error %}
@@ -37,7 +37,7 @@
                             {% if project.logo_url %}
                             <img src="{{ project.logo_url }}"
                                  alt="{{ project.name }}"
-                                 class="project-logo mb-2">
+                                 class="project-logo mb-1">
                             {% endif %}
                             <div class="project-name">
                                 <a href="{% url 'public:project_detail' slug=project.slug %}" class="text-decoration-none text-dark fw-bold">
@@ -126,8 +126,8 @@
     </div>
 
     <!-- Legend -->
-    <div class="text-center mt-4">
-        <div class="d-inline-flex align-items-center gap-3 flex-wrap justify-content-center">
+    <div class="text-center mt-2">
+        <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-center">
             <small class="text-muted">{% trans "Score Legend:" %}</small>
             <span class="score-badge score-1 score-badge-sm">1</span>
             <span class="score-badge score-2 score-badge-sm">2</span>
@@ -138,7 +138,7 @@
     </div>
 
     <!-- Back Button -->
-    <div class="text-center mt-5 no-print">
+    <div class="text-center mt-3 no-print">
         <a href="{% url 'public:home' %}" class="btn btn-outline-primary">{% trans "Back to Homepage" %}</a>
     </div>
     <!-- Field Description Modal -->
@@ -169,14 +169,14 @@
 
 <style>
 .comparison-table {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     min-width: 800px;
 }
 
 .comparison-table th,
 .comparison-table td {
     vertical-align: middle;
-    padding: 1rem;
+    padding: 0.35rem 0.75rem;
 }
 
 .metric-column {
@@ -200,8 +200,8 @@
 }
 
 .project-logo {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
 }
 
@@ -261,22 +261,22 @@
 
 .score-badge {
     display: inline-block;
-    padding: 0.35rem 0.65rem;
-    font-size: 0.875rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
     font-weight: 600;
     line-height: 1;
     color: #fff;
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    border-radius: 0.25rem;
-    min-width: 3rem;
+    border-radius: 0.2rem;
+    min-width: 2.5rem;
 }
 
 .score-badge-sm {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    min-width: 2rem;
+    padding: 0.15rem 0.4rem;
+    font-size: 0.7rem;
+    min-width: 1.8rem;
 }
 
 /* Color scale from red (1) to green (5) */
@@ -303,21 +303,21 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .comparison-table {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
     }
 
     .comparison-table th,
     .comparison-table td {
-        padding: 0.5rem;
+        padding: 0.25rem 0.5rem;
     }
 
     .project-logo {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
     }
 
     .project-name {
-        font-size: 0.85rem;
+        font-size: 0.8rem;
     }
 
     .metric-column {
@@ -340,9 +340,36 @@
         padding: 0 !important;
     }
 
+    .py-5 {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0 !important;
+    }
+
+    .mb-3 {
+        margin-bottom: 0.25rem !important;
+    }
+
     .comparison-table {
         min-width: 0;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.2rem 0.5rem;
+    }
+
+    .project-logo {
+        width: 28px;
+        height: 28px;
+    }
+
+    .score-badge {
+        padding: 0.1rem 0.35rem;
+        font-size: 0.7rem;
+        min-width: 2rem;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     .metric-column, .metric-name {
@@ -354,6 +381,7 @@
         background: transparent;
         width: 2rem;
         padding: 0;
+        font-size: 0.65rem;
         -moz-appearance: textfield;
         appearance: textfield;
     }
@@ -361,11 +389,6 @@
     .weight-input::-webkit-inner-spin-button,
     .weight-input::-webkit-outer-spin-button {
         -webkit-appearance: none;
-    }
-
-    .score-badge {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
     }
 }
 </style>
