@@ -181,8 +181,8 @@ msgstr ""
 "Évaluations expertes et scores de santé communautaire pour les décideurs IT "
 "professionnels"
 
-msgid "Search projects, categories, or keywords..."
-msgstr "Rechercher des projets, catégories ou mots-clés..."
+msgid "Search projects, tags, or keywords..."
+msgstr "Rechercher des projets, tags ou mots-clés..."
 
 msgid "Search projects"
 msgstr "Rechercher des projets"
