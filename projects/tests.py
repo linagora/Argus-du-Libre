@@ -2092,3 +2092,124 @@ class MetricValueAdminTestCase(TestCase):
 
         response = self.client.get("/en/admin/categories/metricvalue/?q=Scraper")
         self.assertContains(response, "Scraper")
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class MergeTagsActionTestCase(TestCase):
+    """Test cases for the merge_tags admin action."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        from projects.models import TagOpinion
+
+        self.admin_user = User.objects.create_superuser(
+            username="admin", email="admin@example.com", password="adminpass"
+        )
+        self.client.force_login(self.admin_user)
+
+        self.tag_ci = Tag.objects.create(name="CI", slug="ci")
+        self.tag_cd = Tag.objects.create(name="CD", slug="cd")
+        self.tag_cicd = Tag.objects.create(name="CI/CD", slug="ci-cd")
+
+        self.software1 = Software.objects.create(name="Jenkins", slug="jenkins")
+        self.software1.tags.add(self.tag_ci)
+
+        self.software2 = Software.objects.create(name="GitLab", slug="gitlab")
+        self.software2.tags.add(self.tag_ci, self.tag_cd)
+
+        self.software3 = Software.objects.create(name="ArgoCD", slug="argocd")
+        self.software3.tags.add(self.tag_cd)
+
+        # Opinions
+        TagOpinion.objects.create(tag=self.tag_ci, locale="en", content="CI opinion EN")
+        TagOpinion.objects.create(tag=self.tag_cd, locale="fr", content="CD opinion FR")
+        TagOpinion.objects.create(
+            tag=self.tag_cicd, locale="en", content="CI/CD opinion EN"
+        )
+
+    def _post_merge(self, tag_ids, primary_id=None, confirm=False):
+        """Helper to post the merge action."""
+        data = {
+            "action": "merge_tags",
+            "_selected_action": [str(t) for t in tag_ids],
+        }
+        if confirm and primary_id:
+            data["confirm"] = "1"
+            data["primary_id"] = str(primary_id)
+        return self.client.post(
+            "/en/admin/categories/tag/", data, follow=True
+        )
+
+    def test_merge_moves_software_relationships(self):
+        """Test that software M2M relationships are moved to primary tag."""
+        self._post_merge(
+            [self.tag_ci.id, self.tag_cd.id, self.tag_cicd.id],
+            primary_id=self.tag_cicd.id,
+            confirm=True,
+        )
+
+        # All software should now have the CI/CD tag
+        self.tag_cicd.refresh_from_db()
+        cicd_softwares = set(self.tag_cicd.softwares.values_list("slug", flat=True))
+        self.assertEqual(cicd_softwares, {"jenkins", "gitlab", "argocd"})
+
+    def test_merge_moves_opinions(self):
+        """Test that opinions are moved to primary tag when no conflict."""
+
+        self._post_merge(
+            [self.tag_ci.id, self.tag_cd.id, self.tag_cicd.id],
+            primary_id=self.tag_cicd.id,
+            confirm=True,
+        )
+
+        # CI/CD should have EN opinion (kept) and FR opinion (from CD)
+        self.tag_cicd.refresh_from_db()
+        locales = set(self.tag_cicd.opinions.values_list("locale", flat=True))
+        self.assertEqual(locales, {"en", "fr"})
+
+        # FR opinion content should come from CD tag
+        fr_opinion = self.tag_cicd.opinions.get(locale="fr")
+        self.assertEqual(fr_opinion.content, "CD opinion FR")
+
+    def test_merge_keeps_primary_opinion_on_conflict(self):
+        """Test that primary tag's opinion is kept when locale conflicts."""
+
+        self._post_merge(
+            [self.tag_ci.id, self.tag_cicd.id],
+            primary_id=self.tag_cicd.id,
+            confirm=True,
+        )
+
+        # CI/CD already had EN opinion, CI also had EN - primary's should be kept
+        self.tag_cicd.refresh_from_db()
+        en_opinion = self.tag_cicd.opinions.get(locale="en")
+        self.assertEqual(en_opinion.content, "CI/CD opinion EN")
+
+    def test_merge_deletes_secondary_tags(self):
+        """Test that secondary tags are deleted after merge."""
+        self._post_merge(
+            [self.tag_ci.id, self.tag_cd.id, self.tag_cicd.id],
+            primary_id=self.tag_cicd.id,
+            confirm=True,
+        )
+
+        self.assertFalse(Tag.objects.filter(id=self.tag_ci.id).exists())
+        self.assertFalse(Tag.objects.filter(id=self.tag_cd.id).exists())
+        self.assertTrue(Tag.objects.filter(id=self.tag_cicd.id).exists())
+
+    def test_merge_error_fewer_than_2_tags(self):
+        """Test that selecting fewer than 2 tags shows error."""
+        response = self._post_merge([self.tag_ci.id])
+
+        self.assertContains(response, "Please select at least 2 tags to merge.")
+
+    def test_merge_shows_confirmation_page(self):
+        """Test that intermediate confirmation page is shown."""
+        response = self._post_merge([self.tag_ci.id, self.tag_cd.id])
+
+        self.assertContains(response, "CI")
+        self.assertContains(response, "CD")
+        self.assertContains(response, "Confirm merge")

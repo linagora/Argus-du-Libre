@@ -115,6 +115,44 @@ class TagAdmin(admin.ModelAdmin):
     fields = ["name", "slug"]
     prepopulated_fields = {"slug": ("name",)}
     inlines = [TagOpinionInline]
+    actions = ["merge_tags"]
+
+    @admin.action(description="Merge selected tags")
+    def merge_tags(self, request, queryset):
+        if queryset.count() < 2:
+            self.message_user(request, "Please select at least 2 tags to merge.", "error")
+            return
+
+        if request.POST.get("confirm"):
+            primary_id = request.POST.get("primary_id")
+            primary_tag = queryset.get(id=primary_id)
+            secondary_tags = queryset.exclude(id=primary_id)
+
+            for tag in secondary_tags:
+                for software in tag.softwares.all():
+                    software.tags.add(primary_tag)
+                    software.tags.remove(tag)
+
+                for opinion in tag.opinions.all():
+                    if not primary_tag.opinions.filter(locale=opinion.locale).exists():
+                        opinion.tag = primary_tag
+                        opinion.save()
+
+                tag.delete()
+
+            self.message_user(
+                request,
+                f"Merged {secondary_tags.count()} tag(s) into '{primary_tag.name}'.",
+            )
+            return
+
+        from django.shortcuts import render
+
+        return render(
+            request,
+            "admin/merge_tags.html",
+            {"tags": queryset, "title": "Merge tags"},
+        )
 
 
 class BlockInline(admin.StackedInline):

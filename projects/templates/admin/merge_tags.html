@@ -1,0 +1,35 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Merge tags" %}{% endblock %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+
+    <p>{% trans "The following tags will be merged:" %}</p>
+    <ul>
+        {% for tag in tags %}
+        <li>{{ tag.name }} ({{ tag.softwares.count }} software{{ tag.softwares.count|pluralize:", s" }})</li>
+        {% endfor %}
+    </ul>
+
+    <p>{% trans "Select the tag to keep as primary:" %}</p>
+    <select name="primary_id">
+        {% for tag in tags %}
+        <option value="{{ tag.id }}">{{ tag.name }}</option>
+        {% endfor %}
+    </select>
+
+    {% for tag in tags %}
+    <input type="hidden" name="_selected_action" value="{{ tag.id }}">
+    {% endfor %}
+    <input type="hidden" name="action" value="merge_tags">
+    <input type="hidden" name="confirm" value="1">
+
+    <div style="margin-top: 1em;">
+        <input type="submit" value="{% trans 'Confirm merge' %}">
+        <a href="{% url 'admin:categories_tag_changelist' %}">{% trans "Cancel" %}</a>
+    </div>
+</form>
+{% endblock %}
