@@ -7,12 +7,16 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <h1 class="display-4 mb-4">{% trans "About Argus du Libre" %}</h1>
+            <h1 class="display-5 fw-bold mb-2">{% trans "About Argus du Libre" %}</h1>
+            <p class="text-muted mb-5">{% trans "The open-source software quality index by LINAGORA." %}</p>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">{% trans "Developed and Operated by LINAGORA" %}</h2>
-                    <p>
+            <div class="help-card mb-4">
+                <div class="help-card-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div>
+                    <h2 class="h5 fw-semibold mb-2">{% trans "Developed and Operated by LINAGORA" %}</h2>
+                    <p class="text-muted mb-0">
                         {% blocktrans %}
                         Argus du Libre is developed and operated by <a href="https://linagora.com/" target="_blank" rel="noopener">LINAGORA</a>,
                         a company specialized in free and open-source software solutions.
@@ -21,58 +25,89 @@
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">{% trans "Beta Version" %}</h2>
-                    <p>
+            <div class="help-card mb-4">
+                <div class="help-card-icon">
+                    <i class="bi bi-screwdriver"></i>
+                </div>
+                <div>
+                    <h2 class="h5 fw-semibold mb-2">{% trans "Beta Version" %}</h2>
+                    <p class="text-muted mb-0">
                         {% trans "This service is currently in beta. We are actively working on improvements and new features." %}
                     </p>
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">{% trans "Open Source Projects" %}</h2>
-                    <p>{% trans "Argus du Libre is built on two main GitHub repositories:" %}</p>
-                    <ul class="list-unstyled ms-3">
-                        <li class="mb-2">
-                            <strong>
-                                <a href="https://github.com/linagora/Argus-du-Libre" target="_blank" rel="noopener">
-                                    Argus-du-Libre
-                                </a>
-                            </strong> - {% trans "The website you are currently using" %}
+            <div class="help-card mb-4">
+                <div class="help-card-icon">
+                    <i class="bi bi-github"></i>
+                </div>
+                <div>
+                    <h2 class="h5 fw-semibold mb-2">{% trans "Open Source Projects" %}</h2>
+                    <p class="text-muted mb-3">{% trans "Argus du Libre is built on two main GitHub repositories:" %}</p>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2 d-flex align-items-start">
+                            <i class="bi bi-arrow-right me-2 mt-1 text-primary"></i>
+                            <span>
+                                <a href="https://github.com/linagora/Argus-du-Libre" target="_blank" rel="noopener" class="fw-semibold">Argus-du-Libre</a>
+                                <span class="text-muted"> — {% trans "The website you are currently using" %}</span>
+                            </span>
                         </li>
-                        <li class="mb-2">
-                            <strong>
-                                <a href="https://github.com/linagora/qsos-lng" target="_blank" rel="noopener">
-                                    qsos-lng
-                                </a>
-                            </strong> - {% trans "The tool that fetches metrics and calculates scores" %}
+                        <li class="d-flex align-items-start">
+                            <i class="bi bi-arrow-right me-2 mt-1 text-primary"></i>
+                            <span>
+                                <a href="https://github.com/linagora/qsos-lng" target="_blank" rel="noopener" class="fw-semibold">qsos-lng</a>
+                                <span class="text-muted"> — {% trans "The tool that fetches metrics and calculates scores" %}</span>
+                            </span>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body">
-                    <h2 class="h4 mb-3">{% trans "Feedback Welcome" %}</h2>
-                    <p>
+            <div class="help-card">
+                <div class="help-card-icon">
+                    <i class="bi bi-chat-dots"></i>
+                </div>
+                <div>
+                    <h2 class="h5 fw-semibold mb-2">{% trans "Feedback Welcome" %}</h2>
+                    <p class="text-muted mb-3">
                         {% blocktrans %}
                         We welcome your feedback and contributions! If you encounter any issues or have suggestions,
                         please feel free to open an issue on our GitHub repositories.
                         {% endblocktrans %}
                     </p>
-                    <div class="d-flex gap-2">
-                        <a href="https://github.com/linagora/Argus-du-Libre/issues"
-                           class="btn btn-primary"
-                           target="_blank"
-                           rel="noopener">
-                            {% trans "Report an Issue" %}
-                        </a>
-                    </div>
+                    <a href="https://github.com/linagora/Argus-du-Libre/issues"
+                       class="btn btn-primary rounded-pill px-4"
+                       target="_blank"
+                       rel="noopener">
+                        {% trans "Report an Issue" %}
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.help-card {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.help-card-icon {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eff6ff;
+    color: var(--argus-blue);
+    border-radius: 12px;
+    font-size: 1.25rem;
+}
+</style>
 {% endblock %}

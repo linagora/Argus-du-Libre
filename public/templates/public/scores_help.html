@@ -6,43 +6,62 @@
 
 {% block content %}
 <div class="container py-5">
-    <h1 class="mb-4">{% trans "Scoring Methodology" %}</h1>
-    <p class="lead mb-5">{% trans "Learn how we evaluate open source projects across different criteria." %}</p>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-5 fw-bold mb-2">{% trans "Scoring Methodology" %}</h1>
+            <p class="text-muted mb-5">{% trans "Learn how we evaluate open source projects across different criteria." %}</p>
 
-    {% if categories_data %}
-    {% for category_data in categories_data %}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h2 class="h5 mb-0">{{ category_data.category_name }}</h2>
-        </div>
-        <div class="card-body">
-            {% for field_data in category_data.fields %}
-            <div class="{% if not forloop.last %}mb-4 pb-4 border-bottom{% endif %}">
-                <h3 class="h6 fw-bold">{{ field_data.field_name }}</h3>
-                {% if field_data.field_description %}
-                <div class="markdown-content text-muted">
-                    {{ field_data.field_description|markdown }}
+            {% if categories_data %}
+            {% for category_data in categories_data %}
+            <div class="scoring-category mb-4">
+                <div class="scoring-category-header">
+                    <h2 class="h5 fw-semibold mb-0">{{ category_data.category_name }}</h2>
                 </div>
-                {% else %}
-                <p class="text-muted fst-italic">{% trans "No description available." %}</p>
-                {% endif %}
+                <div class="scoring-category-body">
+                    {% for field_data in category_data.fields %}
+                    <div class="scoring-field {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                        <h3 class="h6 fw-semibold mb-1">{{ field_data.field_name }}</h3>
+                        {% if field_data.field_description %}
+                        <div class="markdown-content text-muted small">
+                            {{ field_data.field_description|markdown }}
+                        </div>
+                        {% else %}
+                        <p class="text-muted fst-italic small mb-0">{% trans "No description available." %}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             {% endfor %}
-        </div>
-    </div>
-    {% endfor %}
-    {% else %}
-    <div class="text-center text-muted py-5">
-        <p>{% trans "No scoring criteria available at the moment." %}</p>
-    </div>
-    {% endif %}
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <p>{% trans "No scoring criteria available at the moment." %}</p>
+            </div>
+            {% endif %}
 
-    <div class="mt-4">
-        <a href="{% url 'public:home' %}" class="btn btn-outline-secondary">{% trans "Back to Homepage" %}</a>
+            <div class="mt-4">
+                <a href="{% url 'public:home' %}" class="btn btn-outline-secondary rounded-pill px-4">{% trans "Back to Homepage" %}</a>
+            </div>
+        </div>
     </div>
 </div>
 
 <style>
+.scoring-category {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    overflow: hidden;
+}
+.scoring-category-header {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+.scoring-category-body {
+    padding: 1.25rem 1.5rem;
+}
 .markdown-content {
     line-height: 1.6;
 }
