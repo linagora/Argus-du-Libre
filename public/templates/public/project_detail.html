@@ -7,41 +7,40 @@
 {% block content %}
 <div class="container py-5">
     <!-- Project Header -->
-    <div class="text-center mb-5">
-        {% if software.logo_url %}
-        <div class="mb-3">
-            <img src="{{ software.logo_url }}"
-                 alt="{{ software.name }}"
-                 style="width: 150px; height: 150px; object-fit: contain;">
-        </div>
-        {% endif %}
-        <h1 class="display-4 mb-3">{{ software.name }}</h1>
+    <div class="row align-items-center mb-5">
+        <div class="col-md-5">
+            <h1 class="display-4 fw-bold mb-3">{{ software.name }}</h1>
 
-        <!-- Tags -->
-        {% if software.tags.all %}
-        <div class="mb-3">
-            {% for tag in software.tags.all %}
-            <a href="{% url 'public:tag_detail' slug=tag.slug %}" class="badge bg-secondary me-1 text-decoration-none">{{ tag.name }}</a>
-            {% endfor %}
-        </div>
-        {% endif %}
+            <!-- Tags -->
+            {% if software.tags.all %}
+            <div class="mb-3">
+                {% for tag in software.tags.all %}
+                <a href="{% url 'public:tag_detail' slug=tag.slug %}" class="badge bg-secondary me-1 text-decoration-none">{{ tag.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
 
-        <!-- Overall Score and Website Link -->
-        <div class="d-flex justify-content-center align-items-center gap-3">
             {% if software.website_url %}
             <a href="{{ software.website_url }}"
-               class="btn btn-primary"
+               class="btn btn-primary rounded-pill px-4"
                target="_blank"
                rel="noopener">
                 {% trans "Visit Website" %}
             </a>
             {% endif %}
+        </div>
+        <div class="col-md-3 text-center">
+            {% if software.logo_url %}
+            <img src="{{ software.logo_url }}"
+                 alt="{{ software.name }}"
+                 style="max-width: 180px; max-height: 180px; object-fit: contain;">
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-center">
             {% if overall_score %}
-            <div class="d-flex align-items-center">
-                <span class="me-2 fw-semibold">{% trans "Overall Score:" %}</span>
-                <span class="score-badge score-{{ overall_score|floatformat:0 }}" style="font-size: 1rem; padding: 0.5rem 1rem;">
-                    {{ overall_score|floatformat:1 }}
-                </span>
+            <div class="overall-score-label">{% trans "Overall Score" %}</div>
+            <div class="overall-score-circle score-{{ overall_score|floatformat:0 }}">
+                {{ overall_score|floatformat:1 }}
             </div>
             {% endif %}
         </div>
@@ -52,25 +51,28 @@
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
         {% for category_data in categories_with_scores %}
         <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ category_data.category_name }}</h5>
-                    {% if category_data.score %}
-                    <span class="score-badge score-{{ category_data.score|floatformat:0 }}">
-                        {{ category_data.score|floatformat:1 }}
-                    </span>
-                    {% endif %}
-                </div>
+            <div class="card h-100 category-card">
                 <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0 fw-semibold">
+                            {% if category_data.icon %}<i class="bi bi-{{ category_data.icon }} me-2 text-muted"></i>{% endif %}
+                            {{ category_data.category_name }}
+                        </h5>
+                        {% if category_data.score %}
+                        <span class="score-badge score-{{ category_data.score|floatformat:0 }}">
+                            {{ category_data.score|floatformat:1 }}
+                        </span>
+                        {% endif %}
+                    </div>
                     <ul class="list-unstyled mb-0">
                         {% for field_data in category_data.fields %}
-                        <li class="d-flex justify-content-between align-items-center mb-2">
+                        <li class="d-flex align-items-center mb-2 field-row">
                             <a href="{% url 'public:field_metrics' software_slug=software.slug field_slug=field_data.field.slug %}"
-                               class="text-decoration-none text-dark flex-grow-1 field-link">
+                               class="text-decoration-none text-dark field-label field-link">
                                 {{ field_data.field_name }}
                             </a>
                             {% if field_data.field_description %}
-                            <button type="button" class="btn btn-link btn-sm p-0 mx-2 text-muted field-info-btn"
+                            <button type="button" class="btn btn-link btn-sm p-0 mx-1 text-muted field-info-btn"
                                     data-bs-toggle="modal"
                                     data-bs-target="#fieldDescriptionModal"
                                     data-field-name="{{ field_data.field_name }}"
@@ -79,7 +81,10 @@
                             </button>
                             <template id="field-desc-{{ field_data.field.id }}">{{ field_data.field_description|markdown }}</template>
                             {% endif %}
-                            <span class="score-badge score-{{ field_data.score|floatformat:0 }}">
+                            <div class="field-bar-container">
+                                <div class="field-bar field-bar-{{ field_data.score|floatformat:0 }}" style="width: {% widthratio field_data.score 5 100 %}%;"></div>
+                            </div>
+                            <span class="score-badge-sm score-{{ field_data.score|floatformat:0 }}">
                                 {{ field_data.score|floatformat:1 }}
                             </span>
                         </li>
@@ -94,11 +99,9 @@
 
     <!-- Overview Section -->
     {% if overview_block %}
-    <div class="card shadow-sm mb-5">
-        <div class="card-header">
-            <h3 class="mb-0">{% trans "Overview" %}</h3>
-        </div>
+    <div class="card category-card mb-5">
         <div class="card-body">
+            <h3 class="fw-semibold mb-3">{% trans "Overview" %}</h3>
             <div class="markdown-content">
                 {{ overview_block.content|markdown }}
             </div>
@@ -108,11 +111,9 @@
 
     <!-- Tag Opinion Sections -->
     {% for section in tag_opinion_sections %}
-    <div class="card shadow-sm mb-5">
-        <div class="card-header">
-            <h3 class="mb-0">{% trans "Our opinion" %} — <a href="{% url 'public:tag_detail' slug=section.tag.slug %}" class="text-decoration-none">{{ section.tag.name }}</a></h3>
-        </div>
+    <div class="card category-card mb-5">
         <div class="card-body">
+            <h3 class="fw-semibold mb-3">{% trans "Our opinion" %} — <a href="{% url 'public:tag_detail' slug=section.tag.slug %}" class="text-decoration-none">{{ section.tag.name }}</a></h3>
             <div class="markdown-content mb-4">
                 {{ section.opinion_content|markdown }}
             </div>
@@ -167,62 +168,109 @@ document.getElementById('fieldDescriptionModal').addEventListener('show.bs.modal
     this.querySelector('#fieldDescriptionModalLabel').textContent = fieldName;
     this.querySelector('#fieldDescriptionModalBody').innerHTML = template ? template.innerHTML : '';
 });
-
-
 </script>
 
 <style>
+/* Overall score */
+.overall-score-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--argus-dark);
+    margin-bottom: 0.5rem;
+}
+.overall-score-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+
+/* Category cards */
+.category-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* Score badges */
 .score-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3rem;
     padding: 0.35rem 0.65rem;
     font-size: 0.875rem;
     font-weight: 600;
-    line-height: 1;
     color: #fff;
-    text-align: center;
+    border-radius: 0.5rem;
+}
+.score-badge-sm {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    border-radius: 0.5rem;
+    flex-shrink: 0;
+}
+
+/* Color scale */
+.score-1 { background-color: #dc3545; }
+.score-2 { background-color: #fd7e14; }
+.score-3 { background-color: #ffc107; }
+.score-4 { background-color: #a3d977; }
+.score-5 { background-color: #28a745; }
+
+/* Progress bars for field scores */
+.field-row {
+    gap: 0.5rem;
+}
+.field-label {
+    flex-shrink: 0;
+    width: 45%;
     white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.25rem;
-    min-width: 3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem;
 }
-
-/* Color scale from red (1) to green (5) */
-.score-1 {
-    background-color: #dc3545;  /* Red */
+.field-bar-container {
+    flex: 1;
+    height: 10px;
+    background: #e9ecef;
+    border-radius: 5px;
+    overflow: hidden;
+    min-width: 60px;
 }
-
-.score-2 {
-    background-color: #fd7e14;  /* Orange */
+.field-bar {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.3s ease;
 }
-
-.score-3 {
-    background-color: #ffc107;  /* Yellow */
-}
-
-.score-4 {
-    background-color: #a3d977;  /* Light green */
-}
-
-.score-5 {
-    background-color: #28a745;  /* Green */
-}
+.field-bar-1 { background-color: #dc3545; }
+.field-bar-2 { background-color: #fd7e14; }
+.field-bar-3 { background-color: #ffc107; }
+.field-bar-4 { background-color: #a3d977; }
+.field-bar-5 { background-color: #28a745; }
 
 .markdown-content {
     line-height: 1.6;
 }
 
-.card-header h5 {
-    color: #212529;
-}
-
 .field-link {
     transition: color 0.2s;
 }
-
 .field-link:hover {
     color: #0d6efd !important;
     text-decoration: underline !important;
 }
-
 </style>
 {% endblock %}

@@ -278,7 +278,7 @@ class ProjectDetailViewTestCase(LocaleTestCase):
             reverse("public:project_detail", kwargs={"slug": "test-software"})
         )
         self.assertContains(response, self.software.logo_url)
-        self.assertContains(response, "width: 150px; height: 150px")
+        self.assertContains(response, "max-width: 180px; max-height: 180px")
 
     def test_project_detail_shows_tags(self):
         """Test that tags are displayed."""
@@ -410,7 +410,7 @@ class ProjectDetailViewTestCase(LocaleTestCase):
             reverse("public:project_detail", kwargs={"slug": "test-software"})
         )
         # Should have score-3, score-4, and score-5 classes
-        self.assertContains(response, "score-badge score-3")
+        self.assertContains(response, "score-badge-sm score-3")
         self.assertContains(response, "score-badge score-4")
         self.assertContains(response, "score-badge score-5")
 
