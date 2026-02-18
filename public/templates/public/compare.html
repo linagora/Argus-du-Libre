@@ -24,109 +24,107 @@
         <button onclick="window.print()" class="btn btn-sm btn-outline-primary no-print">{% trans "Export PDF" %}</button>
     </div>
 
-    <!-- Comparison Table -->
-    <div class="table-responsive">
-        <table class="table table-bordered comparison-table">
-            <!-- Header Row with Project Names -->
-            <thead>
-                <tr>
-                    <th class="metric-column">{% trans "Metric" %}</th>
-                    {% for project in projects %}
-                    <th class="project-column text-center">
-                        <div class="project-header">
-                            {% if project.logo_url %}
-                            <img src="{{ project.logo_url }}"
-                                 alt="{{ project.name }}"
-                                 class="project-logo mb-1">
-                            {% endif %}
-                            <div class="project-name">
-                                <a href="{% url 'public:project_detail' slug=project.slug %}" class="text-decoration-none text-dark fw-bold">
-                                    {{ project.name }}
-                                </a>
-                            </div>
-                        </div>
-                    </th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Overall Score Row -->
-                <tr class="overall-row" data-row="overall">
-                    <td class="metric-name fw-bold">{% trans "Overall Score" %}</td>
-                    {% for proj_data in projects_data %}
-                    <td class="text-center" data-overall-proj="{{ forloop.counter0 }}">
-                        {% if proj_data.overall_score %}
-                        <span class="score-badge score-{{ proj_data.overall_score|floatformat:0 }}">
-                            {{ proj_data.overall_score|floatformat:1 }}
-                        </span>
-                        {% else %}
-                        <span class="text-muted">—</span>
-                        {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
+    <!-- Project Headers -->
+    <div class="compare-grid" style="--num-projects: {{ projects|length }}">
+        <div class="compare-header">
+            <div class="compare-metric-col header-label">{% trans "Metric" %}</div>
+            {% for project in projects %}
+            <div class="compare-project-col project-header-card">
+                {% if project.logo_url %}
+                <img src="{{ project.logo_url }}" alt="{{ project.name }}" class="project-logo">
+                {% else %}
+                <div class="project-logo-placeholder">{{ project.name|first }}</div>
+                {% endif %}
+                <a href="{% url 'public:project_detail' slug=project.slug %}" class="project-name-link">{{ project.name }}</a>
+            </div>
+            {% endfor %}
+        </div>
 
-                <!-- Category and Field Rows -->
-                {% for category_data in categories_comparison %}
-                <!-- Category Header Row -->
-                <tr class="category-row" data-category-idx="{{ forloop.counter0 }}">
-                    <td class="metric-name fw-bold category-name">{{ category_data.category_name }}</td>
-                    {% for score in category_data.category_scores %}
-                    <td class="text-center" data-cat-proj="{{ forloop.counter0 }}">
-                        {% if score %}
-                        <span class="score-badge score-{{ score|floatformat:0 }}">
-                            {{ score|floatformat:1 }}
-                        </span>
-                        {% else %}
-                        <span class="text-muted">—</span>
-                        {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
+        <!-- Category Cards -->
+        {% for category_data in categories_comparison %}
+        <div class="compare-category-card">
+            <!-- Category Header -->
+            <div class="compare-row category-header-row" data-category-idx="{{ forloop.counter0 }}">
+                <div class="compare-metric-col category-title">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                    {{ category_data.category_name }}
+                </div>
+                {% for score in category_data.category_scores %}
+                <div class="compare-project-col" data-cat-proj="{{ forloop.counter0 }}">
+                    {% if score %}
+                    <div class="score-bar-container">
+                        <div class="score-bar score-{{ score|floatformat:0 }}" style="width: {{ score|floatformat:0 }}0%"></div>
+                        <span class="score-bar-label score-{{ score|floatformat:0 }}">{{ score|floatformat:1 }}</span>
+                    </div>
+                    <span class="score-badge-print score-badge score-{{ score|floatformat:0 }}">{{ score|floatformat:1 }}</span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
 
-                <!-- Field Rows -->
-                {% for field_data in category_data.fields %}
-                <tr class="field-row" data-category-idx="{{ forloop.parentloop.counter0 }}" data-field-idx="{{ forloop.counter0 }}">
-                    <td class="metric-name field-name">
-                        <div class="field-name-inner">
-                            <span class="field-label">
-                                {{ field_data.field_name }}
-                                {% if field_data.field_description %}
-                                <button type="button" class="btn btn-link btn-sm p-0 ms-1 text-muted field-info-btn"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#fieldDescriptionModal"
-                                        data-field-name="{{ field_data.field_name }}"
-                                        data-field-id="{{ field_data.field_id }}">
-                                    <i class="bi bi-info-circle"></i>
-                                </button>
-                                <template id="field-desc-{{ field_data.field_id }}">{{ field_data.field_description|markdown }}</template>
-                                {% endif %}
-                            </span>
-                            <input type="number" class="weight-input" min="1" max="10" step="1"
-                                   data-category-idx="{{ forloop.parentloop.counter0 }}"
-                                   data-field-idx="{{ forloop.counter0 }}">
-                        </div>
-                    </td>
-                    {% for score in field_data.scores %}
-                    <td class="text-center">
-                        {% if score %}
-                        <span class="score-badge score-{{ score|floatformat:0 }}">
-                            {{ score|floatformat:1 }}
-                        </span>
-                        {% else %}
-                        <span class="text-muted">—</span>
+            <!-- Field Rows -->
+            {% for field_data in category_data.fields %}
+            <div class="compare-row field-row" data-category-idx="{{ forloop.parentloop.counter0 }}" data-field-idx="{{ forloop.counter0 }}">
+                <div class="compare-metric-col field-name-cell">
+                    <span class="field-label">
+                        {{ field_data.field_name }}
+                        {% if field_data.field_description %}
+                        <button type="button" class="btn btn-link btn-sm p-0 ms-1 text-muted field-info-btn"
+                                data-bs-toggle="modal"
+                                data-bs-target="#fieldDescriptionModal"
+                                data-field-name="{{ field_data.field_name }}"
+                                data-field-id="{{ field_data.field_id }}">
+                            <i class="bi bi-info-circle"></i>
+                        </button>
+                        <template id="field-desc-{{ field_data.field_id }}">{{ field_data.field_description|markdown }}</template>
                         {% endif %}
-                    </td>
-                    {% endfor %}
-                </tr>
+                    </span>
+                    <input type="number" class="weight-input" min="1" max="10" step="1"
+                           data-category-idx="{{ forloop.parentloop.counter0 }}"
+                           data-field-idx="{{ forloop.counter0 }}">
+                </div>
+                {% for score in field_data.scores %}
+                <div class="compare-project-col">
+                    {% if score %}
+                    <div class="score-bar-container">
+                        <div class="score-bar score-{{ score|floatformat:0 }}" style="width: {{ score|floatformat:0 }}0%"></div>
+                        <span class="score-bar-label score-{{ score|floatformat:0 }}">{{ score|floatformat:1 }}</span>
+                    </div>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
                 {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Overall Score Row (standalone) -->
+    <div class="compare-grid mt-3" style="--num-projects: {{ projects|length }}">
+        <div class="compare-overall-card">
+            <div class="compare-row overall-row" data-row="overall">
+                <div class="compare-metric-col overall-label fw-bold">{% trans "Overall Score" %}</div>
+                {% for proj_data in projects_data %}
+                <div class="compare-project-col" data-overall-proj="{{ forloop.counter0 }}">
+                    {% if proj_data.overall_score %}
+                    <span class="score-badge score-{{ proj_data.overall_score|floatformat:0 }}">
+                        {{ proj_data.overall_score|floatformat:1 }}
+                    </span>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+        </div>
     </div>
 
     <!-- Legend -->
-    <div class="text-center mt-2">
+    <div class="text-center mt-3">
         <div class="d-inline-flex align-items-center gap-2 flex-wrap justify-content-center">
             <small class="text-muted">{% trans "Score Legend:" %}</small>
             <span class="score-badge score-1 score-badge-sm">1</span>
@@ -168,80 +166,133 @@
 </div>
 
 <style>
-.comparison-table {
+/* Grid layout */
+.compare-grid {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.2fr) repeat(var(--num-projects), 1fr);
+    gap: 0;
+}
+
+.compare-header {
+    display: contents;
+}
+
+.compare-row {
+    display: contents;
+}
+
+.compare-metric-col,
+.compare-project-col {
+    display: flex;
+    align-items: center;
+    padding: 0.45rem 0.75rem;
+    min-height: 2.2rem;
+}
+
+.compare-project-col {
+    justify-content: center;
+}
+
+/* Project Header Cards */
+.header-label {
+    font-weight: 600;
+    color: var(--argus-muted);
     font-size: 0.85rem;
-    min-width: 800px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding-bottom: 0.75rem;
 }
 
-.comparison-table th,
-.comparison-table td {
-    vertical-align: middle;
-    padding: 0.35rem 0.75rem;
-}
-
-.metric-column {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    min-width: 200px;
-    position: sticky;
-    left: 0;
-    z-index: 10;
-}
-
-.project-column {
-    min-width: 150px;
-    max-width: 200px;
-}
-
-.project-header {
-    display: flex;
+.project-header-card {
     flex-direction: column;
-    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem 0.5rem;
+    margin: 0 0.35rem;
+    background: #f0f4ff;
+    border-radius: 0.75rem 0.75rem 0 0;
+    border: 1px solid #dde4f0;
+    border-bottom: none;
 }
 
-.project-logo {
-    width: 40px;
-    height: 40px;
+.project-header-card .project-logo {
+    width: 48px;
+    height: 48px;
     object-fit: contain;
+    margin-bottom: 0.4rem;
 }
 
-.project-name {
-    font-size: 1rem;
-    word-break: break-word;
+.project-header-card .project-logo-placeholder {
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    font-size: 1.4rem;
+    margin: 0 auto 0.4rem auto;
 }
 
-.metric-name {
-    background-color: #f8f9fa;
-    position: sticky;
-    left: 0;
-    z-index: 5;
-}
-
-.overall-row {
-    background-color: #e9ecef;
+.project-name-link {
     font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--argus-dark);
+    text-decoration: none;
 }
 
-.category-row {
-    background-color: #f1f3f5;
+.project-name-link:hover {
+    color: var(--argus-blue);
 }
 
-.category-name {
-    padding-left: 1rem;
+/* Category Cards */
+.compare-category-card {
+    display: contents;
 }
 
-.field-row {
-    background-color: #ffffff;
+.compare-category-card .category-header-row .compare-metric-col,
+.compare-category-card .category-header-row .compare-project-col {
+    background: #f1f5f9;
+    border-top: 2px solid #e2e8f0;
+    margin-top: 0.5rem;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
 }
 
-.field-name {
-    padding-left: 2rem;
-    font-size: 0.875rem;
+.compare-category-card .category-header-row .compare-project-col {
+    margin-left: 0.35rem;
+    margin-right: 0.35rem;
 }
 
-.field-name-inner {
-    display: flex;
-    align-items: center;
+.compare-category-card .field-row .compare-project-col {
+    margin-left: 0.35rem;
+    margin-right: 0.35rem;
+    background: #fafbfc;
+}
+
+.compare-category-card .field-row .compare-metric-col {
+    background: #fff;
+}
+
+.compare-category-card .field-row:last-child .compare-project-col,
+.compare-category-card .field-row:last-child .compare-metric-col {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.55rem;
+}
+
+.category-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--argus-dark);
+    gap: 0.4rem;
+}
+
+.category-title i {
+    color: var(--argus-blue);
+    font-size: 0.85rem;
+}
+
+/* Field names */
+.field-name-cell {
+    padding-left: 1.5rem;
+    font-size: 0.85rem;
+    color: #475569;
     gap: 0.5rem;
 }
 
@@ -250,26 +301,55 @@
 }
 
 .weight-input {
-    width: 3rem;
-    padding: 0.1rem 0.25rem;
+    width: 2.8rem;
+    padding: 0.1rem 0.2rem;
     font-size: 0.75rem;
     text-align: center;
-    border: 1px solid #ced4da;
-    border-radius: 0.2rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.25rem;
     flex-shrink: 0;
+    background: #fff;
+    color: #475569;
 }
 
+/* Score Bars */
+.score-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    max-width: 140px;
+}
+
+.score-bar {
+    height: 0.65rem;
+    border-radius: 0.35rem;
+    transition: width 0.3s ease;
+    min-width: 4px;
+}
+
+.score-bar-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 1.8rem;
+    text-align: right;
+    color: #fff;
+    padding: 0.1rem 0.3rem;
+    border-radius: 0.2rem;
+    line-height: 1.2;
+}
+
+/* Score badges (for overall) */
 .score-badge {
     display: inline-block;
-    padding: 0.2rem 0.5rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 700;
     line-height: 1;
     color: #fff;
     text-align: center;
     white-space: nowrap;
-    vertical-align: baseline;
-    border-radius: 0.2rem;
+    border-radius: 0.3rem;
     min-width: 2.5rem;
 }
 
@@ -279,59 +359,70 @@
     min-width: 1.8rem;
 }
 
-/* Color scale from red (1) to green (5) */
-.score-1 {
-    background-color: #dc3545;  /* Red */
+/* Print-only badge for category rows (hidden on screen) */
+.score-badge-print {
+    display: none;
 }
 
-.score-2 {
-    background-color: #fd7e14;  /* Orange */
+/* Color scale */
+.score-1 { background-color: #dc3545; }
+.score-2 { background-color: #fd7e14; }
+.score-3 { background-color: #ffc107; }
+.score-4 { background-color: #a3d977; }
+.score-5 { background-color: #28a745; }
+
+/* Overall Score Card */
+.compare-overall-card {
+    display: contents;
 }
 
-.score-3 {
-    background-color: #ffc107;  /* Yellow */
+.overall-row .compare-metric-col,
+.overall-row .compare-project-col {
+    background: #f0f4ff;
+    border: 1px solid #dde4f0;
+    border-left: none;
+    padding: 0.6rem 0.75rem;
 }
 
-.score-4 {
-    background-color: #a3d977;  /* Light green */
+.overall-row .compare-metric-col {
+    border-left: 1px solid #dde4f0;
+    border-radius: 0.5rem 0 0 0.5rem;
 }
 
-.score-5 {
-    background-color: #28a745;  /* Green */
+.overall-row .compare-project-col:last-child {
+    border-radius: 0 0.5rem 0.5rem 0;
 }
 
-/* Responsive adjustments */
+.overall-label {
+    font-size: 0.95rem;
+    color: var(--argus-dark);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .comparison-table {
-        font-size: 0.75rem;
+    .compare-grid {
+        grid-template-columns: minmax(160px, 1fr) repeat(var(--num-projects), 1fr);
+        font-size: 0.8rem;
+        overflow-x: auto;
     }
 
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.25rem 0.5rem;
+    .project-header-card .project-logo {
+        width: 36px;
+        height: 36px;
     }
 
-    .project-logo {
-        width: 30px;
-        height: 30px;
-    }
-
-    .project-name {
+    .project-name-link {
         font-size: 0.8rem;
     }
 
-    .metric-column {
-        min-width: 150px;
-    }
-
-    .project-column {
-        min-width: 120px;
+    .score-bar-container {
+        max-width: 100px;
     }
 }
 
-/* Print styles */
+/* Print styles — compact single-page layout */
 @media print {
-    header, .no-print {
+    header, footer, .no-print {
         display: none !important;
     }
 
@@ -341,45 +432,190 @@
     }
 
     .py-5 {
-        padding-top: 0.5rem !important;
+        padding-top: 0.25rem !important;
         padding-bottom: 0 !important;
     }
 
     .mb-3 {
-        margin-bottom: 0.25rem !important;
+        margin-bottom: 0.15rem !important;
     }
 
-    .comparison-table {
-        min-width: 0;
+    .mt-3 {
+        margin-top: 0.25rem !important;
+    }
+
+    /* Compact title */
+    .h2 {
+        font-size: 1.15rem !important;
+        margin-bottom: 0.1rem !important;
+    }
+
+    .text-muted.small {
+        font-size: 0.75rem !important;
+    }
+
+    /* Disable grid — use block/flex flow */
+    .compare-grid {
+        display: block !important;
+    }
+
+    .compare-header,
+    .compare-category-card,
+    .compare-overall-card {
+        display: block !important;
+    }
+
+    .compare-row {
+        display: flex !important;
+        align-items: center;
+    }
+
+    .compare-metric-col {
+        flex: 0 0 160px;
+        min-width: 160px;
+    }
+
+    .compare-project-col {
+        flex: 1 1 0;
+    }
+
+    /* Project headers row */
+    .compare-header {
+        display: flex !important;
+    }
+
+    .project-header-card {
+        border: 1px solid #ccc;
+        padding: 0.25rem 0.2rem;
+        margin: 0 0.2rem;
+    }
+
+    .project-header-card .project-logo {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 0.15rem;
+    }
+
+    .project-header-card .project-logo-placeholder {
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+        font-size: 0.9rem;
+        margin-bottom: 0.15rem;
+    }
+
+    .project-name-link {
         font-size: 0.75rem;
     }
 
-    .comparison-table th,
-    .comparison-table td {
-        padding: 0.2rem 0.5rem;
+    .header-label {
+        font-size: 0.75rem;
+        padding-bottom: 0.25rem;
     }
 
-    .project-logo {
-        width: 28px;
-        height: 28px;
+    /* Tight row spacing */
+    .compare-metric-col,
+    .compare-project-col {
+        padding: 0.15rem 0.35rem;
+        min-height: 0;
+    }
+
+    /* Category headers — use badges instead of bars */
+    .category-title {
+        font-size: 0.8rem;
+    }
+
+    .category-title i {
+        font-size: 0.7rem;
+    }
+
+    .compare-category-card .category-header-row .compare-metric-col,
+    .compare-category-card .category-header-row .compare-project-col {
+        margin-top: 0.15rem;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+
+    .compare-category-card .category-header-row .compare-project-col,
+    .compare-category-card .field-row .compare-project-col {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    .category-header-row .score-bar-container {
+        display: none !important;
+    }
+
+    .category-header-row .score-badge-print {
+        display: inline-block !important;
+    }
+
+    .compare-category-card .field-row:last-child .compare-project-col,
+    .compare-category-card .field-row:last-child .compare-metric-col {
+        padding-bottom: 0.15rem;
+    }
+
+    /* Field names */
+    .field-name-cell {
+        font-size: 0.75rem;
+        padding-left: 1rem;
+    }
+
+    /* Hide info buttons in print */
+    .field-info-btn {
+        display: none !important;
+    }
+
+    /* Score bars */
+    .score-bar {
+        height: 0.5rem;
+    }
+
+    .score-bar-container {
+        max-width: 110px;
+        gap: 0.25rem;
+    }
+
+    .score-bar-label {
+        font-size: 0.65rem;
+        min-width: 1.6rem;
+        padding: 0.05rem 0.2rem;
+    }
+
+    /* Overall row */
+    .overall-label {
+        font-size: 0.8rem !important;
+    }
+
+    .overall-row .compare-metric-col,
+    .overall-row .compare-project-col {
+        padding: 0.3rem 0.35rem;
     }
 
     .score-badge {
-        padding: 0.1rem 0.35rem;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        padding: 0.15rem 0.4rem;
         min-width: 2rem;
+    }
+
+    /* Legend */
+    .score-badge-sm {
+        font-size: 0.6rem;
+        padding: 0.1rem 0.3rem;
+        min-width: 1.5rem;
+    }
+
+    /* Color preservation */
+    .score-badge, .score-bar, .score-bar-label, .score-badge-print {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
 
-    .metric-column, .metric-name {
-        position: static;
-    }
-
+    /* Weight inputs — inline, no border */
     .weight-input {
         border: none;
         background: transparent;
-        width: 2rem;
+        width: 1.5rem;
         padding: 0;
         font-size: 0.65rem;
         -moz-appearance: textfield;
@@ -427,6 +663,24 @@
         return 'score-' + Math.min(5, Math.max(1, Math.round(score)));
     }
 
+    function updateBar(cell, score, includePrintBadge) {
+        if (score === null) {
+            cell.innerHTML = '<span class="text-muted">\u2014</span>';
+            return;
+        }
+        var cls = getScoreClass(score);
+        var pct = Math.round(score) + '0%';
+        var html = '<div class="score-bar-container">' +
+            '<div class="score-bar ' + cls + '" style="width: ' + pct + '"></div>' +
+            '<span class="score-bar-label ' + cls + '">' + score.toFixed(1) + '</span>' +
+            '</div>';
+        if (includePrintBadge) {
+            html += '<span class="score-badge-print score-badge ' + cls + '">' +
+                score.toFixed(1) + '</span>';
+        }
+        cell.innerHTML = html;
+    }
+
     function updateBadge(cell, score) {
         if (score === null) {
             cell.innerHTML = '<span class="text-muted">\u2014</span>';
@@ -465,12 +719,12 @@
             categoryScores.push(projScores);
 
             // Update category row cells
-            var catRow = document.querySelector('tr[data-category-idx="' + ci + '"]:not(.field-row)');
+            var catRow = document.querySelector('.category-header-row[data-category-idx="' + ci + '"]');
             if (catRow) {
-                var cells = catRow.querySelectorAll('td[data-cat-proj]');
+                var cells = catRow.querySelectorAll('[data-cat-proj]');
                 cells.forEach(function(cell) {
                     var pi = parseInt(cell.getAttribute('data-cat-proj'), 10);
-                    updateBadge(cell, projScores[pi]);
+                    updateBar(cell, projScores[pi], true);
                 });
             }
         });
@@ -489,7 +743,7 @@
             });
 
             var overall = totalWeight > 0 ? totalWeighted / totalWeight : null;
-            var cell = document.querySelector('td[data-overall-proj="' + pi + '"]');
+            var cell = document.querySelector('[data-overall-proj="' + pi + '"]');
             if (cell) updateBadge(cell, overall);
         }
     }
