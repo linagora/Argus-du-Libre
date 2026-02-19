@@ -54,8 +54,8 @@ class Command(BaseCommand):
             for tag_name in tag_names:
                 if not dry_run:
                     tag, created = Tag.objects.get_or_create(
-                        name=tag_name,
-                        defaults={"slug": slugify(tag_name)},
+                        slug=slugify(tag_name),
+                        defaults={"name": tag_name},
                     )
                     tags.append(tag)
                     if created:
