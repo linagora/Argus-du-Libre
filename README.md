@@ -144,6 +144,20 @@ The application will be available at:
 
 ## Development
 
+### Importing data from CSV
+
+To import software tags from a CSV file:
+
+```bash
+# Dry run to preview changes
+uv run python manage.py import_tags_csv tags.csv --dry-run
+
+# Import for real
+uv run python manage.py import_tags_csv tags.csv
+```
+
+The CSV file should have columns: `Software, Tag 1, Tag 2, Tag 3, ...`
+
 ### Running tests
 
 ```bash
