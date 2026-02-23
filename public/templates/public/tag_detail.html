@@ -30,6 +30,11 @@
         <div class="col compare-card-wrapper" style="position: relative;">
             <label class="compare-checkbox-label" title="{% trans "Select to compare" %}">
                 <input type="checkbox" class="compare-checkbox" value="{{ item.project.slug }}">
+                <span class="compare-checkbox-custom">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                </span>
             </label>
             {% include "public/_project_card.html" with project=item.project score=item.score overview=item.overview %}
         </div>
@@ -87,25 +92,68 @@
 
 .compare-checkbox-label {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 0.75rem;
+    right: 0.75rem;
     z-index: 2;
     cursor: pointer;
-    background: white;
-    border-radius: 0.25rem;
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .compare-checkbox {
-    width: 1rem;
-    height: 1rem;
-    cursor: pointer;
-    margin: 0;
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.compare-checkbox-custom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.compare-checkbox-custom svg {
+    width: 14px;
+    height: 14px;
+    color: white;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.15s ease;
+}
+
+.compare-checkbox-label:hover .compare-checkbox-custom {
+    border-color: var(--argus-red, #C71F45);
+}
+
+.compare-checkbox:checked + .compare-checkbox-custom {
+    background: var(--argus-red, #C71F45);
+    border-color: var(--argus-red, #C71F45);
+}
+
+.compare-checkbox:checked + .compare-checkbox-custom svg {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.compare-checkbox:focus-visible + .compare-checkbox-custom {
+    outline: 2px solid var(--argus-red, #C71F45);
+    outline-offset: 2px;
+}
+
+.compare-checkbox:disabled + .compare-checkbox-custom {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.compare-checkbox:disabled:checked + .compare-checkbox-custom {
+    background: var(--argus-muted, #64748b);
+    border-color: var(--argus-muted, #64748b);
 }
 
 .compare-bar {
