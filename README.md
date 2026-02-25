@@ -149,6 +149,23 @@ The application will be available at:
 To import software tags from a CSV file:
 
 ```bash
+uv run python manage.py import_tags_csv tags.csv --dry-run
+
+# Import for real
+uv run python manage.py import_tags_csv tags.csv
+```
+
+The CSV file should have columns: `Software, Tag 1, Tag 2, Tag 3, ...`
+
+To import software analysis results (scores) from a CSV file:
+
+```bash
+uv run python manage.py import_metrics_csv metrics.csv
+```
+
+The CSV file should have the `software` slug in the first column, followed by columns for each field slug (e.g., `activity`, `popularity`, `maturity`). Scores should be between 1.00 and 5.00, or empty to skip. Software entries that do not exist will be skipped. Fields are assumed to exist.
+
+```bash
 # Dry run to preview changes
 uv run python manage.py import_tags_csv tags.csv --dry-run
 
@@ -157,6 +174,16 @@ uv run python manage.py import_tags_csv tags.csv
 ```
 
 The CSV file should have columns: `Software, Tag 1, Tag 2, Tag 3, ...`
+
+### Exporting metrics to CSV
+
+To export published software with their field scores:
+
+```bash
+uv run python manage.py export_metrics_csv > metrics.csv
+```
+
+The output CSV has columns: `software` (slug), followed by one column per field slug (e.g., `activity`, `popularity`, `maturity`). Values are scores from 1.00 to 5.00, empty if no published score exists.
 
 ### Running tests
 

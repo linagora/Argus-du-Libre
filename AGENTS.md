@@ -266,3 +266,4 @@ All configuration uses environment variables loaded from `.env` file:
 - **Import ordering:** Enforced by isort via ruff
 - **Django-specific rules:** Enabled (DJ ruleset)
 - **Auto-formatting:** Handled by Claude Code hook
+- **Documentation:** When a command is added or changed, update the README accordingly
