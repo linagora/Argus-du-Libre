@@ -104,24 +104,41 @@
             color: #64748b;
             font-size: 1.2rem;
         }
-        .score-badge-blue {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 36px;
-            height: 36px;
-            background: #C71F45;
-            color: white;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            padding: 0 8px;
-        }
         .read-more {
-            color: #C71F45;
+            color: var(--argus-red);
             font-size: 0.85rem;
             font-weight: 500;
         }
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 3rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #fff;
+            border-radius: 0.5rem;
+        }
+        .score-badge-sm {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 2.5rem;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #fff;
+            border-radius: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Color scale */
+        .score-1 { background-color: #dc3545; }
+        .score-2 { background-color: #fd7e14; }
+        .score-3 { background-color: #ffc107; }
+        .score-4 { background-color: #a3d977; }
+        .score-5 { background-color: #28a745; }
         @media print {
             .footer, header { display: none; }
         }
