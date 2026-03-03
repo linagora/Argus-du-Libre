@@ -12,17 +12,9 @@
         </div>
         <h1 class="display-5 fw-bold mb-3">{% trans "Discover quality open source software" %}</h1>
         <p class="lead text-muted mb-4">{% trans "Expert evaluations and community health scores for professional IT decision-makers" %}</p>
-        <form method="get" action="{% url 'public:search' %}" class="mx-auto" style="max-width: 540px;">
-            <div class="input-group input-group-lg search-bar">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text"
-                       name="q"
-                       class="form-control border-start-0"
-                       placeholder="{% trans 'Search projects, tags, or keywords...' %}"
-                       aria-label="{% trans 'Search projects' %}"
-                       required>
+            <div class="mx-auto" style="max-width: 540px;">
+                {% include "public/_search_form.html" %}
             </div>
-        </form>
     </div>
 </section>
 
@@ -81,21 +73,6 @@
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.05em;
-}
-.search-bar .form-control,
-.search-bar .input-group-text {
-    border-color: #e2e8f0;
-}
-.search-bar .input-group-text {
-    border-radius: 12px 0 0 12px;
-}
-.search-bar .form-control {
-    border-radius: 0 12px 12px 0;
-    box-shadow: none;
-}
-.search-bar .form-control:focus {
-    border-color: #e87a93;
-    box-shadow: 0 0 0 3px rgba(199, 31, 69, 0.1);
 }
 .letter-heading {
     font-size: 2rem;
