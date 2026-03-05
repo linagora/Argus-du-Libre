@@ -318,5 +318,185 @@
     "name": "Versions signées",
     "description": "Nous utilisons [Scorecard](https://scorecard.dev/)\n\nCette vérification tente de déterminer si le projet signe cryptographiquement ses artefacts de publication. Elle est actuellement limitée aux dépôts hébergés sur GitHub et ne prend pas en charge les autres plateformes d'hébergement de code source (c'est-à-dire les forges).\n\nLes publications signées attestent de la provenance de l'artefact.\n\nCette vérification recherche les noms de fichiers suivants dans les cinq derniers assets de publication du projet : `*.minisig`, `*.asc` (pgp), `*.sig`, `*.sign`, `*.sigstore`, `*.sigstore.json`, `*.intoto.jsonl`.\n\nSi une signature est trouvée dans les assets de chaque publication, un score de 8 est attribué. Si un fichier de provenance SLSA est trouvé dans les assets de chaque publication (*.intoto.jsonl), le score maximal de 10 est attribué.\n\nCette vérification examine les 30 publications les plus récentes associées à un artefact. Elle ignore les publications contenant uniquement le code source qui sont créées automatiquement par GitHub."
   }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 39,
+  "fields": {
+    "field": 20,
+    "locale": "fr",
+    "name": "Leadership et gouvernance",
+    "description": "Le score de leadership et gouvernance évalue la clarté et l'ouverture du processus décisionnel du projet. Il s'appuie sur des signaux observables : existence de documents de gouvernance, diversité des contributeurs ayant des droits de décision, transparence des processus d'acceptation ou de rejet des contributions.\n\nUn projet sans leadership identifiable obtient 1 ; un projet doté d'une gouvernance communautaire formalisée, transparente et démocratique obtient 5. Les niveaux intermédiaires reflètent une progression du leadership informel vers des structures ouvertes avec rôles définis.\n\nLa gouvernance conditionne la pérennité d'un projet open source : un leadership opaque ou centralisé crée un point de défaillance unique et peut décourager les contributions extérieures. À l'inverse, une gouvernance ouverte rassure les adoptants sur la continuité du projet et donne aux contributeurs une visibilité sur les règles du jeu."
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 40,
+  "fields": {
+    "field": 20,
+    "locale": "en",
+    "name": "Leadership and governance",
+    "description": "The leadership and governance score assesses the clarity and openness of a project's decision-making process. It is based on observable signals: existence of governance documents, diversity of contributors with decision-making rights, and transparency of contribution acceptance or rejection processes.\n\nA project with no identifiable leadership scores 1; a project with a formalized, transparent, and democratic community governance scores 5. Intermediate levels reflect a progression from informal leadership toward open structures with defined roles.\n\nGovernance determines the sustainability of an open-source project: opaque or centralized leadership creates a single point of failure and can discourage external contributions. Conversely, open governance reassures adopters about the project's continuity and gives contributors visibility into the rules of engagement."
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 41,
+  "fields": {
+    "field": 21,
+    "locale": "fr",
+    "name": "Dette technique",
+    "description": "Le score de dette technique reflète la santé structurelle du code de production : complexité excessive, couplage fort, violations des conventions de codage, etc.\n\nUn score de 5 correspond à un code propre et bien structuré ; un score de 1 indique une dette importante susceptible de freiner l'évolution du projet. Les valeurs intermédiaires traduisent des niveaux croissants de dégradation structurelle.\n\nContrairement à la taille ou à la couverture de tests, la dette technique est un indicateur qualitatif : elle ne dit pas combien de code existe, mais dans quel état il se trouve. Elle conditionne directement la facilité à corriger un bug, à ajouter une fonctionnalité ou à reprendre un projet après une longue période d'inactivité."
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 42,
+  "fields": {
+    "field": 21,
+    "locale": "en",
+    "name": "Technical debt",
+    "description": "The technical debt score reflects the structural health of the production code: excessive complexity, tight coupling, coding convention violations, etc.\n\nA score of 5 corresponds to clean, well-structured code; a score of 1 indicates significant debt that is likely to slow the project's evolution. Intermediate values reflect increasing levels of structural degradation.\n\nUnlike size or test coverage, technical debt is a qualitative indicator: it does not say how much code exists, but in what state it is. It directly determines how easy it is to fix a bug, add a feature, or resume a project after a long period of inactivity."
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 43,
+  "fields": {
+    "field": 22,
+    "locale": "fr",
+    "name": "Degré d'ouverture",
+    "description": "Évalue à quel point le logiciel est réellement open source.\n\n- 1 : Open washing, majorité des fonctions critiques sous licence\n- 2 : Principales fonctions accessibles uniquement par licence\n- 3 : Open-core avec fonctions importantes sous licence\n- 4 : Open source avec modules payants optionnels\n- 5 : Entièrement libre sans coûts cachés"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 44,
+  "fields": {
+    "field": 22,
+    "locale": "en",
+    "name": "Degree of openness",
+    "description": "Evaluates how genuinely open source the software is.\n\n- 1: Open washing — majority of critical features under proprietary license\n- 2: Main features accessible only through a paid license\n- 3: Open-core with significant features under license\n- 4: Open source with optional paid modules\n- 5: Fully free with no hidden costs"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 45,
+  "fields": {
+    "field": 23,
+    "locale": "fr",
+    "name": "Coût du support",
+    "description": "Évalue le coût du support technique nécessaire.\n\n- 1 : Support très coûteux ou inexistant\n- 2 : Coût élevé sans garantie de service\n- 3 : Coût modéré, qualité moyenne\n- 4 : Bon rapport coût/qualité\n- 5 : Coût faible, support fiable ou communauté active"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 46,
+  "fields": {
+    "field": 23,
+    "locale": "en",
+    "name": "Support cost",
+    "description": "Evaluates the cost of required technical support.\n\n- 1: Very expensive or non-existent support\n- 2: High cost with no service guarantee\n- 3: Moderate cost, average quality\n- 4: Good cost-to-quality ratio\n- 5: Low cost, reliable support or active community"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 47,
+  "fields": {
+    "field": 24,
+    "locale": "fr",
+    "name": "Coût de déploiement",
+    "description": "Évalue les ressources nécessaires pour installer et intégrer le logiciel.\n\n- 1 : Déploiement très complexe, non automatisé\n- 2 : Installation difficile, documentation limitée\n- 3 : Installation faisable avec support ou effort modéré\n- 4 : Installation guidée, scripts fournis\n- 5 : Déploiement trivial (conteneurisé, automatisé)"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 48,
+  "fields": {
+    "field": 24,
+    "locale": "en",
+    "name": "Deployment cost",
+    "description": "Evaluates the resources required to install and integrate the software.\n\n- 1: Very complex, non-automated deployment\n- 2: Difficult installation, limited documentation\n- 3: Feasible installation with support or moderate effort\n- 4: Guided installation with provided scripts\n- 5: Trivial deployment (containerized, automated)"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 49,
+  "fields": {
+    "field": 25,
+    "locale": "fr",
+    "name": "Coût de formation",
+    "description": "Évalue la facilité pour les utilisateurs à adopter le logiciel.\n\n- 1 : Courbe d'apprentissage très élevée, documentation absente\n- 2 : Formation longue et coûteuse\n- 3 : Formation raisonnable avec documentation correcte\n- 4 : Documentation didactique, communauté d'entraide\n- 5 : Facilement compréhensible, prise en main intuitive"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 50,
+  "fields": {
+    "field": 25,
+    "locale": "en",
+    "name": "Training cost",
+    "description": "Evaluates how easy it is for users to adopt the software.\n\n- 1: Very steep learning curve, no documentation\n- 2: Long and costly training\n- 3: Reasonable training with adequate documentation\n- 4: Tutorial-style documentation, supportive community\n- 5: Easily understandable, intuitive to get started"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 51,
+  "fields": {
+    "field": 26,
+    "locale": "fr",
+    "name": "Réputation",
+    "description": "Évalue l'adoption réelle et la reconnaissance dans le secteur, ainsi que la qualité perçue par les utilisateurs.\n\n- 1 : Très peu connu ou des retours très négatifs\n- 2 : Connu dans un cercle restreint, ou retours mitigés\n- 3 : Références partielles, adoption limitée\n- 4 : Références solides dans plusieurs structures, retours positifs\n- 5 : Référence reconnue dans son domaine, recommendations fréquentes"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 52,
+  "fields": {
+    "field": 26,
+    "locale": "en",
+    "name": "Reputation",
+    "description": "Evaluates real-world adoption and industry recognition, as well as the quality perceived by users.\n\n- 1: Very little known or very negative feedback\n- 2: Known in a limited circle, or mixed reviews\n- 3: Partial references, limited adoption\n- 4: Solid references across multiple organizations, positive feedback\n- 5: Recognized reference in its domain, frequent recommendations"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 53,
+  "fields": {
+    "field": 27,
+    "locale": "fr",
+    "name": "Disponibilité et stabilité",
+    "description": "Évalue la fiabilité en fonctionnement réel.\n\n- 1 : Plantages fréquents, indisponibilités régulières\n- 2 : Uptime inférieur à 95%, problèmes ponctuels graves\n- 3 : Uptime entre 95–98%, stable mais fragile sous charge\n- 4 : Uptime supérieur à 98%, robuste dans la durée\n- 5 : Uptime supérieur 99.9%, haute disponibilité prouvée"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 54,
+  "fields": {
+    "field": 27,
+    "locale": "en",
+    "name": "Availability and stability",
+    "description": "Evaluates reliability in real-world operation.\n\n- 1: Frequent crashes, regular downtime\n- 2: Uptime below 95%, serious occasional issues\n- 3: Uptime between 95–98%, stable but fragile under load\n- 4: Uptime above 98%, robust over time\n- 5: Uptime above 99.9%, proven high availability"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 55,
+  "fields": {
+    "field": 28,
+    "locale": "fr",
+    "name": "Richesse fonctionnelle",
+    "description": "Évalue la quantité de fonctionnalités disponibles et de formats pris en charge.\n\n- 1 : Outil extrêmement spécialisé\n- 2 : Limité dans les fonctionnalités et de formats qu'il peut offrir\n- 3 : Fonctionnalités et formats satisfaisants, sans plus\n- 4 : Riche en fonctionnalités et formats\n- 5 : Très grande versatilité, reconnu pour savoir (presque) tout faire"
+  }
+},
+{
+  "model": "categories.fieldtranslation",
+  "pk": 56,
+  "fields": {
+    "field": 28,
+    "locale": "en",
+    "name": "Feature richness",
+    "description": "Evaluates the breadth of available features and supported formats.\n\n- 1: Extremely specialized tool\n- 2: Limited in features and supported formats\n- 3: Satisfactory features and formats, nothing more\n- 4: Rich in features and formats\n- 5: Very high versatility, recognized for being able to do (almost) everything"
+  }
 }
 ]

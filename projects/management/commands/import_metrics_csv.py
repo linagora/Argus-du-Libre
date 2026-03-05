@@ -21,7 +21,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Attempting to import from {file_path}"))
 
         try:
-            with open(file_path, "r", encoding="utf-8") as csvfile:
+            with open(file_path, encoding="utf-8") as csvfile:
                 reader = csv.reader(csvfile)
                 header = next(reader)  # Read header row
 

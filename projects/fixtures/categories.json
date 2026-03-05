@@ -19,5 +19,19 @@
   "fields": {
     "weight": 1
   }
+},
+{
+  "model": "categories.category",
+  "pk": 4,
+  "fields": {
+    "weight": 1
+  }
+},
+{
+  "model": "categories.category",
+  "pk": 5,
+  "fields": {
+    "weight": 1
+  }
 }
 ]

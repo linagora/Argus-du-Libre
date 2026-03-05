@@ -158,5 +158,95 @@
     "weight": 3,
     "analysis_periodicity_days": null
   }
+},
+{
+  "model": "categories.field",
+  "pk": 20,
+  "fields": {
+    "category": 1,
+    "slug": "leadership-governance",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 21,
+  "fields": {
+    "category": 2,
+    "slug": "technical-debt",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 22,
+  "fields": {
+    "category": 4,
+    "slug": "openness-degree",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 23,
+  "fields": {
+    "category": 4,
+    "slug": "support-cost",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 24,
+  "fields": {
+    "category": 4,
+    "slug": "deployment-cost",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 25,
+  "fields": {
+    "category": 4,
+    "slug": "training-cost",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 26,
+  "fields": {
+    "category": 5,
+    "slug": "reputation",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 27,
+  "fields": {
+    "category": 5,
+    "slug": "availability-stability",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
+},
+{
+  "model": "categories.field",
+  "pk": 28,
+  "fields": {
+    "category": 5,
+    "slug": "feature-richness",
+    "weight": 1,
+    "analysis_periodicity_days": null
+  }
 }
 ]

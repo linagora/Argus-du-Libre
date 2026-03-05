@@ -52,5 +52,41 @@
     "locale": "en",
     "name": "Security"
   }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 7,
+  "fields": {
+    "category": 4,
+    "locale": "fr",
+    "name": "Coûts"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 8,
+  "fields": {
+    "category": 4,
+    "locale": "en",
+    "name": "Costs"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 9,
+  "fields": {
+    "category": 5,
+    "locale": "fr",
+    "name": "Performance et usage"
+  }
+},
+{
+  "model": "categories.categorytranslation",
+  "pk": 10,
+  "fields": {
+    "category": 5,
+    "locale": "en",
+    "name": "Performance and Usage"
+  }
 }
 ]
