@@ -238,5 +238,15 @@
     "weight": 1,
     "collection_enabled": true
   }
+},
+{
+  "model": "categories.metric",
+  "pk": 25,
+  "fields": {
+    "field": 21,
+    "slug": "ai_technical_debt",
+    "weight": 1,
+    "collection_enabled": true
+  }
 }
 ]

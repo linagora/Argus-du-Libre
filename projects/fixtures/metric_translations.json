@@ -478,5 +478,25 @@
     "name": "Nombre de fonctions",
     "description": "Nombre total de fonctions dans le code"
   }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 49,
+  "fields": {
+    "metric": 25,
+    "locale": "en",
+    "name": "AI Technical Debt",
+    "description": "Technical debt assessment using AI analysis"
+  }
+},
+{
+  "model": "categories.metrictranslation",
+  "pk": 50,
+  "fields": {
+    "metric": 25,
+    "locale": "fr",
+    "name": "Dette technique (IA)",
+    "description": "Évaluation de la dette technique via analyse IA"
+  }
 }
 ]
