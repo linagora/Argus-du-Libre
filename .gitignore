@@ -71,3 +71,6 @@ dmypy.json
 
 # Prefer AGENTS.md to CLAUDE.md
 CLAUDE.md
+
+# Git worktrees
+.worktrees/
