@@ -8,6 +8,8 @@ from projects.models import (
     Block,
     Category,
     CategoryTranslation,
+    CostFeedbackEntry,
+    CostFeedbackSubmission,
     Field,
     FieldTranslation,
     Metric,
@@ -267,7 +269,9 @@ class CategoryAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/en/admin/categories/category/{self.category.id}/change/", data, follow=True
+            f"/en/admin/categories/category/{self.category.id}/change/",
+            data,
+            follow=True,
         )
 
         # Refresh from database
@@ -483,9 +487,7 @@ class FieldTranslationModelTestCase(TestCase):
             name="Test Field",
             description="This field measures code quality.",
         )
-        self.assertEqual(
-            translation.description, "This field measures code quality."
-        )
+        self.assertEqual(translation.description, "This field measures code quality.")
 
 
 @override_settings(
@@ -534,7 +536,9 @@ class FieldAdminTestCase(TestCase):
 
     def test_field_edit_view_accessible(self):
         """Test that field edit view is accessible."""
-        response = self.client.get(f"/en/admin/categories/field/{self.field.id}/change/")
+        response = self.client.get(
+            f"/en/admin/categories/field/{self.field.id}/change/"
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_create_field_with_translations(self):
@@ -554,7 +558,9 @@ class FieldAdminTestCase(TestCase):
             "translations-1-name": "Politique de confidentialité",
         }
 
-        response = self.client.post("/en/admin/categories/field/add/", data, follow=True)
+        response = self.client.post(
+            "/en/admin/categories/field/add/", data, follow=True
+        )
 
         self.assertEqual(Field.objects.count(), 2)
         new_field = Field.objects.get(slug="privacy-policy")
@@ -948,7 +954,9 @@ class SoftwareAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/",
+            data,
+            follow=True,
         )
 
         self.software.refresh_from_db()
@@ -1209,7 +1217,9 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/",
+            data,
+            follow=True,
         )
 
         # Should have 2 blocks now
@@ -1245,7 +1255,9 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/",
+            data,
+            follow=True,
         )
 
         self.block.refresh_from_db()
@@ -1279,7 +1291,9 @@ class BlockAdminTestCase(TestCase):
         }
 
         response = self.client.post(
-            f"/en/admin/categories/software/{self.software.id}/change/", data, follow=True
+            f"/en/admin/categories/software/{self.software.id}/change/",
+            data,
+            follow=True,
         )
 
         self.assertFalse(Block.objects.filter(id=block_id).exists())
@@ -1514,7 +1528,9 @@ class AnalysisResultAdminTestCase(TestCase):
             is_published=True,
         )
 
-        response = self.client.get("/en/admin/categories/analysisresult/?is_published=1")
+        response = self.client.get(
+            "/en/admin/categories/analysisresult/?is_published=1"
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_filter_by_is_manual(self):
@@ -1848,12 +1864,16 @@ class MetricAdminTestCase(TestCase):
 
     def test_metric_edit_view_accessible(self):
         """Test that metric edit view is accessible."""
-        response = self.client.get(f"/en/admin/categories/metric/{self.metric.id}/change/")
+        response = self.client.get(
+            f"/en/admin/categories/metric/{self.metric.id}/change/"
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_metric_edit_view_shows_translations(self):
         """Test that edit view shows existing translations."""
-        response = self.client.get(f"/en/admin/categories/metric/{self.metric.id}/change/")
+        response = self.client.get(
+            f"/en/admin/categories/metric/{self.metric.id}/change/"
+        )
         self.assertContains(response, "GitHub Stars")
         self.assertContains(response, "Étoiles GitHub")
 
@@ -1879,7 +1899,9 @@ class MetricAdminTestCase(TestCase):
             "translations-1-description": "Nombre de téléchargements du package npm",
         }
 
-        response = self.client.post("/en/admin/categories/metric/add/", data, follow=True)
+        response = self.client.post(
+            "/en/admin/categories/metric/add/", data, follow=True
+        )
 
         # Check that metric was created
         self.assertEqual(Metric.objects.count(), 2)
@@ -2139,9 +2161,7 @@ class MergeTagsActionTestCase(TestCase):
         if confirm and primary_id:
             data["confirm"] = "1"
             data["primary_id"] = str(primary_id)
-        return self.client.post(
-            "/en/admin/categories/tag/", data, follow=True
-        )
+        return self.client.post("/en/admin/categories/tag/", data, follow=True)
 
     def test_merge_moves_software_relationships(self):
         """Test that software M2M relationships are moved to primary tag."""
@@ -2213,3 +2233,119 @@ class MergeTagsActionTestCase(TestCase):
         self.assertContains(response, "CI")
         self.assertContains(response, "CD")
         self.assertContains(response, "Confirm merge")
+
+
+# --- Cost Feedback Model Tests -------------------------------------------------
+
+
+class CostFeedbackModelTestCase(TestCase):
+    def setUp(self):
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.field_openness = Field.objects.create(
+            category=category, slug="openness-degree", weight=1
+        )
+        self.field_support = Field.objects.create(
+            category=category, slug="support-cost", weight=1
+        )
+        self.field_deployment = Field.objects.create(
+            category=category, slug="deployment-cost", weight=1
+        )
+        self.field_training = Field.objects.create(
+            category=category, slug="training-cost", weight=1
+        )
+        self.software = Software.objects.create(
+            name="CrowdTest", slug="crowd-test", state=Software.STATE_PUBLISHED
+        )
+
+    def test_submission_creation(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software,
+            locale="en",
+            ip_address="127.0.0.1",
+        )
+        self.assertEqual(sub.software, self.software)
+        self.assertEqual(sub.locale, "en")
+        self.assertIsNone(sub.general_comment)
+        self.assertIsNotNone(sub.created_at)
+
+    def test_submission_with_general_comment(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software,
+            locale="fr",
+            ip_address="10.0.0.1",
+            general_comment="Very affordable overall.",
+        )
+        self.assertEqual(sub.general_comment, "Very affordable overall.")
+
+    def test_entry_creation(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        entry = CostFeedbackEntry.objects.create(
+            submission=sub,
+            field=self.field_openness,
+            score=4,
+        )
+        self.assertEqual(entry.score, 4)
+        self.assertIsNone(entry.note)
+
+    def test_entry_with_note(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        entry = CostFeedbackEntry.objects.create(
+            submission=sub,
+            field=self.field_support,
+            score=3,
+            note="Community support is decent.",
+        )
+        self.assertEqual(entry.note, "Community support is decent.")
+
+    def test_entry_unique_per_submission_and_field(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        CostFeedbackEntry.objects.create(
+            submission=sub, field=self.field_openness, score=2
+        )
+        with self.assertRaises(Exception):
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.field_openness, score=5
+            )
+
+    def test_submission_cascade_deletes_entries(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        CostFeedbackEntry.objects.create(
+            submission=sub, field=self.field_openness, score=3
+        )
+        sub_id = sub.pk
+        sub.delete()
+        self.assertFalse(
+            CostFeedbackEntry.objects.filter(submission_id=sub_id).exists()
+        )
+
+    def test_software_cascade_deletes_submissions(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        self.software.delete()
+        self.assertFalse(CostFeedbackSubmission.objects.filter(pk=sub.pk).exists())
+
+    def test_str_submission(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        self.assertIn("CrowdTest", str(sub))
+        self.assertIn("en", str(sub))
+
+    def test_str_entry(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        entry = CostFeedbackEntry.objects.create(
+            submission=sub, field=self.field_openness, score=4
+        )
+        self.assertIn("4", str(entry))

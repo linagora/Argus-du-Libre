@@ -381,3 +381,58 @@ class MetricValue(models.Model):
     def __str__(self):
         """Return metric value description."""
         return f"{self.software.name} - {self.metric} - {self.value} ({self.collected_at.date()})"
+
+
+# --- Cost Crowdsourcing -------------------------------------------------------
+
+COSTS_FIELD_SLUGS = [
+    "openness-degree",
+    "support-cost",
+    "deployment-cost",
+    "training-cost",
+]
+
+
+class CostFeedbackSubmission(models.Model):
+    software = models.ForeignKey(
+        Software,
+        on_delete=models.CASCADE,
+        related_name="cost_feedback_submissions",
+    )
+    locale = models.CharField(max_length=10)
+    general_comment = models.TextField(blank=True, null=True)
+    ip_address = models.GenericIPAddressField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Cost Feedback Submission"
+        verbose_name_plural = "Cost Feedback Submissions"
+
+    def __str__(self):
+        return (
+            f"{self.software.name} [{self.locale}] @ {self.created_at:%Y-%m-%d %H:%M}"
+        )
+
+
+class CostFeedbackEntry(models.Model):
+    submission = models.ForeignKey(
+        CostFeedbackSubmission,
+        on_delete=models.CASCADE,
+        related_name="entries",
+    )
+    field = models.ForeignKey(
+        Field,
+        on_delete=models.CASCADE,
+        related_name="cost_feedback_entries",
+    )
+    score = models.PositiveSmallIntegerField()
+    note = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = [["submission", "field"]]
+        verbose_name = "Cost Feedback Entry"
+        verbose_name_plural = "Cost Feedback Entries"
+
+    def __str__(self):
+        return f"{self.field} -- score {self.score}"
