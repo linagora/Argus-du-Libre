@@ -100,6 +100,104 @@
     </div>
     {% endif %}
 
+    <!-- User Cost Feedback Section -->
+    {% if cost_feedback_form %}
+    <div class="card category-card mb-5" id="cost-feedback-section">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="fw-semibold mb-0">{% trans "User Cost Feedback" %}</h3>
+                <button class="btn btn-outline-primary btn-sm"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#costFeedbackForm"
+                        aria-expanded="false">
+                    {% trans "Share your experience" %}
+                </button>
+            </div>
+
+            {% if feedback_created %}
+            <div class="alert alert-success mb-3" role="alert">
+                {% trans "Thank you! Your feedback has been recorded." %}
+            </div>
+            {% endif %}
+
+            <!-- Recent notes per Costs field (up to 5 notes each) -->
+            {% for field in costs_fields %}
+            <div class="mb-4">
+                <strong>{{ field.slug }}</strong>
+                {% for entry in field.cost_feedback_entries.all %}
+                {% if forloop.counter <= 5 and entry.note %}
+                <div class="border rounded p-2 mb-2 bg-light">
+                    <p class="mb-1 small">{{ entry.note }}</p>
+                    <small class="text-muted">
+                        {{ entry.submission.created_at|date:"N j, Y" }}
+                        &middot; {{ entry.submission.locale }}
+                        {% if entry.submission.general_comment %}
+                        &middot; <em>{{ entry.submission.general_comment|truncatewords:15 }}</em>
+                        {% endif %}
+                    </small>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <!-- Rating form (collapsed by default, expanded on validation errors) -->
+            <div class="collapse {% if cost_feedback_form.errors %}show{% endif %}"
+                 id="costFeedbackForm">
+                <hr>
+                <h5 class="fw-semibold mb-3">{% trans "Rate the Costs fields" %}</h5>
+                {% if cost_feedback_form.errors %}
+                <div class="alert alert-danger">
+                    {% trans "Please correct the errors below." %}
+                </div>
+                {% endif %}
+                <form method="post"
+                      action="{% url 'public:create_cost_feedback' slug=software.slug %}">
+                    {% csrf_token %}
+                    {{ cost_feedback_form.locale }}
+                    {% for field, score_widget, note_widget in cost_feedback_form.get_field_rows %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">{{ field.slug }}</label>
+                        <div class="d-flex gap-3 flex-wrap mb-2">
+                            {% for choice in score_widget %}
+                            <div class="form-check form-check-inline">
+                                {{ choice.tag }}
+                                <label class="form-check-label"
+                                       for="{{ choice.id_for_label }}">
+                                    {{ choice.choice_label }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if score_widget.errors %}
+                        <div class="text-danger small">{{ score_widget.errors }}</div>
+                        {% endif %}
+                        <textarea name="{{ note_widget.html_name }}"
+                                  class="form-control form-control-sm mt-1"
+                                  rows="2"
+                                  placeholder="{% trans 'Optional note...' %}">{{ note_widget.value|default:'' }}</textarea>
+                    </div>
+                    {% endfor %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold"
+                               for="{{ cost_feedback_form.general_comment.id_for_label }}">
+                            {% trans "General comment (optional)" %}
+                        </label>
+                        <textarea name="{{ cost_feedback_form.general_comment.html_name }}"
+                                  id="{{ cost_feedback_form.general_comment.id_for_label }}"
+                                  class="form-control"
+                                  rows="3">{{ cost_feedback_form.general_comment.value|default:'' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        {% trans "Submit feedback" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Overview Section -->
     {% if overview_block %}
     <div class="card category-card mb-5">
