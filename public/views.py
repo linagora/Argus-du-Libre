@@ -671,3 +671,49 @@ def scores_help(request):
 def about(request):
     """About page with project information."""
     return render(request, "public/about.html")
+
+
+@require_POST
+def create_cost_feedback(request, slug):
+    """POST-only: validate and persist crowd cost ratings, then redirect."""
+    software = get_object_or_404(Software, slug=slug, state=Software.STATE_PUBLISHED)
+    costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+    form = CostFeedbackForm(request.POST, fields=costs_fields)
+
+    if not form.is_valid():
+        return _render_project_detail_with_form(request, software, form)
+
+    ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[
+        0
+    ].strip() or request.META.get("REMOTE_ADDR", "")
+
+    with transaction.atomic():
+        submission = CostFeedbackSubmission.objects.create(
+            software=software,
+            locale=form.cleaned_data["locale"],
+            general_comment=form.cleaned_data.get("general_comment") or None,
+            ip_address=ip,
+        )
+        for field in costs_fields:
+            score = int(form.cleaned_data[f"score_{field.slug}"])
+            note = form.cleaned_data.get(f"note_{field.slug}") or None
+            CostFeedbackEntry.objects.create(
+                submission=submission,
+                field=field,
+                score=score,
+                note=note,
+            )
+
+    CostScoreAggregator(software).run()
+
+    return redirect(
+        reverse("public:project_detail", kwargs={"slug": slug}) + "?feedback=created"
+    )
+
+
+def _render_project_detail_with_form(request, software, form):
+    """Re-render project_detail when the cost feedback form has errors."""
+    context = _build_project_detail_context(request, software)
+    context["cost_feedback_form"] = form
+    context["feedback_created"] = False
+    return render(request, "public/project_detail.html", context)

@@ -2252,3 +2252,109 @@ class CostScoreAggregatorTestCase(TestCase):
         )
         # (1+2+2)/3 = 1.666... rounded to 1.67
         self.assertEqual(result.score, Decimal("1.67"))
+
+
+# --- create_cost_feedback View Tests ------------------------------------------
+
+
+class CreateCostFeedbackViewTestCase(LocaleTestCase):
+    def setUp(self):
+        super().setUp()
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.fields = {}
+        for slug in COSTS_FIELD_SLUGS:
+            self.fields[slug] = Field.objects.create(
+                category=category, slug=slug, weight=1
+            )
+        self.software = Software.objects.create(
+            name="ViewSW", slug="view-sw", state=Software.STATE_PUBLISHED
+        )
+
+    def _post_valid(self, **overrides):
+        data = {
+            "score_openness-degree": "4",
+            "note_openness-degree": "Open source.",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "5",
+            "note_deployment-cost": "Simple.",
+            "score_training-cost": "2",
+            "note_training-cost": "",
+            "general_comment": "Good enough.",
+            "locale": "en",
+        }
+        data.update(overrides)
+        return self.client.post(
+            "/en/project/view-sw/cost-feedback/",
+            data=data,
+        )
+
+    def test_get_is_not_allowed(self):
+        response = self.client.get("/en/project/view-sw/cost-feedback/")
+        self.assertEqual(response.status_code, 405)
+
+    def test_valid_post_creates_submission(self):
+        self._post_valid()
+        self.assertEqual(CostFeedbackSubmission.objects.count(), 1)
+        sub = CostFeedbackSubmission.objects.first()
+        self.assertEqual(sub.software, self.software)
+        self.assertEqual(sub.locale, "en")
+        self.assertEqual(sub.general_comment, "Good enough.")
+
+    def test_valid_post_creates_four_entries(self):
+        self._post_valid()
+        self.assertEqual(CostFeedbackEntry.objects.count(), 4)
+
+    def test_valid_post_redirects_with_query_param(self):
+        response = self._post_valid()
+        self.assertRedirects(
+            response,
+            "/en/project/view-sw/?feedback=created",
+            fetch_redirect_response=False,
+        )
+
+    def test_valid_post_triggers_aggregation(self):
+        self._post_valid()
+        # on_commit fires in TestCase after the transaction, so aggregation runs
+        self.assertTrue(
+            AnalysisResult.objects.filter(
+                software=self.software,
+                field=self.fields["openness-degree"],
+            ).exists()
+        )
+
+    def test_invalid_score_does_not_create_submission(self):
+        response = self._post_valid(**{"score_openness-degree": "9"})
+        # Invalid form: re-renders project_detail (200), no submission created
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(CostFeedbackSubmission.objects.count(), 0)
+
+    def test_returns_404_for_draft_software(self):
+        Software.objects.create(
+            name="Draft", slug="draft-sw", state=Software.STATE_DRAFT
+        )
+        response = self.client.post(
+            "/en/project/draft-sw/cost-feedback/",
+            data={"locale": "en"},
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_ip_address_stored(self):
+        self.client.post(
+            "/en/project/view-sw/cost-feedback/",
+            data={
+                "score_openness-degree": "3",
+                "note_openness-degree": "",
+                "score_support-cost": "3",
+                "note_support-cost": "",
+                "score_deployment-cost": "3",
+                "note_deployment-cost": "",
+                "score_training-cost": "3",
+                "note_training-cost": "",
+                "locale": "en",
+            },
+            REMOTE_ADDR="192.168.1.1",
+        )
+        sub = CostFeedbackSubmission.objects.first()
+        self.assertEqual(sub.ip_address, "192.168.1.1")
