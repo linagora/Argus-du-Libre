@@ -19,11 +19,15 @@ class LocaleTestCase(TestCase):
         deactivate()
         super().tearDown()
 
+
 from projects.models import (
+    COSTS_FIELD_SLUGS,
     AnalysisResult,
     Block,
     Category,
     CategoryTranslation,
+    CostFeedbackEntry,
+    CostFeedbackSubmission,
     Field,
     FieldTranslation,
     Metric,
@@ -32,6 +36,7 @@ from projects.models import (
     Software,
     Tag,
 )
+from public.forms import CostFeedbackForm
 
 
 class HomeViewTestCase(LocaleTestCase):
@@ -70,7 +75,9 @@ class HomeViewTestCase(LocaleTestCase):
         response = self.client.get(reverse("public:home"))
         self.assertContains(response, "Featured Project")
         # Check featured_projects context (not full page, which has "All Projects")
-        featured_names = [p["project"].name for p in response.context["featured_projects"]]
+        featured_names = [
+            p["project"].name for p in response.context["featured_projects"]
+        ]
         self.assertIn("Featured Project", featured_names)
         self.assertNotIn("Not Featured", featured_names)
         self.assertNotIn("Draft Featured", featured_names)
@@ -732,9 +739,7 @@ class TagDetailViewTestCase(LocaleTestCase):
         )
         self.assertContains(response, "compare-checkbox")
         # Should have one checkbox per published project (2 published in database tag)
-        self.assertEqual(
-            response.content.decode().count('class="compare-checkbox"'), 2
-        )
+        self.assertEqual(response.content.decode().count('class="compare-checkbox"'), 2)
 
     def test_tag_detail_has_compare_bar(self):
         """Test that tag detail page has sticky compare bar markup."""
@@ -969,9 +974,7 @@ class SearchViewTestCase(LocaleTestCase):
         results = response.context["results"]
 
         # Count occurrences of software1
-        django_count = sum(
-            1 for r in results if r["project"].slug == "django-project"
-        )
+        django_count = sum(1 for r in results if r["project"].slug == "django-project")
         self.assertEqual(django_count, 1)
 
     def test_search_orders_by_featured_at_then_created_at(self):
@@ -1810,46 +1813,34 @@ class ScoresHelpViewTestCase(LocaleTestCase):
 
     def test_scores_help_page_loads_successfully(self):
         """Test that scores help page returns 200 status."""
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "public/scores_help.html")
 
     def test_scores_help_shows_category_names(self):
         """Test that category names are displayed."""
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Technology")
 
     def test_scores_help_shows_field_names(self):
         """Test that field names are displayed."""
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Code Quality")
         self.assertContains(response, "Performance")
 
     def test_scores_help_shows_field_descriptions(self):
         """Test that field descriptions are displayed."""
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "Measures the overall quality")
 
     def test_scores_help_shows_no_description_message(self):
         """Test that fields without descriptions show a message."""
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertContains(response, "No description available")
 
     def test_scores_help_respects_locale(self):
         """Test that scores help uses correct locale."""
-        response = self.client.get(
-            "/fr/help/scores/", HTTP_ACCEPT_LANGUAGE="fr"
-        )
+        response = self.client.get("/fr/help/scores/", HTTP_ACCEPT_LANGUAGE="fr")
         self.assertContains(response, "Technologie")
         self.assertContains(response, "Qualité du code")
         self.assertContains(response, "qualité globale du code source")
@@ -1858,9 +1849,7 @@ class ScoresHelpViewTestCase(LocaleTestCase):
         """Test empty state when no categories exist."""
         Category.objects.all().delete()
 
-        response = self.client.get(
-            "/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en"
-        )
+        response = self.client.get("/en/help/scores/", HTTP_ACCEPT_LANGUAGE="en")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "No scoring criteria available")
 
@@ -1923,18 +1912,14 @@ class ProjectDetailFieldDescriptionTestCase(LocaleTestCase):
             "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
         )
         self.assertContains(response, "bi-info-circle")
-        self.assertContains(
-            response, f"field-desc-{self.field_with_desc.id}"
-        )
+        self.assertContains(response, f"field-desc-{self.field_with_desc.id}")
 
     def test_info_icon_not_shown_for_field_without_description(self):
         """Test that info icon does not appear for fields without description."""
         response = self.client.get(
             "/en/project/test-software/", HTTP_ACCEPT_LANGUAGE="en"
         )
-        self.assertNotContains(
-            response, f"field-desc-{self.field_without_desc.id}"
-        )
+        self.assertNotContains(response, f"field-desc-{self.field_without_desc.id}")
 
     def test_field_description_modal_present(self):
         """Test that the field description modal is present on the page."""
@@ -1957,3 +1942,124 @@ class ProjectDetailFieldDescriptionTestCase(LocaleTestCase):
         )
         self.assertContains(response, "/en/help/scores/")
         self.assertContains(response, "View all scoring criteria")
+
+
+# --- Cost Feedback Form Tests -------------------------------------------------
+
+
+class CostFeedbackFormTestCase(TestCase):
+    def setUp(self):
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.fields = {}
+        for slug in COSTS_FIELD_SLUGS:
+            self.fields[slug] = Field.objects.create(
+                category=category, slug=slug, weight=1
+            )
+
+    def test_valid_form_all_scores(self):
+        data = {
+            "score_openness-degree": "4",
+            "note_openness-degree": "Good openness.",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "5",
+            "note_deployment-cost": "Easy to deploy.",
+            "score_training-cost": "2",
+            "note_training-cost": "",
+            "general_comment": "Overall reasonable.",
+            "locale": "en",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_invalid_score_out_of_range(self):
+        data = {
+            "score_openness-degree": "6",
+            "note_openness-degree": "",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertFalse(form.is_valid())
+
+    def test_score_zero_is_invalid(self):
+        data = {
+            "score_openness-degree": "0",
+            "note_openness-degree": "",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertFalse(form.is_valid())
+
+    def test_missing_score_is_invalid(self):
+        data = {
+            # openness-degree score missing
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertFalse(form.is_valid())
+
+    def test_optional_note_can_be_empty(self):
+        data = {
+            "score_openness-degree": "3",
+            "note_openness-degree": "",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_general_comment_is_optional(self):
+        data = {
+            "score_openness-degree": "3",
+            "note_openness-degree": "",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+            # no general_comment key
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_locale_roundtrips(self):
+        data = {
+            "score_openness-degree": "4",
+            "note_openness-degree": "",
+            "score_support-cost": "4",
+            "note_support-cost": "",
+            "score_deployment-cost": "4",
+            "note_deployment-cost": "",
+            "score_training-cost": "4",
+            "note_training-cost": "",
+            "locale": "fr",
+        }
+        form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["locale"], "fr")
