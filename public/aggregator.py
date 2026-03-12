@@ -25,11 +25,11 @@ class CostScoreAggregator:
 
     def __init__(self, software: Software):
         self.software = software
-        self._costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
 
     def run(self):
         with transaction.atomic():
-            for field in self._costs_fields:
+            costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+            for field in costs_fields:
                 avg = CostFeedbackEntry.objects.filter(
                     submission__software=self.software,
                     field=field,

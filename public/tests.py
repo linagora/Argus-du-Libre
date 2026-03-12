@@ -2129,8 +2129,6 @@ class CostScoreAggregatorTestCase(TestCase):
         result = AnalysisResult.objects.get(
             software=self.software, field=self.fields["openness-degree"]
         )
-        from decimal import Decimal
-
         self.assertEqual(result.score, Decimal("4.00"))
         self.assertTrue(result.is_published)
         self.assertTrue(result.is_manual)
@@ -2157,8 +2155,6 @@ class CostScoreAggregatorTestCase(TestCase):
         result = AnalysisResult.objects.get(
             software=self.software, field=self.fields["openness-degree"]
         )
-        from decimal import Decimal
-
         self.assertEqual(result.score, Decimal("3.00"))
 
     def test_aggregation_updates_existing_result(self):
@@ -2183,8 +2179,6 @@ class CostScoreAggregatorTestCase(TestCase):
             software=self.software, field=self.fields["openness-degree"]
         )
         self.assertEqual(results.count(), 1)
-        from decimal import Decimal
-
         self.assertEqual(results.first().score, Decimal("5.00"))
 
     def test_no_entries_leaves_result_untouched(self):
@@ -2198,8 +2192,6 @@ class CostScoreAggregatorTestCase(TestCase):
         CostScoreAggregator(self.software).run()
 
         existing.refresh_from_db()
-        from decimal import Decimal
-
         self.assertEqual(existing.score, Decimal("3.50"))
 
     def test_only_costs_fields_are_touched(self):
@@ -2226,8 +2218,6 @@ class CostScoreAggregatorTestCase(TestCase):
         CostScoreAggregator(self.software).run()
 
         other_result.refresh_from_db()
-        from decimal import Decimal
-
         self.assertEqual(other_result.score, Decimal("3.00"))
 
     def test_score_rounded_to_two_decimal_places(self):
@@ -2260,7 +2250,5 @@ class CostScoreAggregatorTestCase(TestCase):
         result = AnalysisResult.objects.get(
             software=self.software, field=self.fields["openness-degree"]
         )
-        from decimal import Decimal
-
         # (1+2+2)/3 = 1.666... rounded to 1.67
         self.assertEqual(result.score, Decimal("1.67"))
