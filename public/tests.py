@@ -2,7 +2,9 @@
 
 from datetime import UTC, datetime
 from decimal import Decimal
+from io import StringIO
 
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from django.utils.translation import activate, deactivate
@@ -2433,3 +2435,56 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
         self.assertIn("cost_feedback_form", response.context)
         self.assertIn("feedback_created", response.context)
         self.assertFalse(response.context["feedback_created"])
+
+
+# --- Management Command Tests -------------------------------------------------
+
+
+class ComputeCostScoresCommandTestCase(TestCase):
+    def setUp(self):
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.fields = {}
+        for slug in COSTS_FIELD_SLUGS:
+            self.fields[slug] = Field.objects.create(
+                category=category, slug=slug, weight=1
+            )
+        self.software = Software.objects.create(
+            name="CmdSW", slug="cmd-sw", state=Software.STATE_PUBLISHED
+        )
+        self.draft = Software.objects.create(
+            name="DraftSW", slug="draft-cmd-sw", state=Software.STATE_DRAFT
+        )
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        for slug in COSTS_FIELD_SLUGS:
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.fields[slug], score=5
+            )
+
+    def test_command_runs_without_error(self):
+        out = StringIO()
+        call_command("compute_cost_scores", stdout=out)
+        output = out.getvalue()
+        self.assertIn("CmdSW", output)
+
+    def test_command_creates_analysis_results(self):
+        call_command("compute_cost_scores", stdout=StringIO())
+        self.assertEqual(
+            AnalysisResult.objects.filter(
+                software=self.software, is_published=True, is_manual=True
+            ).count(),
+            4,
+        )
+
+    def test_command_skips_draft_software(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.draft, locale="en", ip_address="127.0.0.1"
+        )
+        for slug in COSTS_FIELD_SLUGS:
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.fields[slug], score=3
+            )
+        call_command("compute_cost_scores", stdout=StringIO())
+        self.assertFalse(AnalysisResult.objects.filter(software=self.draft).exists())
