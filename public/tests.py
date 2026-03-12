@@ -2063,3 +2063,25 @@ class CostFeedbackFormTestCase(TestCase):
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["locale"], "fr")
+
+    def test_get_field_rows_returns_tuples(self):
+        data = {
+            "score_openness-degree": "4",
+            "note_openness-degree": "",
+            "score_support-cost": "3",
+            "note_support-cost": "",
+            "score_deployment-cost": "3",
+            "note_deployment-cost": "",
+            "score_training-cost": "3",
+            "note_training-cost": "",
+            "locale": "en",
+        }
+        fields_list = list(self.fields.values())
+        form = CostFeedbackForm(data=data, fields=fields_list)
+        self.assertTrue(form.is_valid(), form.errors)
+        rows = form.get_field_rows()
+        self.assertEqual(len(rows), len(COSTS_FIELD_SLUGS))
+        for i, (field, score_widget, note_widget) in enumerate(rows):
+            self.assertEqual(field, fields_list[i])
+            self.assertIn(f"score_{field.slug}", score_widget.html_name)
+            self.assertIn(f"note_{field.slug}", note_widget.html_name)
