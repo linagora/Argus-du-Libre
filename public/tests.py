@@ -36,6 +36,7 @@ from projects.models import (
     Software,
     Tag,
 )
+from public.aggregator import CostScoreAggregator
 from public.forms import CostFeedbackForm
 
 
@@ -2085,3 +2086,181 @@ class CostFeedbackFormTestCase(TestCase):
             self.assertEqual(field, fields_list[i])
             self.assertIn(f"score_{field.slug}", score_widget.html_name)
             self.assertIn(f"note_{field.slug}", note_widget.html_name)
+
+
+# --- Aggregator Tests ---------------------------------------------------------
+
+
+class CostScoreAggregatorTestCase(TestCase):
+    def setUp(self):
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.fields = {}
+        for slug in COSTS_FIELD_SLUGS:
+            self.fields[slug] = Field.objects.create(
+                category=category, slug=slug, weight=1
+            )
+        self.software = Software.objects.create(
+            name="AggSW", slug="agg-sw", state=Software.STATE_PUBLISHED
+        )
+
+    def _make_submission(self, scores: dict):
+        """Helper: create a submission with entries for given {slug: score} dict."""
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        for slug, score in scores.items():
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.fields[slug], score=score
+            )
+        return sub
+
+    def test_aggregation_creates_analysis_result(self):
+        self._make_submission(
+            {
+                "openness-degree": 4,
+                "support-cost": 3,
+                "deployment-cost": 5,
+                "training-cost": 2,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        result = AnalysisResult.objects.get(
+            software=self.software, field=self.fields["openness-degree"]
+        )
+        from decimal import Decimal
+
+        self.assertEqual(result.score, Decimal("4.00"))
+        self.assertTrue(result.is_published)
+        self.assertTrue(result.is_manual)
+
+    def test_aggregation_averages_multiple_submissions(self):
+        self._make_submission(
+            {
+                "openness-degree": 4,
+                "support-cost": 4,
+                "deployment-cost": 4,
+                "training-cost": 4,
+            }
+        )
+        self._make_submission(
+            {
+                "openness-degree": 2,
+                "support-cost": 2,
+                "deployment-cost": 2,
+                "training-cost": 2,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        result = AnalysisResult.objects.get(
+            software=self.software, field=self.fields["openness-degree"]
+        )
+        from decimal import Decimal
+
+        self.assertEqual(result.score, Decimal("3.00"))
+
+    def test_aggregation_updates_existing_result(self):
+        AnalysisResult.objects.create(
+            software=self.software,
+            field=self.fields["openness-degree"],
+            score="1.00",
+            is_published=True,
+            is_manual=True,
+        )
+        self._make_submission(
+            {
+                "openness-degree": 5,
+                "support-cost": 5,
+                "deployment-cost": 5,
+                "training-cost": 5,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        results = AnalysisResult.objects.filter(
+            software=self.software, field=self.fields["openness-degree"]
+        )
+        self.assertEqual(results.count(), 1)
+        from decimal import Decimal
+
+        self.assertEqual(results.first().score, Decimal("5.00"))
+
+    def test_no_entries_leaves_result_untouched(self):
+        existing = AnalysisResult.objects.create(
+            software=self.software,
+            field=self.fields["openness-degree"],
+            score="3.50",
+            is_published=True,
+            is_manual=True,
+        )
+        CostScoreAggregator(self.software).run()
+
+        existing.refresh_from_db()
+        from decimal import Decimal
+
+        self.assertEqual(existing.score, Decimal("3.50"))
+
+    def test_only_costs_fields_are_touched(self):
+        category2 = Category.objects.create()
+        CategoryTranslation.objects.create(category=category2, locale="en", name="Tech")
+        other_field = Field.objects.create(
+            category=category2, slug="other-field", weight=1
+        )
+        other_result = AnalysisResult.objects.create(
+            software=self.software,
+            field=other_field,
+            score="3.00",
+            is_published=True,
+            is_manual=False,
+        )
+        self._make_submission(
+            {
+                "openness-degree": 5,
+                "support-cost": 5,
+                "deployment-cost": 5,
+                "training-cost": 5,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        other_result.refresh_from_db()
+        from decimal import Decimal
+
+        self.assertEqual(other_result.score, Decimal("3.00"))
+
+    def test_score_rounded_to_two_decimal_places(self):
+        self._make_submission(
+            {
+                "openness-degree": 1,
+                "support-cost": 2,
+                "deployment-cost": 3,
+                "training-cost": 4,
+            }
+        )
+        self._make_submission(
+            {
+                "openness-degree": 2,
+                "support-cost": 2,
+                "deployment-cost": 3,
+                "training-cost": 4,
+            }
+        )
+        self._make_submission(
+            {
+                "openness-degree": 2,
+                "support-cost": 2,
+                "deployment-cost": 3,
+                "training-cost": 4,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        result = AnalysisResult.objects.get(
+            software=self.software, field=self.fields["openness-degree"]
+        )
+        from decimal import Decimal
+
+        # (1+2+2)/3 = 1.666... rounded to 1.67
+        self.assertEqual(result.score, Decimal("1.67"))
