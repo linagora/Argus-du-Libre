@@ -328,6 +328,8 @@ class CostFeedbackEntryInline(admin.TabularInline):
 
 @admin.register(CostFeedbackSubmission, site=admin_site)
 class CostFeedbackSubmissionAdmin(admin.ModelAdmin):
+    """Admin interface for CostFeedbackSubmission (read-only moderation view)."""
+
     list_display = [
         "id",
         "software",
@@ -353,10 +355,15 @@ class CostFeedbackSubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(CostFeedbackEntry, site=admin_site)
 class CostFeedbackEntryAdmin(admin.ModelAdmin):
+    """Admin interface for CostFeedbackEntry (read-only moderation view)."""
+
     list_display = ["id", "submission", "field", "score"]
     list_filter = ["field", "score"]
     readonly_fields = ["submission", "field", "score", "note"]
     ordering = ["-submission__created_at"]
 
     def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
         return False

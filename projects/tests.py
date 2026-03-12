@@ -2393,3 +2393,7 @@ class CostFeedbackAdminTestCase(TestCase):
             f"/en/admin/categories/costfeedbacksubmission/{self.submission.pk}/change/"
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_submission_add_not_allowed(self):
+        response = self.client.get("/en/admin/categories/costfeedbacksubmission/add/")
+        self.assertEqual(response.status_code, 403)
