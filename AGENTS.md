@@ -78,12 +78,23 @@ Conditional authentication via `OIDC_ENABLED` environment variable. Custom backe
 - Each Tag can have one TagOpinion per locale
 - Displayed on tag detail page and on project detail page for each tag with an opinion
 
+**CostFeedbackSubmission:**
+- Stores anonymous crowd-sourced feedback for a Software instance
+- Fields: `software` FK, `locale` (string), `general_comment` (optional text), `ip_address`, `created_at`
+- One submission can contain entries for multiple cost fields
+
+**CostFeedbackEntry:**
+- Stores a per-field score (1–5) and optional note within a CostFeedbackSubmission
+- Fields: `submission` FK, `field` FK, `score` (IntegerField 1–5), `note` (optional text)
+- Each (submission, field) pair is unique
+
 **Key constraints:**
 - `UNIQUE(category_id, slug)` on Field
 - `UNIQUE(field_id, slug)` on Metric
 - `UNIQUE(software_id, kind, locale)` on Block
 - `UNIQUE(tag_id, locale)` on TagOpinion
 - `UNIQUE(slug)` on Tag and Software
+- `UNIQUE(submission_id, field_id)` on CostFeedbackEntry
 
 **Analysis Results:**
 - Links Software to Field with a score (1.00 to 5.00)
@@ -163,6 +174,7 @@ All public URLs support i18n with language prefix (e.g., `/en/`, `/fr/`):
 | `/compare/` | `compare` | Side-by-side project comparison |
 | `/project/<slug>/` | `project_detail` | Individual project details |
 | `/tag/<slug>/` | `tag_detail` | Projects filtered by tag |
+| `/project/<slug>/cost-feedback/` | `create_cost_feedback` | Submit anonymous cost ratings |
 
 ### Page Structure
 
@@ -222,6 +234,22 @@ The project uses a **weighted mean** system for scoring:
 ```python
 # Field scores: Code Quality (4.5, weight=2), Performance (3.0, weight=1)
 # Category score = (4.5 × 2 + 3.0 × 1) / (2 + 1) = 4.0
+```
+
+### Cost Crowdsourcing
+
+The project supports crowd-sourced cost ratings from anonymous users, stored separately from editorial scores.
+
+**Key components:**
+- `COSTS_FIELD_SLUGS` constant in `projects/models.py` — list of the four cost field slugs (`openness-degree`, `support-cost`, `deployment-cost`, `training-cost`)
+- `CostScoreAggregator` in `public/aggregator.py` — averages `CostFeedbackEntry` scores per field for a single Software and writes results to `AnalysisResult` (with `is_published=True`, `is_manual=True`)
+- `CostFeedbackForm` in `public/forms.py` — renders per-field radio inputs (1–5) and an optional general comment
+- `create_cost_feedback` POST view at `/project/<slug>/cost-feedback/` — validates form, saves `CostFeedbackSubmission` + `CostFeedbackEntry` records, triggers aggregation via `on_commit`
+- `compute_cost_scores` management command — recomputes cost scores for all published software by calling `CostScoreAggregator` for each
+
+**Management command:**
+```bash
+uv run python manage.py compute_cost_scores
 ```
 
 ### Localization

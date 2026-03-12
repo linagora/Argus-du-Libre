@@ -185,6 +185,16 @@ uv run python manage.py export_metrics_csv > metrics.csv
 
 The output CSV has columns: `software` (slug), followed by one column per field slug (e.g., `activity`, `popularity`, `maturity`). Values are scores from 1.00 to 5.00, empty if no published score exists.
 
+### Recomputing crowd-sourced cost scores
+
+To recompute cost scores from crowd-sourced feedback for all published software:
+
+```bash
+uv run python manage.py compute_cost_scores
+```
+
+This reads `CostFeedbackEntry` rows, averages scores per cost field, and writes results to `AnalysisResult`. Useful after bulk-importing feedback data or to refresh scores on demand.
+
 ### Running tests
 
 ```bash
