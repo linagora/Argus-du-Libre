@@ -18,15 +18,21 @@ class CostFeedbackForm(forms.Form):
     )
     locale = forms.CharField(widget=forms.HiddenInput())
 
-    def __init__(self, *args, fields=None, **kwargs):
+    def __init__(self, *args, fields=None, locale=None, **kwargs):
         super().__init__(*args, **kwargs)
         self._cost_fields = fields or []
         for field in self._cost_fields:
             score_key = f"score_{field.slug}"
             note_key = f"note_{field.slug}"
+            if locale:
+                translation = field.get_translation(locale)
+                field_label = translation.name if translation else field.slug
+            else:
+                field_label = field.slug
             self.fields[score_key] = forms.ChoiceField(
                 choices=SCORE_CHOICES,
                 widget=forms.RadioSelect(),
+                label=field_label,
             )
             self.fields[note_key] = forms.CharField(
                 required=False,

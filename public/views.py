@@ -218,8 +218,17 @@ def _build_project_detail_context(request, software):
             }
         )
 
-    # Fetch the four Costs fields so the template and caller can build the form
-    costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+    # Build costs_fields with translated names for template rendering
+    raw_costs_fields = Field.objects.filter(slug__in=COSTS_FIELD_SLUGS)
+    costs_fields = []
+    for cf in raw_costs_fields:
+        translation = cf.get_translation(locale)
+        costs_fields.append(
+            {
+                "field": cf,
+                "name": translation.name if translation else cf.slug,
+            }
+        )
 
     return {
         "software": software,
@@ -239,8 +248,10 @@ def project_detail(request, slug):
         state=Software.STATE_PUBLISHED,
     )
     context = _build_project_detail_context(request, software)
+    locale = get_language()
+    raw_fields = [d["field"] for d in context["costs_fields"]]
     context["cost_feedback_form"] = CostFeedbackForm(
-        initial={"locale": get_language()}, fields=context["costs_fields"]
+        initial={"locale": locale}, fields=raw_fields, locale=locale
     )
     context["feedback_created"] = request.GET.get("feedback") == "created"
     return render(request, "public/project_detail.html", context)

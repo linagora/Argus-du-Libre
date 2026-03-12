@@ -110,7 +110,8 @@
                         type="button"
                         data-bs-toggle="collapse"
                         data-bs-target="#costFeedbackForm"
-                        aria-expanded="false">
+                        aria-controls="costFeedbackForm"
+                        aria-expanded="{% if cost_feedback_form.errors %}true{% else %}false{% endif %}">
                     {% trans "Share your experience" %}
                 </button>
             </div>
@@ -122,10 +123,10 @@
             {% endif %}
 
             <!-- Recent notes per Costs field (up to 5 notes each) -->
-            {% for field in costs_fields %}
+            {% for cost_field in costs_fields %}
             <div class="mb-4">
-                <strong>{{ field.slug }}</strong>
-                {% for entry in field.cost_feedback_entries.all %}
+                <strong>{{ cost_field.name }}</strong>
+                {% for entry in cost_field.field.cost_feedback_entries.all %}
                 {% if forloop.counter <= 5 and entry.note %}
                 <div class="border rounded p-2 mb-2 bg-light">
                     <p class="mb-1 small">{{ entry.note }}</p>
@@ -158,7 +159,7 @@
                     {{ cost_feedback_form.locale }}
                     {% for field, score_widget, note_widget in cost_feedback_form.get_field_rows %}
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">{{ field.slug }}</label>
+                        <label class="form-label fw-semibold">{{ score_widget.label }}</label>
                         <div class="d-flex gap-3 flex-wrap mb-2">
                             {% for choice in score_widget %}
                             <div class="form-check form-check-inline">
