@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-16 16:42+0000\n"
+"POT-Creation-Date: 2026-03-12 12:59+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -16,14 +16,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+msgid "Merge tags"
+msgstr ""
+
+msgid "The following tags will be merged:"
+msgstr ""
+
+msgid "Select the tag to keep as primary:"
+msgstr ""
+
+msgid "Confirm merge"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
 msgid "Read more"
 msgstr "En savoir plus"
+
+msgid "Search projects, tags, or keywords..."
+msgstr "Rechercher des projets, tags ou mots-clés..."
+
+msgid "Search projects"
+msgstr "Rechercher des projets"
 
 msgid "About"
 msgstr "À propos"
 
 msgid "About Argus du Libre"
 msgstr "À propos d'Argus du Libre"
+
+msgid "The open-source software quality index by LINAGORA."
+msgstr ""
 
 msgid "Developed and Operated by LINAGORA"
 msgstr "Développé et exploité par LINAGORA"
@@ -184,12 +208,6 @@ msgstr ""
 "Évaluations expertes et scores de santé communautaire pour les décideurs IT "
 "professionnels"
 
-msgid "Search projects, tags, or keywords..."
-msgstr "Rechercher des projets, tags ou mots-clés..."
-
-msgid "Search projects"
-msgstr "Rechercher des projets"
-
 msgid "No featured projects available at the moment."
 msgstr "Aucun projet en vedette pour le moment."
 
@@ -199,8 +217,29 @@ msgstr "Tous les projets"
 msgid "Visit Website"
 msgstr "Visiter le site"
 
-msgid "Overall Score:"
-msgstr "Score global :"
+msgid "User Cost Feedback"
+msgstr "Retours utilisateurs sur les coûts"
+
+msgid "Share your experience"
+msgstr "Partagez votre expérience"
+
+msgid "Thank you! Your feedback has been recorded."
+msgstr "Merci ! Votre retour a bien été enregistré."
+
+msgid "Rate the Costs fields"
+msgstr "Évaluez les champs Coûts"
+
+msgid "Please correct the errors below."
+msgstr "Veuillez corriger les erreurs ci-dessous."
+
+msgid "Optional note..."
+msgstr "Note optionnelle..."
+
+msgid "General comment (optional)"
+msgstr "Commentaire général (optionnel)"
+
+msgid "Submit feedback"
+msgstr "Envoyer le retour"
 
 msgid "Overview"
 msgstr "Aperçu"
