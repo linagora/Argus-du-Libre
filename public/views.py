@@ -4,13 +4,27 @@ import json
 from collections import defaultdict
 from decimal import Decimal
 
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Count
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import get_language
+from django.views.decorators.http import require_POST
 
-from projects.models import Block, Field, MetricValue, Software, Tag, TagOpinion
+from projects.models import (
+    COSTS_FIELD_SLUGS,
+    Block,
+    CostFeedbackEntry,
+    CostFeedbackSubmission,
+    Field,
+    MetricValue,
+    Software,
+    Tag,
+    TagOpinion,
+)
+from public.aggregator import CostScoreAggregator
+from public.forms import CostFeedbackForm
 
 
 def _calculate_overall_score(software):
@@ -21,7 +35,10 @@ def _calculate_overall_score(software):
         if not result.is_published:
             continue
         fid = result.field_id
-        if fid not in latest_by_field or result.created_at > latest_by_field[fid].created_at:
+        if (
+            fid not in latest_by_field
+            or result.created_at > latest_by_field[fid].created_at
+        ):
             latest_by_field[fid] = result
 
     if not latest_by_field:
@@ -75,9 +92,7 @@ def home(request):
         projects_by_letter[first_letter].append(project)
 
     # Sort letters alphabetically, with # at the end
-    sorted_letters = sorted(
-        projects_by_letter.keys(), key=lambda x: (x == "#", x)
-    )
+    sorted_letters = sorted(projects_by_letter.keys(), key=lambda x: (x == "#", x))
     projects_by_letter_sorted = [
         (letter, projects_by_letter[letter]) for letter in sorted_letters
     ]
@@ -90,15 +105,12 @@ def home(request):
     return render(request, "public/home.html", context)
 
 
-def project_detail(request, slug):
-    """Project detail view showing scores by category."""
-    software = get_object_or_404(
-        Software.objects.prefetch_related("tags", "analysis_results__field__category"),
-        slug=slug,
-        state=Software.STATE_PUBLISHED,
-    )
-
-    # Get current locale
+def _build_project_detail_context(request, software):
+    """
+    Build the context dict for the project_detail template.
+    Called by both `project_detail` (GET) and `_render_project_detail_with_form`
+    (POST error re-render) so context logic is not duplicated.
+    """
     locale = get_language()
 
     # Get overview block for current locale
@@ -123,16 +135,10 @@ def project_detail(request, slug):
         category = result.field.category
         field = result.field
 
-        # Get localized field name
         field_translation = field.get_translation(locale)
         field_name = field_translation.name if field_translation else str(field)
+        field_description = field_translation.description if field_translation else ""
 
-        # Get field description
-        field_description = (
-            field_translation.description if field_translation else ""
-        )
-
-        # Add field score
         categories_data[category]["fields"][field.id] = {
             "field": field,
             "field_name": field_name,
@@ -140,13 +146,11 @@ def project_detail(request, slug):
             "score": result.score,
         }
 
-        # Accumulate for weighted mean
         categories_data[category]["total_weighted"] += (
             float(result.score) * field.weight
         )
         categories_data[category]["total_weight"] += field.weight
 
-    # Calculate category scores (weighted mean) and prepare final data
     categories_with_scores = []
     for category, data in categories_data.items():
         if data["total_weight"] > 0:
@@ -156,16 +160,14 @@ def project_detail(request, slug):
         else:
             category_score = None
 
-        # Get localized category name
         category_translation = category.get_translation(locale)
         category_name = (
             category_translation.name if category_translation else str(category)
         )
 
-        # Convert fields dict to sorted list
         fields_list = sorted(
             data["fields"].values(),
-            key=lambda x: (x["field"].weight, x["field"].id)
+            key=lambda x: (x["field"].weight, x["field"].id),
         )
 
         categories_with_scores.append(
@@ -177,10 +179,8 @@ def project_detail(request, slug):
             }
         )
 
-    # Sort by category weight
     categories_with_scores.sort(key=lambda x: (x["category"].weight, x["category"].id))
 
-    # Calculate overall project score (weighted mean of category scores)
     overall_score = None
     if categories_with_scores:
         total_weighted = 0
@@ -189,13 +189,11 @@ def project_detail(request, slug):
             if cat_data["score"] is not None:
                 total_weighted += float(cat_data["score"]) * cat_data["category"].weight
                 total_weight += cat_data["category"].weight
-
         if total_weight > 0:
             overall_score = Decimal(str(total_weighted / total_weight)).quantize(
                 Decimal("0.01")
             )
 
-    # Build tag opinion sections
     tag_opinion_sections = []
     tag_opinions = TagOpinion.objects.filter(
         tag__in=software.tags.all(), locale=locale
@@ -220,14 +218,31 @@ def project_detail(request, slug):
             }
         )
 
-    context = {
+    # Fetch the four Costs fields so the template and caller can build the form
+    costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+
+    return {
         "software": software,
         "overview_block": overview_block,
         "categories_with_scores": categories_with_scores,
         "overall_score": overall_score,
         "tag_opinion_sections": tag_opinion_sections,
+        "costs_fields": costs_fields,
     }
 
+
+def project_detail(request, slug):
+    """Project detail view showing scores by category."""
+    software = get_object_or_404(
+        Software.objects.prefetch_related("tags", "analysis_results__field__category"),
+        slug=slug,
+        state=Software.STATE_PUBLISHED,
+    )
+    context = _build_project_detail_context(request, software)
+    context["cost_feedback_form"] = CostFeedbackForm(
+        initial={"locale": get_language()}, fields=context["costs_fields"]
+    )
+    context["feedback_created"] = request.GET.get("feedback") == "created"
     return render(request, "public/project_detail.html", context)
 
 
