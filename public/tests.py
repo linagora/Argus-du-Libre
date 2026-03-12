@@ -2358,3 +2358,78 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
         )
         sub = CostFeedbackSubmission.objects.first()
         self.assertEqual(sub.ip_address, "192.168.1.1")
+
+
+# --- Template Integration Tests -----------------------------------------------
+
+
+class CostFeedbackTemplateTestCase(LocaleTestCase):
+    def setUp(self):
+        super().setUp()
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.fields = {}
+        for slug in COSTS_FIELD_SLUGS:
+            self.fields[slug] = Field.objects.create(
+                category=category, slug=slug, weight=1
+            )
+        self.software = Software.objects.create(
+            name="TemplateSW", slug="template-sw", state=Software.STATE_PUBLISHED
+        )
+
+    def test_project_detail_includes_feedback_section(self):
+        response = self.client.get("/en/project/template-sw/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Share your experience")
+        self.assertContains(response, "cost-feedback")
+
+    def test_success_banner_shown_with_query_param(self):
+        response = self.client.get("/en/project/template-sw/?feedback=created")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Thank you")
+
+    def test_no_success_banner_without_query_param(self):
+        response = self.client.get("/en/project/template-sw/")
+        self.assertNotContains(response, "Thank you")
+
+    def test_aggregate_score_badge_visible_after_submission(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        for slug in COSTS_FIELD_SLUGS:
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.fields[slug], score=4
+            )
+        # Trigger aggregation manually (on_commit does not fire mid-test)
+        CostScoreAggregator(self.software).run()
+
+        response = self.client.get("/en/project/template-sw/")
+        self.assertContains(response, "4.0")
+
+    def test_recent_notes_displayed(self):
+        sub = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        CostFeedbackEntry.objects.create(
+            submission=sub,
+            field=self.fields["openness-degree"],
+            score=4,
+            note="Very open source friendly.",
+        )
+        for slug in ["support-cost", "deployment-cost", "training-cost"]:
+            CostFeedbackEntry.objects.create(
+                submission=sub, field=self.fields[slug], score=3
+            )
+
+        response = self.client.get("/en/project/template-sw/")
+        self.assertContains(response, "Very open source friendly.")
+
+    def test_form_renders_radio_buttons(self):
+        response = self.client.get("/en/project/template-sw/")
+        self.assertContains(response, 'type="radio"')
+
+    def test_cost_feedback_form_in_context(self):
+        response = self.client.get("/en/project/template-sw/")
+        self.assertIn("cost_feedback_form", response.context)
+        self.assertIn("feedback_created", response.context)
+        self.assertFalse(response.context["feedback_created"])
