@@ -1,5 +1,6 @@
 """Models for multilingual categories."""
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
@@ -426,7 +427,12 @@ class CostFeedbackEntry(models.Model):
         on_delete=models.CASCADE,
         related_name="cost_feedback_entries",
     )
-    score = models.PositiveSmallIntegerField()
+    score = models.PositiveSmallIntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(5),
+        ]
+    )
     note = models.TextField(blank=True, null=True)
 
     class Meta:
