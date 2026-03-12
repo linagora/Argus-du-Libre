@@ -683,9 +683,8 @@ def create_cost_feedback(request, slug):
     if not form.is_valid():
         return _render_project_detail_with_form(request, software, form)
 
-    ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[
-        0
-    ].strip() or request.META.get("REMOTE_ADDR", "")
+    xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    ip = xff.split(",")[0].strip() if xff else request.META.get("REMOTE_ADDR", "")
 
     with transaction.atomic():
         submission = CostFeedbackSubmission.objects.create(

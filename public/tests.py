@@ -2316,7 +2316,7 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
 
     def test_valid_post_triggers_aggregation(self):
         self._post_valid()
-        # on_commit fires in TestCase after the transaction, so aggregation runs
+        # Aggregation runs synchronously (not via on_commit) so it's visible in tests
         self.assertTrue(
             AnalysisResult.objects.filter(
                 software=self.software,
