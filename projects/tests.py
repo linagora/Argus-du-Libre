@@ -2349,3 +2349,47 @@ class CostFeedbackModelTestCase(TestCase):
             submission=sub, field=self.field_openness, score=4
         )
         self.assertIn("4", str(entry))
+
+
+# --- Cost Feedback Admin Tests ------------------------------------------------
+
+
+@override_settings(
+    OIDC_ENABLED=False,
+    AUTHENTICATION_BACKENDS=["django.contrib.auth.backends.ModelBackend"],
+)
+class CostFeedbackAdminTestCase(TestCase):
+    def setUp(self):
+        self.admin_user = User.objects.create_superuser(
+            username="admin_cost", email="admin_cost@example.com", password="pass"
+        )
+        self.client.force_login(self.admin_user)
+        category = Category.objects.create()
+        CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
+        self.field = Field.objects.create(
+            category=category, slug="openness-degree", weight=1
+        )
+        self.software = Software.objects.create(
+            name="AdminSW", slug="admin-sw", state=Software.STATE_PUBLISHED
+        )
+        self.submission = CostFeedbackSubmission.objects.create(
+            software=self.software, locale="en", ip_address="127.0.0.1"
+        )
+        CostFeedbackEntry.objects.create(
+            submission=self.submission, field=self.field, score=3
+        )
+
+    def test_submission_list_accessible(self):
+        response = self.client.get("/en/admin/categories/costfeedbacksubmission/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "AdminSW")
+
+    def test_entry_list_accessible(self):
+        response = self.client.get("/en/admin/categories/costfeedbackentry/")
+        self.assertEqual(response.status_code, 200)
+
+    def test_submission_detail_accessible(self):
+        response = self.client.get(
+            f"/en/admin/categories/costfeedbacksubmission/{self.submission.pk}/change/"
+        )
+        self.assertEqual(response.status_code, 200)

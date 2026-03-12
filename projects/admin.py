@@ -8,6 +8,8 @@ from projects.models import (
     Block,
     Category,
     CategoryTranslation,
+    CostFeedbackEntry,
+    CostFeedbackSubmission,
     Field,
     FieldTranslation,
     Metric,
@@ -120,7 +122,9 @@ class TagAdmin(admin.ModelAdmin):
     @admin.action(description="Merge selected tags")
     def merge_tags(self, request, queryset):
         if queryset.count() < 2:
-            self.message_user(request, "Please select at least 2 tags to merge.", "error")
+            self.message_user(
+                request, "Please select at least 2 tags to merge.", "error"
+            )
             return
 
         if request.POST.get("confirm"):
@@ -312,3 +316,47 @@ class MetricValueAdmin(admin.ModelAdmin):
     ordering = ["-collected_at"]
     readonly_fields = ["collected_at"]
     autocomplete_fields = ["software"]
+
+
+class CostFeedbackEntryInline(admin.TabularInline):
+    model = CostFeedbackEntry
+    extra = 0
+    fields = ["field", "score", "note"]
+    readonly_fields = ["field", "score", "note"]
+    can_delete = False
+
+
+@admin.register(CostFeedbackSubmission, site=admin_site)
+class CostFeedbackSubmissionAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "software",
+        "locale",
+        "ip_address",
+        "created_at",
+    ]
+    list_filter = ["locale", "created_at"]
+    search_fields = ["software__name", "ip_address"]
+    readonly_fields = [
+        "software",
+        "locale",
+        "ip_address",
+        "general_comment",
+        "created_at",
+    ]
+    inlines = [CostFeedbackEntryInline]
+    ordering = ["-created_at"]
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(CostFeedbackEntry, site=admin_site)
+class CostFeedbackEntryAdmin(admin.ModelAdmin):
+    list_display = ["id", "submission", "field", "score"]
+    list_filter = ["field", "score"]
+    readonly_fields = ["submission", "field", "score", "note"]
+    ordering = ["-submission__created_at"]
+
+    def has_add_permission(self, request):
+        return False
