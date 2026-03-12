@@ -100,12 +100,24 @@
     </div>
     {% endif %}
 
-    <!-- User Cost Feedback Section -->
+    <!-- Overview Section -->
+    {% if overview_block %}
+    <div class="card category-card mb-5">
+        <div class="card-body">
+            <h3 class="fw-semibold mb-3">{% trans "Overview" %}</h3>
+            <div class="markdown-content">
+                {{ overview_block.content|markdown }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- User Feedback Section -->
     {% if cost_feedback_form %}
     <div class="card category-card mb-5" id="cost-feedback-section">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="fw-semibold mb-0">{% trans "User Cost Feedback" %}</h3>
+                <h3 class="fw-semibold mb-0">{% trans "User Feedback" %}</h3>
                 <button class="btn btn-outline-primary btn-sm"
                         type="button"
                         data-bs-toggle="collapse"
@@ -122,24 +134,11 @@
             </div>
             {% endif %}
 
-            <!-- Recent notes per Costs field (up to 5 notes each) -->
-            {% for cost_field in costs_fields %}
-            <div class="mb-4">
-                <strong>{{ cost_field.name }}</strong>
-                {% for entry in cost_field.field.cost_feedback_entries.all %}
-                {% if forloop.counter <= 5 and entry.note %}
-                <div class="border rounded p-2 mb-2 bg-light">
-                    <p class="mb-1 small">{{ entry.note }}</p>
-                    <small class="text-muted">
-                        {{ entry.submission.created_at|date:"N j, Y" }}
-                        &middot; {{ entry.submission.locale }}
-                        {% if entry.submission.general_comment %}
-                        &middot; <em>{{ entry.submission.general_comment|truncatewords:15 }}</em>
-                        {% endif %}
-                    </small>
-                </div>
-                {% endif %}
-                {% endfor %}
+            <!-- Recent general comments from users (up to 5) -->
+            {% for submission in recent_submissions %}
+            <div class="border rounded p-3 mb-2 bg-light">
+                <p class="mb-1 small">{{ submission.general_comment }}</p>
+                <small class="text-muted">{{ submission.created_at|date:"N j, Y" }}</small>
             </div>
             {% endfor %}
 
@@ -157,7 +156,7 @@
                       action="{% url 'public:create_cost_feedback' slug=software.slug %}">
                     {% csrf_token %}
                     {{ cost_feedback_form.locale }}
-                    {% for field, score_widget, note_widget in cost_feedback_form.get_field_rows %}
+                    {% for field, score_widget in cost_feedback_form.get_field_rows %}
                     <div class="mb-4">
                         <label class="form-label fw-semibold">{{ score_widget.label }}</label>
                         <div class="d-flex gap-3 flex-wrap mb-2">
@@ -174,10 +173,6 @@
                         {% if score_widget.errors %}
                         <div class="text-danger small">{{ score_widget.errors }}</div>
                         {% endif %}
-                        <textarea name="{{ note_widget.html_name }}"
-                                  class="form-control form-control-sm mt-1"
-                                  rows="2"
-                                  placeholder="{% trans 'Optional note...' %}">{{ note_widget.value|default:'' }}</textarea>
                     </div>
                     {% endfor %}
                     <div class="mb-3">
@@ -194,18 +189,6 @@
                         {% trans "Submit feedback" %}
                     </button>
                 </form>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Overview Section -->
-    {% if overview_block %}
-    <div class="card category-card mb-5">
-        <div class="card-body">
-            <h3 class="fw-semibold mb-3">{% trans "Overview" %}</h3>
-            <div class="markdown-content">
-                {{ overview_block.content|markdown }}
             </div>
         </div>
     </div>

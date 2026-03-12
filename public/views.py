@@ -230,6 +230,13 @@ def _build_project_detail_context(request, software):
             }
         )
 
+    # 5 most recent submissions with a general comment
+    recent_submissions = list(
+        software.cost_feedback_submissions.exclude(general_comment__isnull=True)
+        .exclude(general_comment="")
+        .order_by("-created_at")[:5]
+    )
+
     return {
         "software": software,
         "overview_block": overview_block,
@@ -237,6 +244,7 @@ def _build_project_detail_context(request, software):
         "overall_score": overall_score,
         "tag_opinion_sections": tag_opinion_sections,
         "costs_fields": costs_fields,
+        "recent_submissions": recent_submissions,
     }
 
 
@@ -706,12 +714,10 @@ def create_cost_feedback(request, slug):
         )
         for field in costs_fields:
             score = int(form.cleaned_data[f"score_{field.slug}"])
-            note = form.cleaned_data.get(f"note_{field.slug}") or None
             CostFeedbackEntry.objects.create(
                 submission=submission,
                 field=field,
                 score=score,
-                note=note,
             )
 
     CostScoreAggregator(software).run()

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 12:59+0000\n"
+"POT-Creation-Date: 2026-03-12 14:48+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -217,8 +217,11 @@ msgstr "Tous les projets"
 msgid "Visit Website"
 msgstr "Visiter le site"
 
-msgid "User Cost Feedback"
-msgstr "Retours utilisateurs sur les coûts"
+msgid "Overview"
+msgstr "Aperçu"
+
+msgid "User Feedback"
+msgstr "Retours utilisateur"
 
 msgid "Share your experience"
 msgstr "Partagez votre expérience"
@@ -232,17 +235,11 @@ msgstr "Évaluez les champs Coûts"
 msgid "Please correct the errors below."
 msgstr "Veuillez corriger les erreurs ci-dessous."
 
-msgid "Optional note..."
-msgstr "Note optionnelle..."
-
 msgid "General comment (optional)"
 msgstr "Commentaire général (optionnel)"
 
 msgid "Submit feedback"
 msgstr "Envoyer le retour"
-
-msgid "Overview"
-msgstr "Aperçu"
 
 msgid "Our opinion"
 msgstr "Notre avis"

@@ -2070,13 +2070,9 @@ class CostFeedbackFormTestCase(TestCase):
     def test_get_field_rows_returns_tuples(self):
         data = {
             "score_openness-degree": "4",
-            "note_openness-degree": "",
             "score_support-cost": "3",
-            "note_support-cost": "",
             "score_deployment-cost": "3",
-            "note_deployment-cost": "",
             "score_training-cost": "3",
-            "note_training-cost": "",
             "locale": "en",
         }
         fields_list = list(self.fields.values())
@@ -2084,10 +2080,9 @@ class CostFeedbackFormTestCase(TestCase):
         self.assertTrue(form.is_valid(), form.errors)
         rows = form.get_field_rows()
         self.assertEqual(len(rows), len(COSTS_FIELD_SLUGS))
-        for i, (field, score_widget, note_widget) in enumerate(rows):
+        for i, (field, score_widget) in enumerate(rows):
             self.assertEqual(field, fields_list[i])
             self.assertIn(f"score_{field.slug}", score_widget.html_name)
-            self.assertIn(f"note_{field.slug}", note_widget.html_name)
 
 
 # --- Aggregator Tests ---------------------------------------------------------
@@ -2276,13 +2271,9 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
     def _post_valid(self, **overrides):
         data = {
             "score_openness-degree": "4",
-            "note_openness-degree": "Open source.",
             "score_support-cost": "3",
-            "note_support-cost": "",
             "score_deployment-cost": "5",
-            "note_deployment-cost": "Simple.",
             "score_training-cost": "2",
-            "note_training-cost": "",
             "general_comment": "Good enough.",
             "locale": "en",
         }
@@ -2408,23 +2399,20 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
         response = self.client.get("/en/project/template-sw/")
         self.assertContains(response, "4.0")
 
-    def test_recent_notes_displayed(self):
+    def test_recent_general_comments_displayed(self):
         sub = CostFeedbackSubmission.objects.create(
-            software=self.software, locale="en", ip_address="127.0.0.1"
+            software=self.software,
+            locale="en",
+            ip_address="127.0.0.1",
+            general_comment="Very affordable and open source friendly.",
         )
-        CostFeedbackEntry.objects.create(
-            submission=sub,
-            field=self.fields["openness-degree"],
-            score=4,
-            note="Very open source friendly.",
-        )
-        for slug in ["support-cost", "deployment-cost", "training-cost"]:
+        for slug in COSTS_FIELD_SLUGS:
             CostFeedbackEntry.objects.create(
-                submission=sub, field=self.fields[slug], score=3
+                submission=sub, field=self.fields[slug], score=4
             )
 
         response = self.client.get("/en/project/template-sw/")
-        self.assertContains(response, "Very open source friendly.")
+        self.assertContains(response, "Very affordable and open source friendly.")
 
     def test_form_renders_radio_buttons(self):
         response = self.client.get("/en/project/template-sw/")
