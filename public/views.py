@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.db import models, transaction
 from django.db.models import Count
+from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -82,7 +83,7 @@ def home(request):
 
     # Get all published software grouped by first letter
     all_projects = Software.objects.filter(state=Software.STATE_PUBLISHED).order_by(
-        "name"
+        Lower("name")
     )
     projects_by_letter = defaultdict(list)
     for project in all_projects:

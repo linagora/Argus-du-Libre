@@ -147,6 +147,34 @@ class HomeViewTestCase(LocaleTestCase):
         self.assertContains(response, project_url)
         self.assertContains(response, "Read more")
 
+    def test_home_page_orders_projects_case_insensitively(self):
+        """Test that the A-Z list orders projects case-insensitively (e.g. 'bat' before 'Bugzilla')."""
+        Software.objects.create(
+            name="bat",
+            slug="bat",
+            state=Software.STATE_PUBLISHED,
+        )
+        Software.objects.create(
+            name="Bugzilla",
+            slug="bugzilla",
+            state=Software.STATE_PUBLISHED,
+        )
+        response = self.client.get(reverse("public:home"))
+        projects_by_letter = response.context["projects_by_letter"]
+        b_projects = next(
+            (projects for letter, projects in projects_by_letter if letter == "B"),
+            [],
+        )
+        names = [p.name for p in b_projects]
+        self.assertEqual(
+            names.index("bat"), 0, f"'bat' should come before 'Bugzilla', got: {names}"
+        )
+        self.assertEqual(
+            names.index("Bugzilla"),
+            1,
+            f"'Bugzilla' should come after 'bat', got: {names}",
+        )
+
 
 class ProjectDetailViewTestCase(LocaleTestCase):
     """Test cases for project detail view."""
