@@ -1,6 +1,5 @@
 from django import forms
 
-
 SCORE_CHOICES = [(str(i), str(i)) for i in range(1, 6)]
 
 

@@ -1,14 +1,14 @@
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 from django.db import transaction
 from django.db.models import Avg
 
 from projects.models import (
+    COSTS_FIELD_SLUGS,
     AnalysisResult,
     CostFeedbackEntry,
     Field,
     Software,
-    COSTS_FIELD_SLUGS,
 )
 
 

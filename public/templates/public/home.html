@@ -10,17 +10,19 @@
         <div class="mb-3">
             <span class="badge-pill">&#x1f3c6; {% trans "RELIABLE OPEN SOURCE DIRECTORY" %}</span>
         </div>
-        <h1 class="display-5 fw-bold mb-3">{% trans "Discover quality open source software" %}</h1>
+        <h1 id="page-title" class="display-5 fw-bold mb-3">{% trans "Discover quality open source software" %}</h1>
         <p class="lead text-muted mb-4">{% trans "Expert evaluations and community health scores for professional IT decision-makers" %}</p>
             <div class="mx-auto" style="max-width: 540px;">
-                {% include "public/_search_form.html" %}
+                <div aria-live="polite" aria-atomic="true">
+                    {% include "public/_search_form.html" %}
+                </div>
             </div>
     </div>
 </section>
 
 <!-- Featured Projects -->
-<section class="container py-5">
-    <h2 class="h4 fw-bold mb-4">{% trans "Featured Projects" %}</h2>
+<section class="container py-5" aria-labelledby="featured-heading">
+    <h2 id="featured-heading" class="h4 fw-bold mb-4">{% trans "Featured Projects" %}</h2>
 
     {% if featured_projects %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
@@ -37,8 +39,8 @@
 
 <!-- All Projects Index -->
 {% if projects_by_letter %}
-<section class="container py-5">
-    <h2 class="h4 fw-bold mb-4">{% trans "All Projects" %}</h2>
+<section class="container py-5" aria-labelledby="all-projects-heading">
+    <h2 id="all-projects-heading" class="h4 fw-bold mb-4">{% trans "All Projects" %}</h2>
     <div class="row">
         {% for letter, projects in projects_by_letter %}
         <div class="col-6 col-md-4 col-lg-3 mb-4">
@@ -67,8 +69,8 @@
 .badge-pill {
     display: inline-block;
     padding: 6px 16px;
-    background: #fae0e6;
-    color: #C71F45;
+    background: #fbd4dd;
+    color: var(--argus-red);
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: 600;
@@ -83,11 +85,11 @@
     margin-bottom: 0.75rem;
 }
 .project-link {
-    color: #1e293b;
+    color: var(--argus-dark);
     font-size: 0.95rem;
 }
 .project-link:hover {
-    color: #C71F45;
+    color: var(--argus-red);
 }
 </style>
 {% endblock %}

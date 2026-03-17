@@ -1,11 +1,15 @@
 {% load i18n %}
 <form method="get" action="{% url 'public:search' %}" class="input-group">
-    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-    <input type="text"
+    <label for="search-input" class="visually-hidden">{% trans "Search projects" %}</label>
+    <button type="submit" class="btn btn-outline-secondary border-end-0 rounded-start"
+            aria-label="{% trans 'Refine your search' %}">
+        <i class="bi bi-search text-muted" aria-hidden="true"></i>
+    </button>
+    <input id="search-input"
+           type="text"
            name="q"
-           class="form-control border-start-0"
+           class="form-control border-start-0 border-secondary"
            placeholder="{% trans 'Search projects, tags, or keywords...' %}"
-           aria-label="{% trans 'Search projects' %}"
            value="{{ request.GET.q }}" {# Preserve search query on subsequent searches #}
            required>
 </form>
