@@ -158,17 +158,25 @@
                     {{ cost_feedback_form.locale }}
                     {% for field, score_widget in cost_feedback_form.get_field_rows %}
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">{{ score_widget.label }}</label>
-                        <div class="d-flex gap-3 flex-wrap mb-2">
-                            {% for choice in score_widget %}
-                            <div class="form-check form-check-inline">
-                                {{ choice.tag }}
-                                <label class="form-check-label"
-                                       for="{{ choice.id_for_label }}">
-                                    {{ choice.choice_label }}
-                                </label>
+                        <div class="d-flex align-items-center gap-3 mb-1">
+                            <label class="form-label fw-semibold mb-0">{{ score_widget.label }}</label>
+                            <span class="score-slider-badge score-{{ score_widget.value|default:'' }}"
+                                  id="badge-{{ score_widget.html_name }}">
+                                {{ score_widget.value|default:'—' }}
+                            </span>
+                        </div>
+                        <div class="score-slider-wrap">
+                            <input type="range"
+                                   class="score-slider"
+                                   name="{{ score_widget.html_name }}"
+                                   id="{{ score_widget.id_for_label }}"
+                                   min="1" max="5" step="1"
+                                   value="{{ score_widget.value|default:3 }}"
+                                   data-badge="badge-{{ score_widget.html_name }}"
+                                   {% if not score_widget.value %}data-unset="true"{% endif %}>
+                            <div class="score-slider-labels">
+                                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
                             </div>
-                            {% endfor %}
                         </div>
                         {% if score_widget.errors %}
                         <div class="text-danger small">{{ score_widget.errors }}</div>
@@ -243,6 +251,22 @@
 </div>
 
 <script>
+// Score sliders
+document.querySelectorAll('.score-slider').forEach(function(slider) {
+    function update() {
+        var v = slider.value;
+        var badge = document.getElementById(slider.dataset.badge);
+        if (badge) {
+            badge.textContent = v;
+            badge.className = 'score-slider-badge score-' + v;
+        }
+        slider.removeAttribute('data-unset');
+    }
+    slider.addEventListener('input', update);
+    // Initialise badge if a value is already bound (form errors re-display)
+    if (!slider.dataset.unset) update();
+});
+
 // Field description modal
 document.getElementById('fieldDescriptionModal').addEventListener('show.bs.modal', function(event) {
     var button = event.relatedTarget;
@@ -357,5 +381,66 @@ document.getElementById('fieldDescriptionModal').addEventListener('show.bs.modal
     color: #C71F45 !important;
     text-decoration: underline !important;
 }
+
+/* Score slider */
+.score-slider-wrap {
+    max-width: 360px;
+}
+.score-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    outline: none;
+    cursor: pointer;
+    background: linear-gradient(to right, #dc3545, #fd7e14, #ffc107, #a3d977, #28a745);
+}
+.score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid #1a202c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+.score-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid #1a202c;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    cursor: pointer;
+}
+.score-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+}
+.score-slider-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: #d1d5db;
+    color: #6b7280;
+    transition: background 0.2s, color 0.2s;
+}
+.score-slider-badge.score-1 { background: #dc3545; color: #fff; }
+.score-slider-badge.score-2 { background: #fd7e14; color: #fff; }
+.score-slider-badge.score-3 { background: #ffc107; color: #374151; }
+.score-slider-badge.score-4 { background: #a3d977; color: #374151; }
+.score-slider-badge.score-5 { background: #28a745; color: #fff; }
 </style>
 {% endblock %}
