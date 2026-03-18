@@ -241,7 +241,7 @@ The project uses a **weighted mean** system for scoring:
 The project supports crowd-sourced cost ratings from anonymous users, stored separately from editorial scores.
 
 **Key components:**
-- `COSTS_FIELD_SLUGS` constant in `projects/models.py` — list of the four cost field slugs (`openness-degree`, `support-cost`, `deployment-cost`, `training-cost`)
+- `FEEDBACK_FIELD_SLUGS` constant in `projects/models.py` — list of the cost and Usage feedback slugs (`openness-degree`, `support-cost`, `deployment-cost`, `training-cost`, `usage-feature-richness`, `usage-reputation`, `usage-stability`)
 - `CostScoreAggregator` in `public/aggregator.py` — averages `CostFeedbackEntry` scores per field for a single Software and writes results to `AnalysisResult` (with `is_published=True`, `is_manual=True`)
 - `CostFeedbackForm` in `public/forms.py` — renders per-field radio inputs (1–5) and an optional general comment
 - `create_cost_feedback` POST view at `/project/<slug>/cost-feedback/` — validates form, saves `CostFeedbackSubmission` + `CostFeedbackEntry` records, triggers aggregation via `on_commit`

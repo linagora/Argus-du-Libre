@@ -4,21 +4,21 @@ from django.db import transaction
 from django.db.models import Avg
 
 from projects.models import (
-    COSTS_FIELD_SLUGS,
     AnalysisResult,
     CostFeedbackEntry,
     Field,
+    FEEDBACK_FIELD_SLUGS,
     Software,
 )
 
 
 class CostScoreAggregator:
     """
-    Computes mean CostFeedbackEntry scores per Costs field for a single
-    Software instance and writes the results into AnalysisResult.
+    Computes mean CostFeedbackEntry scores per crowdsourced feedback field for a
+    single Software instance and writes the results into AnalysisResult.
 
-    Only fields whose slug is in COSTS_FIELD_SLUGS are ever written;
-    all other AnalysisResult rows are left untouched.
+    Only fields whose slug is in FEEDBACK_FIELD_SLUGS are ever written; all
+    other AnalysisResult rows are left untouched.
 
     If a field has no entries, the corresponding AnalysisResult is left as-is.
     """
@@ -28,7 +28,7 @@ class CostScoreAggregator:
 
     def run(self):
         with transaction.atomic():
-            costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+            costs_fields = list(Field.objects.filter(slug__in=FEEDBACK_FIELD_SLUGS))
             for field in costs_fields:
                 avg = CostFeedbackEntry.objects.filter(
                     submission__software=self.software,

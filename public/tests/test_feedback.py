@@ -23,7 +23,6 @@ class LocaleTestCase(TestCase):
 
 
 from projects.models import (
-    COSTS_FIELD_SLUGS,
     AnalysisResult,
     Block,
     Category,
@@ -32,6 +31,7 @@ from projects.models import (
     CostFeedbackSubmission,
     Field,
     FieldTranslation,
+    FEEDBACK_FIELD_SLUGS,
     Metric,
     MetricTranslation,
     MetricValue,
@@ -1983,131 +1983,76 @@ class CostFeedbackFormTestCase(TestCase):
         category = Category.objects.create()
         CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
         self.fields = {}
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             self.fields[slug] = Field.objects.create(
                 category=category, slug=slug, weight=1
             )
 
+    def _feedback_data(self, overrides=None, include_general=True):
+        data = {}
+        for slug in FEEDBACK_FIELD_SLUGS:
+            data[f"score_{slug}"] = "3"
+            data[f"note_{slug}"] = ""
+        if include_general:
+            data["general_comment"] = "Overall reasonable."
+        data["locale"] = "en"
+        if overrides:
+            data.update(overrides)
+        return data
+
     def test_valid_form_all_scores(self):
-        data = {
-            "score_openness-degree": "4",
-            "note_openness-degree": "Good openness.",
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "5",
-            "note_deployment-cost": "Easy to deploy.",
-            "score_training-cost": "2",
-            "note_training-cost": "",
-            "general_comment": "Overall reasonable.",
-            "locale": "en",
-        }
+        data = self._feedback_data(
+            {
+                "score_openness-degree": "4",
+                "note_openness-degree": "Good openness.",
+                "score_deployment-cost": "5",
+                "note_deployment-cost": "Easy to deploy.",
+                "score_training-cost": "2",
+                "score_feature-richness": "5",
+                "note_feature-richness": "Very feature-rich.",
+            }
+        )
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_invalid_score_out_of_range(self):
-        data = {
-            "score_openness-degree": "6",
-            "note_openness-degree": "",
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "3",
-            "note_deployment-cost": "",
-            "score_training-cost": "3",
-            "note_training-cost": "",
-            "locale": "en",
-        }
+        data = self._feedback_data({"score_openness-degree": "6"})
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertFalse(form.is_valid())
 
     def test_score_zero_is_invalid(self):
-        data = {
-            "score_openness-degree": "0",
-            "note_openness-degree": "",
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "3",
-            "note_deployment-cost": "",
-            "score_training-cost": "3",
-            "note_training-cost": "",
-            "locale": "en",
-        }
+        data = self._feedback_data({"score_openness-degree": "0"})
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertFalse(form.is_valid())
 
     def test_missing_score_is_invalid(self):
-        data = {
-            # openness-degree score missing
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "3",
-            "note_deployment-cost": "",
-            "score_training-cost": "3",
-            "note_training-cost": "",
-            "locale": "en",
-        }
+        data = self._feedback_data()
+        del data["score_openness-degree"]
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertFalse(form.is_valid())
 
     def test_optional_note_can_be_empty(self):
-        data = {
-            "score_openness-degree": "3",
-            "note_openness-degree": "",
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "3",
-            "note_deployment-cost": "",
-            "score_training-cost": "3",
-            "note_training-cost": "",
-            "locale": "en",
-        }
+        data = self._feedback_data()
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_general_comment_is_optional(self):
-        data = {
-            "score_openness-degree": "3",
-            "note_openness-degree": "",
-            "score_support-cost": "3",
-            "note_support-cost": "",
-            "score_deployment-cost": "3",
-            "note_deployment-cost": "",
-            "score_training-cost": "3",
-            "note_training-cost": "",
-            "locale": "en",
-            # no general_comment key
-        }
+        data = self._feedback_data(include_general=False)
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertTrue(form.is_valid(), form.errors)
 
     def test_locale_roundtrips(self):
-        data = {
-            "score_openness-degree": "4",
-            "note_openness-degree": "",
-            "score_support-cost": "4",
-            "note_support-cost": "",
-            "score_deployment-cost": "4",
-            "note_deployment-cost": "",
-            "score_training-cost": "4",
-            "note_training-cost": "",
-            "locale": "fr",
-        }
+        data = self._feedback_data({"score_openness-degree": "4", "locale": "fr"})
         form = CostFeedbackForm(data=data, fields=list(self.fields.values()))
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data["locale"], "fr")
 
     def test_get_field_rows_returns_tuples(self):
-        data = {
-            "score_openness-degree": "4",
-            "score_support-cost": "3",
-            "score_deployment-cost": "3",
-            "score_training-cost": "3",
-            "locale": "en",
-        }
         fields_list = list(self.fields.values())
-        form = CostFeedbackForm(data=data, fields=fields_list)
+        form = CostFeedbackForm(data=self._feedback_data(), fields=fields_list)
         self.assertTrue(form.is_valid(), form.errors)
         rows = form.get_field_rows()
-        self.assertEqual(len(rows), len(COSTS_FIELD_SLUGS))
+        self.assertEqual(len(rows), len(FEEDBACK_FIELD_SLUGS))
         for i, (field, score_widget) in enumerate(rows):
             self.assertEqual(field, fields_list[i])
             self.assertIn(f"score_{field.slug}", score_widget.html_name)
@@ -2121,7 +2066,7 @@ class CostScoreAggregatorTestCase(TestCase):
         category = Category.objects.create()
         CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
         self.fields = {}
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             self.fields[slug] = Field.objects.create(
                 category=category, slug=slug, weight=1
             )
@@ -2278,6 +2223,22 @@ class CostScoreAggregatorTestCase(TestCase):
         # (1+2+2)/3 = 1.666... rounded to 1.67
         self.assertEqual(result.score, Decimal("1.67"))
 
+    def test_usage_field_aggregation(self):
+        self._make_submission(
+            {
+                "feature-richness": 5,
+                "reputation": 4,
+            }
+        )
+        CostScoreAggregator(self.software).run()
+
+        result = AnalysisResult.objects.get(
+            software=self.software, field=self.fields["feature-richness"]
+        )
+        self.assertEqual(result.score, Decimal("5.00"))
+        self.assertTrue(result.is_published)
+        self.assertTrue(result.is_manual)
+
 
 # --- create_cost_feedback View Tests ------------------------------------------
 
@@ -2288,7 +2249,7 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
         category = Category.objects.create()
         CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
         self.fields = {}
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             self.fields[slug] = Field.objects.create(
                 category=category, slug=slug, weight=1
             )
@@ -2297,19 +2258,22 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
         )
 
     def _post_valid(self, **overrides):
-        data = {
-            "score_openness-degree": "4",
-            "score_support-cost": "3",
-            "score_deployment-cost": "5",
-            "score_training-cost": "2",
-            "general_comment": "Good enough.",
-            "locale": "en",
-        }
-        data.update(overrides)
+        data = self._valid_feedback_data(**overrides)
         return self.client.post(
             "/en/project/view-sw/cost-feedback/",
             data=data,
         )
+
+    def _valid_feedback_data(self, **overrides):
+        data = {
+            "general_comment": "Good enough.",
+            "locale": "en",
+        }
+        for slug in FEEDBACK_FIELD_SLUGS:
+            data[f"score_{slug}"] = "3"
+            data[f"note_{slug}"] = ""
+        data.update(overrides)
+        return data
 
     def test_get_is_not_allowed(self):
         response = self.client.get("/en/project/view-sw/cost-feedback/")
@@ -2323,9 +2287,9 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
         self.assertEqual(sub.locale, "en")
         self.assertEqual(sub.general_comment, "Good enough.")
 
-    def test_valid_post_creates_four_entries(self):
+    def test_valid_post_creates_feedback_entries(self):
         self._post_valid()
-        self.assertEqual(CostFeedbackEntry.objects.count(), 4)
+        self.assertEqual(CostFeedbackEntry.objects.count(), len(FEEDBACK_FIELD_SLUGS))
 
     def test_valid_post_redirects_with_query_param(self):
         response = self._post_valid()
@@ -2362,19 +2326,10 @@ class CreateCostFeedbackViewTestCase(LocaleTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_ip_address_stored(self):
+        data = self._valid_feedback_data()
         self.client.post(
             "/en/project/view-sw/cost-feedback/",
-            data={
-                "score_openness-degree": "3",
-                "note_openness-degree": "",
-                "score_support-cost": "3",
-                "note_support-cost": "",
-                "score_deployment-cost": "3",
-                "note_deployment-cost": "",
-                "score_training-cost": "3",
-                "note_training-cost": "",
-                "locale": "en",
-            },
+            data=data,
             REMOTE_ADDR="192.168.1.1",
         )
         sub = CostFeedbackSubmission.objects.first()
@@ -2390,7 +2345,7 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
         category = Category.objects.create()
         CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
         self.fields = {}
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             self.fields[slug] = Field.objects.create(
                 category=category, slug=slug, weight=1
             )
@@ -2417,7 +2372,7 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
         sub = CostFeedbackSubmission.objects.create(
             software=self.software, locale="en", ip_address="127.0.0.1"
         )
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             CostFeedbackEntry.objects.create(
                 submission=sub, field=self.fields[slug], score=4
             )
@@ -2434,7 +2389,7 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
             ip_address="127.0.0.1",
             general_comment="Very affordable and open source friendly.",
         )
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             CostFeedbackEntry.objects.create(
                 submission=sub, field=self.fields[slug], score=4
             )
@@ -2442,9 +2397,9 @@ class CostFeedbackTemplateTestCase(LocaleTestCase):
         response = self.client.get("/en/project/template-sw/")
         self.assertContains(response, "Very affordable and open source friendly.")
 
-    def test_form_renders_radio_buttons(self):
+    def test_form_renders_slider_controls(self):
         response = self.client.get("/en/project/template-sw/")
-        self.assertContains(response, 'type="radio"')
+        self.assertContains(response, 'class="score-slider"')
 
     def test_cost_feedback_form_in_context(self):
         response = self.client.get("/en/project/template-sw/")
@@ -2461,7 +2416,7 @@ class ComputeCostScoresCommandTestCase(TestCase):
         category = Category.objects.create()
         CategoryTranslation.objects.create(category=category, locale="en", name="Costs")
         self.fields = {}
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             self.fields[slug] = Field.objects.create(
                 category=category, slug=slug, weight=1
             )
@@ -2474,7 +2429,7 @@ class ComputeCostScoresCommandTestCase(TestCase):
         sub = CostFeedbackSubmission.objects.create(
             software=self.software, locale="en", ip_address="127.0.0.1"
         )
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             CostFeedbackEntry.objects.create(
                 submission=sub, field=self.fields[slug], score=5
             )
@@ -2491,14 +2446,14 @@ class ComputeCostScoresCommandTestCase(TestCase):
             AnalysisResult.objects.filter(
                 software=self.software, is_published=True, is_manual=True
             ).count(),
-            4,
+            len(FEEDBACK_FIELD_SLUGS),
         )
 
     def test_command_skips_draft_software(self):
         sub = CostFeedbackSubmission.objects.create(
             software=self.draft, locale="en", ip_address="127.0.0.1"
         )
-        for slug in COSTS_FIELD_SLUGS:
+        for slug in FEEDBACK_FIELD_SLUGS:
             CostFeedbackEntry.objects.create(
                 submission=sub, field=self.fields[slug], score=3
             )

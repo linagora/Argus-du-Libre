@@ -384,13 +384,16 @@ class MetricValue(models.Model):
         return f"{self.software.name} - {self.metric} - {self.value} ({self.collected_at.date()})"
 
 
-# --- Cost Crowdsourcing -------------------------------------------------------
+# --- Crowdsourced feedback ---------------------------------------------------
 
-COSTS_FIELD_SLUGS = [
+FEEDBACK_FIELD_SLUGS = [
     "openness-degree",
     "support-cost",
     "deployment-cost",
     "training-cost",
+    "feature-richness",
+    "reputation",
+    "availability-stability",
 ]
 
 

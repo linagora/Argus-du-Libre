@@ -14,10 +14,10 @@ from django.utils.translation import get_language
 from django.views.decorators.http import require_POST
 
 from projects.models import (
-    COSTS_FIELD_SLUGS,
     Block,
     CostFeedbackEntry,
     CostFeedbackSubmission,
+    FEEDBACK_FIELD_SLUGS,
     Field,
     MetricValue,
     Software,
@@ -220,9 +220,9 @@ def _build_project_detail_context(request, software):
         )
 
     # Build costs_fields with translated names for template rendering
-    raw_costs_fields = Field.objects.filter(slug__in=COSTS_FIELD_SLUGS)
+    raw_feedback_fields = Field.objects.filter(slug__in=FEEDBACK_FIELD_SLUGS)
     costs_fields = []
-    for cf in raw_costs_fields:
+    for cf in raw_feedback_fields:
         translation = cf.get_translation(locale)
         costs_fields.append(
             {
@@ -697,7 +697,7 @@ def about(request):
 def create_cost_feedback(request, slug):
     """POST-only: validate and persist crowd cost ratings, then redirect."""
     software = get_object_or_404(Software, slug=slug, state=Software.STATE_PUBLISHED)
-    costs_fields = list(Field.objects.filter(slug__in=COSTS_FIELD_SLUGS))
+    costs_fields = list(Field.objects.filter(slug__in=FEEDBACK_FIELD_SLUGS))
     form = CostFeedbackForm(request.POST, fields=costs_fields)
 
     if not form.is_valid():
