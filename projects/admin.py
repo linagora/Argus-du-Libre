@@ -323,7 +323,6 @@ class CostFeedbackEntryInline(admin.TabularInline):
     extra = 0
     fields = ["field", "score", "note"]
     readonly_fields = ["field", "score", "note"]
-    can_delete = False
 
 
 @admin.register(CostFeedbackSubmission, site=admin_site)
@@ -363,7 +362,4 @@ class CostFeedbackEntryAdmin(admin.ModelAdmin):
     ordering = ["-submission__created_at"]
 
     def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
         return False

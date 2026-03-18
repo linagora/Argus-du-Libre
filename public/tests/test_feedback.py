@@ -2223,6 +2223,20 @@ class CostScoreAggregatorTestCase(TestCase):
         # (1+2+2)/3 = 1.666... rounded to 1.67
         self.assertEqual(result.score, Decimal("1.67"))
 
+    def test_deleting_entry_triggers_cost_score_aggregation(self):
+        self._make_submission({"openness-degree": 4})
+        second_submission = self._make_submission({"openness-degree": 2})
+        CostScoreAggregator(self.software).run()
+
+        CostFeedbackEntry.objects.filter(
+            submission=second_submission, field=self.fields["openness-degree"]
+        ).delete()
+
+        result = AnalysisResult.objects.get(
+            software=self.software, field=self.fields["openness-degree"]
+        )
+        self.assertEqual(result.score, Decimal("4.00"))
+
     def test_usage_field_aggregation(self):
         self._make_submission(
             {

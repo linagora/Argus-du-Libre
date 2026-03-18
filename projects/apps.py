@@ -6,3 +6,7 @@ class ProjectsConfig(AppConfig):
     name = "projects"
     label = "categories"  # Keep database tables with categories_ prefix
     verbose_name = "Projects"
+
+    def ready(self):
+        # Register signal handlers.
+        from . import signals  # noqa: F401
