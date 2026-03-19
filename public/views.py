@@ -14,10 +14,10 @@ from django.utils.translation import get_language
 from django.views.decorators.http import require_POST
 
 from projects.models import (
+    FEEDBACK_FIELD_SLUGS,
     Block,
     CostFeedbackEntry,
     CostFeedbackSubmission,
-    FEEDBACK_FIELD_SLUGS,
     Field,
     MetricValue,
     Software,

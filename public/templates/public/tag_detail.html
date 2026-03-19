@@ -3,6 +3,7 @@
 {% load markdown_extras %}
 
 {% block title %}{{ tag.name }} - Argus du Libre{% endblock %}
+{% block description %}<meta name="description" content="{% blocktrans with name=tag.name %}Browse open-source projects tagged {{ name }} and compare their quality scores on Argus du Libre.{% endblocktrans %}">{% endblock %}
 
 {% block content %}
 <div class="container py-5">

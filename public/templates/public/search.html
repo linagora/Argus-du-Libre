@@ -2,6 +2,7 @@
 {% load i18n %}
 
 {% block title %}{% trans "Search Results" %} - Argus du Libre{% endblock %}
+{% block description %}<meta name="description" content="{% if query %}{% blocktrans with query=query %}Search results for "{{ query }}" in the Argus du Libre open-source software directory.{% endblocktrans %}{% else %}{% trans "Search the Argus du Libre open-source software quality directory." %}{% endif %}">{% endblock %}
 
 {% block content %}
 <div class="container py-5">

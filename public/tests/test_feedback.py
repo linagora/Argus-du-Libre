@@ -23,6 +23,7 @@ class LocaleTestCase(TestCase):
 
 
 from projects.models import (
+    FEEDBACK_FIELD_SLUGS,
     AnalysisResult,
     Block,
     Category,
@@ -31,7 +32,6 @@ from projects.models import (
     CostFeedbackSubmission,
     Field,
     FieldTranslation,
-    FEEDBACK_FIELD_SLUGS,
     Metric,
     MetricTranslation,
     MetricValue,

@@ -3,6 +3,7 @@
 {% load markdown_extras %}
 
 {% block title %}{{ software.name }} - Argus du Libre{% endblock %}
+{% block description %}<meta name="description" content="{% if overview_block %}{{ overview_block.content|striptags|truncatechars:160 }}{% else %}{% blocktrans with name=software.name %}Discover the open-source quality analysis for {{ name }} on Argus du Libre.{% endblocktrans %}{% endif %}">{% endblock %}
 
 {% block content %}
 <div class="container py-5">

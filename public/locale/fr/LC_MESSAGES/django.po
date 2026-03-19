@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 14:48+0000\n"
+"POT-Creation-Date: 2026-03-19 09:00+0000\n"
 "PO-Revision-Date: 2025-12-03 15:00:00+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -31,14 +31,29 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+#, python-format
+msgid "Read more about %(name)s"
+msgstr ""
+
+#, python-format
+msgid "Project card for %(name)s"
+msgstr ""
+
+#, python-format
+msgid "Score: %(value)s"
+msgstr ""
+
 msgid "Read more"
 msgstr "En savoir plus"
 
-msgid "Search projects, tags, or keywords..."
-msgstr "Rechercher des projets, tags ou mots-clés..."
-
 msgid "Search projects"
 msgstr "Rechercher des projets"
+
+msgid "Refine your search"
+msgstr ""
+
+msgid "Search projects, tags, or keywords..."
+msgstr "Rechercher des projets, tags ou mots-clés..."
 
 msgid "About"
 msgstr "À propos"
@@ -112,18 +127,30 @@ msgstr ""
 msgid "Report an Issue"
 msgstr "Signaler un problème"
 
-msgid "Travailler dans l'Open Source"
-msgstr "Travailler dans l'Open Source"
-
-msgid "Expertise"
-msgstr "Expertise"
-
 msgid ""
 "The leading open-source software quality index, helping enterprise decision-"
 "makers choose sustainable technology stacks."
 msgstr ""
 "L'indice de référence des logiciels open source, aidant les décideurs à "
 "choisir des solutions technologiques durables."
+
+msgid "Skip to main content"
+msgstr ""
+
+msgid "Primary navigation"
+msgstr ""
+
+msgid "Travailler dans l'Open Source"
+msgstr "Travailler dans l'Open Source"
+
+msgid "Expertise"
+msgstr "Expertise"
+
+msgid "Switch to English"
+msgstr ""
+
+msgid "Basculer en français"
+msgstr ""
 
 msgid "Directory"
 msgstr "Répertoire"
@@ -214,6 +241,12 @@ msgstr "Aucun projet en vedette pour le moment."
 msgid "All Projects"
 msgstr "Tous les projets"
 
+#, python-format
+msgid ""
+"Discover the open-source quality analysis for %(name)s on Argus du Libre."
+msgstr ""
+"Découvrez l'analyse qualité open source de %(name)s sur Argus du Libre."
+
 msgid "Visit Website"
 msgstr "Visiter le site"
 
@@ -268,6 +301,16 @@ msgid "Search Results"
 msgstr "Résultats de recherche"
 
 #, python-format
+msgid ""
+"Search results for \"%(query)s\" in the Argus du Libre open-source software "
+"directory."
+msgstr ""
+"Résultats de recherche pour « %(query)s » dans l'annuaire Argus du Libre."
+
+msgid "Search the Argus du Libre open-source software quality directory."
+msgstr "Recherchez dans l'annuaire qualité open source Argus du Libre."
+
+#, python-format
 msgid "Results for \"%(query)s\""
 msgstr "Résultats pour \"%(query)s\""
 
@@ -297,6 +340,14 @@ msgstr[1] ""
 
 msgid "No projects found matching your search."
 msgstr "Aucun projet ne correspond à votre recherche."
+
+#, python-format
+msgid ""
+"Browse open-source projects tagged %(name)s and compare their quality scores "
+"on Argus du Libre."
+msgstr ""
+"Parcourez les projets open source avec le tag %(name)s et comparez leurs "
+"scores qualité sur Argus du Libre."
 
 msgid "Projects with this tag"
 msgstr "Projets avec ce tag"

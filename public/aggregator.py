@@ -4,10 +4,10 @@ from django.db import transaction
 from django.db.models import Avg
 
 from projects.models import (
+    FEEDBACK_FIELD_SLUGS,
     AnalysisResult,
     CostFeedbackEntry,
     Field,
-    FEEDBACK_FIELD_SLUGS,
     Software,
 )
 
