@@ -26,6 +26,7 @@ from projects.models import (
 )
 from public.aggregator import CostScoreAggregator
 from public.forms import CostFeedbackForm
+from public.seo import clean_description
 
 
 def _calculate_overall_score(software):
@@ -238,6 +239,12 @@ def _build_project_detail_context(request, software):
         .order_by("-created_at")[:5]
     )
 
+    default_project_description = f"{software.name} scores on Argus du Libre."
+    fallback_content = overview_block.content if overview_block else ""
+    meta_description = clean_description(
+        fallback_content, fallback=default_project_description
+    )
+
     return {
         "software": software,
         "overview_block": overview_block,
@@ -246,6 +253,7 @@ def _build_project_detail_context(request, software):
         "tag_opinion_sections": tag_opinion_sections,
         "costs_fields": costs_fields,
         "recent_submissions": recent_submissions,
+        "meta_description": meta_description,
     }
 
 
@@ -329,6 +337,12 @@ def tag_detail(request, slug):
         "projects": _build_project_list(projects, locale),
     }
 
+    tag_description_fallback = f"Projects tagged {tag.name} on Argus du Libre."
+    tag_description_source = opinion.content if opinion else tag_description_fallback
+    context["meta_description"] = clean_description(
+        tag_description_source, fallback=tag_description_fallback
+    )
+
     return render(request, "public/tag_detail.html", context)
 
 
@@ -360,6 +374,13 @@ def search(request):
         "query": query,
         "results": results,
     }
+
+    if query:
+        match_text = "projects" if len(results) != 1 else "project"
+        description = f'Search results for "{query}" on Argus du Libre.'
+        if results:
+            description += f" {len(results)} {match_text} found."
+        context["meta_description"] = clean_description(description)
 
     return render(request, "public/search.html", context)
 

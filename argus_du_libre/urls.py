@@ -16,12 +16,15 @@ Including another URLconf
 """
 
 from django.conf.urls.i18n import i18n_patterns
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
 from argus_du_libre.admin import admin_site
+from public.sitemaps import sitemaps as public_sitemaps
 
 urlpatterns = [
     path("oidc/", include("mozilla_django_oidc.urls")),
+    path("sitemap.xml", sitemap, {"sitemaps": public_sitemaps}, name="sitemap"),
 ]
 
 urlpatterns += i18n_patterns(
