@@ -212,6 +212,13 @@ All project listing pages use a single shared include template: `public/template
 
 **CSS:** Card styles (`.project-card`, `.project-logo`, `.project-logo-placeholder`, `.score-badge-blue`, `.read-more`) live in `base.html`. Note: `.score-badge-blue` is distinct from the color-coded `.score-badge` / `.score-1` through `.score-5` classes used on the project detail page.
 
+### SEO Enhancements
+
+Recent SEO-focused work touches the public surface so metadata, indexability, and locale hints stay fresh:
+- Meta descriptions now pipe through `public/aggregator.py`, the localized strings in `public/locale/fr/LC_MESSAGES/django.po`, and the templates under `public/templates/public/{base,project_detail,search,tag_detail}.html`, with `public/tests/test_feedback.py` and `public/views.py` covering the new description flow.
+- The sitemap stack (`public/seo.py`, `public/sitemaps.py`) registers `sitemap.xml` via `argus_du_libre/urls.py` and `argus_du_libre/settings.py`, and is validated by `public/tests/test_seo.py`, `public/tests/test_sitemap.py`, and the updated `public/views.py` endpoints.
+- Hreflang support now renders `<link rel="alternate" hreflang>` entries through `public/templatetags/hreflang.py` and the shared `public/templates/public/base.html`, with `public/tests/test_hreflang.py` asserting the locale-specific output.
+
 ### Score Calculation System
 
 The project uses a **weighted mean** system for scoring:
